@@ -1,0 +1,38 @@
+\int \left| (ax + b)^n \right|\,dx = {(ax + b)^{n+2} \over a(n+1) \left| ax + b \right|} + C \,\, [\,n\text{ is odd, and } n \neq -1\,]
+Integral Left ModulusBracket RoundBracketOpen Letter(a) Letter(x) Plus Letter(b) RoundBracketClose RaiseToIndex Letter(n) Right ModulusBracket UnknownSymbol Letter(,) Letter(d) Letter(x) Equals GroupOpen RoundBracketOpen Letter(a) Letter(x) Plus Letter(b) RoundBracketClose RaiseToIndex GroupOpen Letter(n) Plus Number(2) GroupClose UnknownSymbol Letter(a) RoundBracketOpen Letter(n) Plus Number(1) RoundBracketClose Left ModulusBracket Letter(a) Letter(x) Plus Letter(b) Right ModulusBracket GroupClose Plus Letter(C) UnknownSymbol Letter(,) UnknownSymbol Letter(,) SquareBracketOpen UnknownSymbol Letter(,) Letter(n) Text GroupOpen Letter(i) Letter(s) Letter(o) Letter(d) Letter(d) Letter(,) Letter(a) Letter(n) Letter(d) GroupClose Letter(n) NotEquals Minus Number(1) UnknownSymbol Letter(,) SquareBracketClose
+
+\int \left| \sin{ax} \right|\,dx = {-1 \over a} \left| \sin{ax} \right| \cot{ax} + C
+Integral Left ModulusBracket Sine GroupOpen Letter(a) Letter(x) GroupClose Right ModulusBracket UnknownSymbol Letter(,) Letter(d) Letter(x) Equals GroupOpen Minus Number(1) UnknownSymbol Letter(a) GroupClose Left ModulusBracket Sine GroupOpen Letter(a) Letter(x) GroupClose Right ModulusBracket Cotangent GroupOpen Letter(a) Letter(x) GroupClose Plus Letter(C)
+
+\int \left| \cos{ax} \right|\,dx = {1 \over a} \left| \cos{ax} \right| \tan{ax} + C
+Integral Left ModulusBracket Cosine GroupOpen Letter(a) Letter(x) GroupClose Right ModulusBracket UnknownSymbol Letter(,) Letter(d) Letter(x) Equals GroupOpen Number(1) UnknownSymbol Letter(a) GroupClose Left ModulusBracket Cosine GroupOpen Letter(a) Letter(x) GroupClose Right ModulusBracket Tangent GroupOpen Letter(a) Letter(x) GroupClose Plus Letter(C)
+
+\int \left| \tan{ax} \right|\,dx = {\tan(ax)[-\ln\left|\cos{ax}\right|] \over a \left| \tan{ax} \right|} + C
+Integral Left ModulusBracket Tangent GroupOpen Letter(a) Letter(x) GroupClose Right ModulusBracket UnknownSymbol Letter(,) Letter(d) Letter(x) Equals GroupOpen Tangent RoundBracketOpen Letter(a) Letter(x) RoundBracketClose SquareBracketOpen Minus UnknownSymbol Left ModulusBracket Cosine GroupOpen Letter(a) Letter(x) GroupClose Right ModulusBracket SquareBracketClose UnknownSymbol Letter(a) Left ModulusBracket Tangent GroupOpen Letter(a) Letter(x) GroupClose Right ModulusBracket GroupClose Plus Letter(C)
+
+\int \left| \csc{ax} \right|\,dx = {-\ln \left| \csc{ax} + \cot{ax} \right|\sin{ax} \over a \left| \sin{ax} \right|} + C 
+Integral Left ModulusBracket UnknownSymbol GroupOpen Letter(a) Letter(x) GroupClose Right ModulusBracket UnknownSymbol Letter(,) Letter(d) Letter(x) Equals GroupOpen Minus UnknownSymbol Left ModulusBracket UnknownSymbol GroupOpen Letter(a) Letter(x) GroupClose Plus Cotangent GroupOpen Letter(a) Letter(x) GroupClose Right ModulusBracket Sine GroupOpen Letter(a) Letter(x) GroupClose UnknownSymbol Letter(a) Left ModulusBracket Sine GroupOpen Letter(a) Letter(x) GroupClose Right ModulusBracket GroupClose Plus Letter(C)
+
+\int \left| \sec{ax} \right|\,dx = {\ln \left| \sec{ax} + \tan{ax} \right| \cos{ax} \over a \left| \cos{ax} \right|} + C 
+Integral Left ModulusBracket Secant GroupOpen Letter(a) Letter(x) GroupClose Right ModulusBracket UnknownSymbol Letter(,) Letter(d) Letter(x) Equals GroupOpen UnknownSymbol Left ModulusBracket Secant GroupOpen Letter(a) Letter(x) GroupClose Plus Tangent GroupOpen Letter(a) Letter(x) GroupClose Right ModulusBracket Cosine GroupOpen Letter(a) Letter(x) GroupClose UnknownSymbol Letter(a) Left ModulusBracket Cosine GroupOpen Letter(a) Letter(x) GroupClose Right ModulusBracket GroupClose Plus Letter(C)
+
+\int \left| \cot{ax} \right|\,dx = {\tan(ax)[\ln\left|\sin{ax}\right|] \over a \left| \tan{ax} \right|} + C 
+Integral Left ModulusBracket Cotangent GroupOpen Letter(a) Letter(x) GroupClose Right ModulusBracket UnknownSymbol Letter(,) Letter(d) Letter(x) Equals GroupOpen Tangent RoundBracketOpen Letter(a) Letter(x) RoundBracketClose SquareBracketOpen UnknownSymbol Left ModulusBracket Sine GroupOpen Letter(a) Letter(x) GroupClose Right ModulusBracket SquareBracketClose UnknownSymbol Letter(a) Left ModulusBracket Tangent GroupOpen Letter(a) Letter(x) GroupClose Right ModulusBracket GroupClose Plus Letter(C)
+
+\int \arcsin{x} \, dx = x \, \arcsin{x} + \sqrt{1 - x^2} + C
+Integral UnknownSymbol GroupOpen Letter(x) GroupClose UnknownSymbol Letter(,) Letter(d) Letter(x) Equals Letter(x) UnknownSymbol Letter(,) UnknownSymbol GroupOpen Letter(x) GroupClose Plus Root GroupOpen Number(1) Minus Letter(x) RaiseToIndex Number(2) GroupClose Plus Letter(C)
+
+\int \arccos{x} \, dx = x \, \arccos{x} - \sqrt{1 - x^2} + C
+Integral UnknownSymbol GroupOpen Letter(x) GroupClose UnknownSymbol Letter(,) Letter(d) Letter(x) Equals Letter(x) UnknownSymbol Letter(,) UnknownSymbol GroupOpen Letter(x) GroupClose Minus Root GroupOpen Number(1) Minus Letter(x) RaiseToIndex Number(2) GroupClose Plus Letter(C)
+
+\int \arctan{x} \, dx = x \, \arctan{x} - \frac{1}{2} \ln{\left| 1 + x^2\right|} + C
+Integral UnknownSymbol GroupOpen Letter(x) GroupClose UnknownSymbol Letter(,) Letter(d) Letter(x) Equals Letter(x) UnknownSymbol Letter(,) UnknownSymbol GroupOpen Letter(x) GroupClose Minus Fraction GroupOpen Number(1) GroupClose GroupOpen Number(2) GroupClose UnknownSymbol GroupOpen Left ModulusBracket Number(1) Plus Letter(x) RaiseToIndex Number(2) Right ModulusBracket GroupClose Plus Letter(C)
+
+\int \arcsec{x} \, dx = x \, \arcsec{x} + \frac{\sqrt{x^2 - 1}\ln{(x + \sqrt{x^2-1})}}{x \, \sqrt{1 - \frac{1}{x^2}}} + C
+Integral UnknownSymbol GroupOpen Letter(x) GroupClose UnknownSymbol Letter(,) Letter(d) Letter(x) Equals Letter(x) UnknownSymbol Letter(,) UnknownSymbol GroupOpen Letter(x) GroupClose Plus Fraction GroupOpen Root GroupOpen Letter(x) RaiseToIndex Number(2) Minus Number(1) GroupClose UnknownSymbol GroupOpen RoundBracketOpen Letter(x) Plus Root GroupOpen Letter(x) RaiseToIndex Number(2) Minus Number(1) GroupClose RoundBracketClose GroupClose GroupClose GroupOpen Letter(x) UnknownSymbol Letter(,) Root GroupOpen Number(1) Minus Fraction GroupOpen Number(1) GroupClose GroupOpen Letter(x) RaiseToIndex Number(2) GroupClose GroupClose GroupClose Plus Letter(C)
+
+\int \arccsc{x} \, dx = x \, \arccsc{x} + \frac{\sqrt{x^2 - 1}\ln{(x + \sqrt{x^2-1})}}{x \, \sqrt{1 - \frac{1}{x^2}}} + C
+Integral UnknownSymbol GroupOpen Letter(x) GroupClose UnknownSymbol Letter(,) Letter(d) Letter(x) Equals Letter(x) UnknownSymbol Letter(,) UnknownSymbol GroupOpen Letter(x) GroupClose Plus Fraction GroupOpen Root GroupOpen Letter(x) RaiseToIndex Number(2) Minus Number(1) GroupClose UnknownSymbol GroupOpen RoundBracketOpen Letter(x) Plus Root GroupOpen Letter(x) RaiseToIndex Number(2) Minus Number(1) GroupClose RoundBracketClose GroupClose GroupClose GroupOpen Letter(x) UnknownSymbol Letter(,) Root GroupOpen Number(1) Minus Fraction GroupOpen Number(1) GroupClose GroupOpen Letter(x) RaiseToIndex Number(2) GroupClose GroupClose GroupClose Plus Letter(C)
+
+\int \arccot{x} \, dx = x \, \arccot{x} + \frac{1}{2} \ln{\left| 1 + x^2\right|} + C
+Integral UnknownSymbol GroupOpen Letter(x) GroupClose UnknownSymbol Letter(,) Letter(d) Letter(x) Equals Letter(x) UnknownSymbol Letter(,) UnknownSymbol GroupOpen Letter(x) GroupClose Plus Fraction GroupOpen Number(1) GroupClose GroupOpen Number(2) GroupClose UnknownSymbol GroupOpen Left ModulusBracket Number(1) Plus Letter(x) RaiseToIndex Number(2) Right ModulusBracket GroupClose Plus Letter(C)
