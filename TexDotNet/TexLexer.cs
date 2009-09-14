@@ -5,11 +5,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-using System.Text.RegularExpressions;
-
 namespace TexDotNet
 {
-    using TokenStream = IEnumerable<Token>;
+    using TokenStream = IEnumerator<Token>;
 
     public class TexLexer : ILexer
     {
@@ -22,6 +20,16 @@ namespace TexDotNet
         {
             get;
             set;
+        }
+
+        public TokenStream Tokenise(string input)
+        {
+            return Tokenise(new StringReader(input));
+        }
+
+        public TokenStream Tokenise(Stream stream)
+        {
+            return Tokenise(new StreamReader(stream));
         }
 
         public TokenStream Tokenise(TextReader reader)
@@ -54,6 +62,7 @@ namespace TexDotNet
                     yield return Token.FromValue(ScanShortSymbol(reader, out value), value);
                 }
             }
+            yield return Token.FromKind(TokenKind.EndOfStream);
         }
 
         protected double ScanReal(TrackedTextReader reader)
@@ -100,6 +109,8 @@ namespace TexDotNet
                     return TokenKind.Plus;
                 case '-':
                     return TokenKind.Minus;
+                case '*':
+                    return TokenKind.Dot;
                 case '/':
                     return TokenKind.Divide;
                 case '!':

@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{24039324-63B9-4F57-969D-23A574C6A7FE}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <ProjectGuid>{3CC61991-FCC0-4547-8538-615202DFFB31}</ProjectGuid>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>TexDotNet</RootNamespace>
-    <AssemblyName>TexDotNet</AssemblyName>
+    <RootNamespace>TexDotNet.CommandLine</RootNamespace>
+    <AssemblyName>TexDotNet.CommandLine</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -45,20 +45,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AbstractSyntaxTree.cs" />
-    <Compile Include="IParser.cs" />
-    <Compile Include="ParseNode.cs" />
-    <Compile Include="ParseNodeCollection.cs" />
-    <Compile Include="ParserException.cs" />
-    <Compile Include="ILexer.cs" />
-    <Compile Include="LexerException.cs" />
-    <Compile Include="ParseTree.cs" />
-    <Compile Include="TexHelper.cs" />
-    <Compile Include="TexLexer.cs" />
-    <Compile Include="TexParser.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Token.cs" />
-    <Compile Include="TrackedTextReader.cs" />
+    <Compile Include="TreeTextRenderer.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TexDotNet\TexDotNet.csproj">
+      <Project>{24039324-63B9-4F57-969D-23A574C6A7FE}</Project>
+      <Name>TexDotNet</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -7,6 +7,8 @@ namespace TexDotNet
 {
     public struct Token
     {
+        public static readonly Token Null = new Token(TokenKind.Null);
+
         public static Token FromNumber(double value)
         {
             return new Token(TokenKind.Number, value);
@@ -45,6 +47,8 @@ namespace TexDotNet
 
     public enum TokenKind
     {
+        Null,
+        EndOfStream,
         UnknownSymbol,
 
         Number,

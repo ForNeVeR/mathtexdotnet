@@ -12,9 +12,9 @@ namespace TexDotNet.Tests
     using TokenStream = IEnumerable<Token>;
 
     [TestClass]
-    public class ParserTest
+    public class ParserTests
     {
-        public ParserTest()
+        public ParserTests()
         {
         }
 
@@ -55,6 +55,7 @@ namespace TexDotNet.Tests
         [TestMethod()]
         public void QuickParserTest()
         {
+            TexHelper.BuildParseTree("");
         }
     }
 }

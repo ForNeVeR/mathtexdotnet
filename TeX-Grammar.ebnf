@@ -1,4 +1,4 @@
-expr = term , [ inline op prec 1 , epxr ] ;
-term = value [ "^" expr ] [ "_" expr ] , [ inline op prec 2 , term ] ;
+expr = term , [ ( "+" | "-" ) , epxr ] ;
+term = value [ ( "^" | "_" ) ( value | "{" , expr , "}" ) ] , [ ( "*" | "/" ) , term ] ;
 value = number | symbol | bracket expr ;
 bracket expr = "{" , expr , "}" | "(" , expr , ")" | "[" , expr , "]" | "\{" , expr , "\}" ;

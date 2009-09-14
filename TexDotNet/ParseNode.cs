@@ -7,19 +7,34 @@ namespace TexDotNet
 {
     public class ParseNode
     {
-        public ParseNode(Token value, IList<ParseNode> children)
+        public ParseNode(Token token, IList<ParseNode> children)
         {
-            this.Value = value;
+            this.Kind = ParseNodeKind.Token;
+            this.Token = token;
             this.Children = new ParseNodeCollection(children);
         }
 
-        public ParseNode(Token value)
+        public ParseNode(Token token)
         {
-            this.Value = value;
+            this.Kind = ParseNodeKind.Token;
+            this.Token = token;
             this.Children = null;
         }
 
-        public Token Value
+        public ParseNode(ParseNodeKind kind)
+        {
+            this.Kind = kind;
+            this.Token = Token.Null;
+            this.Children = new ParseNodeCollection();
+        }
+
+        public ParseNodeKind Kind
+        {
+            get;
+            set;
+        }
+
+        public Token Token
         {
             get;
             set;
@@ -30,5 +45,24 @@ namespace TexDotNet
             get;
             private set;
         }
+
+        public override string ToString()
+        {
+            if (this.Kind == ParseNodeKind.Token)
+            {
+                return this.Token.ToString();
+            }
+            else
+            {
+                return this.Kind.ToString();
+            }
+        }
+    }
+
+    public enum ParseNodeKind
+    {
+        Token,
+        Expression,
+        Term
     }
 }

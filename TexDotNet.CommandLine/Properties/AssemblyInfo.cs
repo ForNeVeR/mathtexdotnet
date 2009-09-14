@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("TeX.NET Library")]
+[assembly: AssemblyTitle("TeX.NET Command Line")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("e93b596d-1e80-49a8-8447-b78999f11a2c")]
+[assembly: Guid("cd6c407a-3618-40c9-9e1c-ecf2f43df7a6")]
 
 // Version information for an assembly consists of the following four values:
 //

@@ -11,6 +11,6 @@ namespace TexDotNet
         {
         }
 
-        // TODO
+        // TODO: Design class.
     }
 }

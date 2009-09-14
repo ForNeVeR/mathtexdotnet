@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{CE0E82EA-B6FC-4423-931E-C7061BDA20A3}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -40,12 +40,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CollectionsExtensions.cs" />
     <Compile Include="SystemHelper.cs" />
     <Compile Include="TestExamplesReader.cs" />
-    <Compile Include="ParserTest.cs" />
+    <Compile Include="ParserTests.cs" />
     <Compile Include="DebugExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="LexerTest.cs" />
+    <Compile Include="LexerTests.cs" />
     <Compile Include="TestExample.cs" />
   </ItemGroup>
   <ItemGroup>

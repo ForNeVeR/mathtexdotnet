@@ -12,7 +12,7 @@ namespace TexDotNet.Tests
     using TokenStream = IEnumerable<Token>;
 
     [TestClass]
-    public class LexerTest
+    public class LexerTests
     {
         private static TestExample[] examples;
 
@@ -20,7 +20,7 @@ namespace TexDotNet.Tests
         public static void ClassInitialize(TestContext testContext)
         {
             using (var examplesReader = new TestExamplesReader(SystemHelper.GetResourceStream("Examples.txt")))
-                LexerTest.examples = examplesReader.ReadAllExamples().ToArray();
+                LexerTests.examples = examplesReader.ReadAllExamples().ToArray();
         }
 
         [ClassCleanup()]
@@ -30,7 +30,7 @@ namespace TexDotNet.Tests
 
         private TexLexer lexer;
         
-        public LexerTest()
+        public LexerTests()
         {
             lexer = new TexLexer();
         }
