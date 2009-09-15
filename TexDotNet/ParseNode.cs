@@ -21,6 +21,13 @@ namespace TexDotNet
             this.Children = null;
         }
 
+        public ParseNode(ParseNodeKind kind, IList<ParseNode> children)
+        {
+            this.Kind = kind;
+            this.Token = Token.Null;
+            this.Children = new ParseNodeCollection(children);
+        }
+
         public ParseNode(ParseNodeKind kind)
         {
             this.Kind = kind;
@@ -63,6 +70,9 @@ namespace TexDotNet
     {
         Token,
         Expression,
-        Term
+        Term,
+        IndexedValue,
+        Modifier,
+        Function,
     }
 }

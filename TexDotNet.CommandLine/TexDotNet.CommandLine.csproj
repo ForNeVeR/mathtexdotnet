@@ -45,6 +45,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\TexDotNet.Tests\CollectionsExtensions.cs">
+      <Link>CollectionsExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\TexDotNet.Tests\DebugExtensions.cs">
+      <Link>DebugExtensions.cs</Link>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TreeTextRenderer.cs" />

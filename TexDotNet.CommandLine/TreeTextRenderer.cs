@@ -6,7 +6,7 @@ using System.Text;
 
 namespace TexDotNet.CommandLine
 {
-    public class TreeTextRenderer
+    public sealed class TreeTextRenderer
     {
         public TreeTextRenderer(TextWriter writer)
         {
@@ -19,19 +19,25 @@ namespace TexDotNet.CommandLine
             private set;
         }
 
-        public void Render(ParseTree tree)
+        public void Render(ExpressionTree tree)
         {
-            Render(tree.RootNode, 0);
+            Render(tree.RootNode, node => node.Children, 0);
         }
 
-        public void Render(ParseNode node, int level)
+        public void Render(ParseTree tree)
+        {
+            Render(tree.RootNode, node => node.Children, 0);
+        }
+
+        private void Render<TNode>(TNode node, Func<TNode, IEnumerable<TNode>> getChildren, int level)
         {
             var indentation = new string(' ', level * 2);
             this.Writer.WriteLine(indentation + node.ToString());
-            if (node.Children != null)
+            var children = getChildren(node);
+            if (children != null)
             {
-                foreach (var childNode in node.Children)
-                    Render(childNode, level + 1);
+                foreach (var childNode in children)
+                    Render(childNode, getChildren, level + 1);
             }
         }
     }

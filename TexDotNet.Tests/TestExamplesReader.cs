@@ -72,7 +72,7 @@ namespace TexDotNet.Tests
             var expectedTokenString = streamReader.ReadLine();
             var expectedTokens = expectedTokenString.Split(' ').Select(tokenString =>
             {
-                return Token.FromKind(TokenKind.UnknownSymbol);
+                return Token.FromKind(SymbolKind.Unknown);
             }).ToArray();
 
             streamReader.ReadLine();

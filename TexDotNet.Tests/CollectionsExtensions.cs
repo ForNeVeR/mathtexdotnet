@@ -6,7 +6,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 
-namespace TexDotNet.Tests
+namespace TexDotNet
 {
     public static class CollectionsExtensions
     {

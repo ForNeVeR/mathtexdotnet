@@ -43,6 +43,7 @@ namespace TexDotNet
             while (reader.Peek() != -1)
             {
                 nextChar = (char)reader.Peek();
+
                 if (char.IsWhiteSpace(nextChar))
                 {
                     reader.Read();
@@ -62,7 +63,7 @@ namespace TexDotNet
                     yield return Token.FromValue(ScanShortSymbol(reader, out value), value);
                 }
             }
-            yield return Token.FromKind(TokenKind.EndOfStream);
+            yield return Token.FromKind(SymbolKind.EndOfStream);
         }
 
         protected double ScanReal(TrackedTextReader reader)
@@ -80,69 +81,69 @@ namespace TexDotNet
                 CultureInfo.InvariantCulture.NumberFormat);
         }
 
-        protected TokenKind ScanShortSymbol(TrackedTextReader reader, out object value)
+        protected SymbolKind ScanShortSymbol(TrackedTextReader reader, out object value)
         {
             char chr = (char)reader.Read();
             value = null;
             switch (chr)
             {
                 case '^':
-                    return TokenKind.RaiseToIndex;
+                    return SymbolKind.RaiseToIndex;
                 case '_':
-                    return TokenKind.LowerToIndex;
+                    return SymbolKind.LowerToIndex;
                 case '\'':
-                    return TokenKind.Prime;
+                    return SymbolKind.Prime;
                 case ':':
-                    return TokenKind.Colon;
+                    return SymbolKind.Colon;
 
                 #region Relations
                 case '=':
-                    return TokenKind.Equals;
+                    return SymbolKind.Equals;
                 case '<':
-                    return TokenKind.LessThan;
+                    return SymbolKind.LessThan;
                 case '>':
-                    return TokenKind.GreaterThan;
+                    return SymbolKind.GreaterThan;
                 #endregion
 
                 #region Operators
                 case '+':
-                    return TokenKind.Plus;
+                    return SymbolKind.Plus;
                 case '-':
-                    return TokenKind.Minus;
+                    return SymbolKind.Minus;
                 case '*':
-                    return TokenKind.Dot;
+                    return SymbolKind.Star;
                 case '/':
-                    return TokenKind.Divide;
+                    return SymbolKind.Divide;
                 case '!':
-                    return TokenKind.Factorial;
+                    return SymbolKind.Factorial;
                 #endregion
 
                 #region Brackets
                 case '{':
-                    return TokenKind.GroupOpen;
+                    return SymbolKind.GroupOpen;
                 case '}':
-                    return TokenKind.GroupClose;
+                    return SymbolKind.GroupClose;
                 case '(':
-                    return TokenKind.RoundBracketOpen;
+                    return SymbolKind.RoundBracketOpen;
                 case ')':
-                    return TokenKind.RoundBracketClose;
+                    return SymbolKind.RoundBracketClose;
                 case '[':
-                    return TokenKind.SquareBracketOpen;
+                    return SymbolKind.SquareBracketOpen;
                 case ']':
-                    return TokenKind.SquareBracketClose;
+                    return SymbolKind.SquareBracketClose;
                 case '|':
-                    return TokenKind.ModulusBracket;
+                    return SymbolKind.ModulusBracket;
                 #endregion
 
                 default:
                     value = chr;
-                    return TokenKind.Letter;
+                    return SymbolKind.Letter;
                 //throw new LexerException(reader.Position, string.Format(
                 //    "Illegal character '{0}'.", chr));
             }
         }
 
-        protected TokenKind ScanLongSymbol(TrackedTextReader reader, out object value)
+        protected SymbolKind ScanLongSymbol(TrackedTextReader reader, out object value)
         {
             var sb = new StringBuilder();
             char nextChr;
@@ -163,9 +164,9 @@ namespace TexDotNet
             {
                 case "infty":
                     value = double.PositiveInfinity;
-                    return TokenKind.Number;
+                    return SymbolKind.Number;
                 case "text":
-                    return TokenKind.Text;
+                    return SymbolKind.Text;
 
                 #region Greek letters
                 case "alpha":
@@ -222,232 +223,232 @@ namespace TexDotNet
                 case "omega":
                 case "Omega":
                     value = symbol.Substring(1);
-                    return TokenKind.GreekLetter;
+                    return SymbolKind.GreekLetter;
                 #endregion
 
                 #region Brackets
                 case "{":
-                    return TokenKind.CurlyBracketOpen;
+                    return SymbolKind.CurlyBracketOpen;
                 case "}":
-                    return TokenKind.CurlyBracketClose;
+                    return SymbolKind.CurlyBracketClose;
                 case "|":
-                    return TokenKind.NormBracket;
+                    return SymbolKind.NormBracket;
                 case "langle":
-                    return TokenKind.AngleBracketOpen;
+                    return SymbolKind.AngleBracketOpen;
                 case "rangle":
-                    return TokenKind.AngleBracketClose;
+                    return SymbolKind.AngleBracketClose;
                 case "lfloor":
-                    return TokenKind.FloorBracketOpen;
+                    return SymbolKind.FloorBracketOpen;
                 case "rfloor":
-                    return TokenKind.FloorBracketClose;
+                    return SymbolKind.FloorBracketClose;
                 case "lceil":
-                    return TokenKind.CeilingBracketOpen;
+                    return SymbolKind.CeilingBracketOpen;
                 case "rceil":
-                    return TokenKind.CeilingBracketClose;
+                    return SymbolKind.CeilingBracketClose;
                 #endregion
 
                 #region Relations
                 case "neq":
-                    return TokenKind.NotEquals;
+                    return SymbolKind.NotEquals;
                 case "doteq":
-                    return TokenKind.DotEquals;
+                    return SymbolKind.DotEquals;
                 case "approx":
-                    return TokenKind.Approximates;
+                    return SymbolKind.Approximates;
                 case "equiv":
-                    return TokenKind.Equivalent;
+                    return SymbolKind.Equivalent;
                 case "leq":
-                    return TokenKind.LessThanOrEqualTo;
+                    return SymbolKind.LessThanOrEqualTo;
                 case "geq":
-                    return TokenKind.GreaterThanOrEqualTo;
+                    return SymbolKind.GreaterThanOrEqualTo;
                 case "ll":
-                    return TokenKind.MuchLessThan;
+                    return SymbolKind.MuchLessThan;
                 case "gg":
-                    return TokenKind.MuchGreaterThan;
+                    return SymbolKind.MuchGreaterThan;
                 case "propto":
-                    return TokenKind.Proportional;
+                    return SymbolKind.Proportional;
                 case "asymp":
-                    return TokenKind.Asymptotic;
+                    return SymbolKind.Asymptotic;
                 case "bowtie":
-                    return TokenKind.Bowtie;
+                    return SymbolKind.Bowtie;
                 case "models":
-                    return TokenKind.Models;
+                    return SymbolKind.Models;
                 case "prec":
-                    return TokenKind.Precedes;
+                    return SymbolKind.Precedes;
                 case "preceq":
-                    return TokenKind.PrecedesOrEquals;
+                    return SymbolKind.PrecedesOrEquals;
                 case "succ":
-                    return TokenKind.Succedes;
+                    return SymbolKind.Succedes;
                 case "succeq":
-                    return TokenKind.SuccedesOrEquals;
+                    return SymbolKind.SuccedesOrEquals;
                 case "cong":
-                    return TokenKind.Congruent;
+                    return SymbolKind.Congruent;
                 case "sim":
-                    return TokenKind.Similar;
+                    return SymbolKind.Similar;
                 case "simeq":
-                    return TokenKind.SimilarOrEquals;
+                    return SymbolKind.SimilarOrEquals;
                 case "perp":
-                    return TokenKind.Perpendicular;
+                    return SymbolKind.Perpendicular;
                 case "mid":
-                    return TokenKind.Middle;
+                    return SymbolKind.Middle;
                 case "subset":
-                    return TokenKind.Subset;
+                    return SymbolKind.Subset;
                 case "subseteq":
-                    return TokenKind.SubsetOrEqualTo;
+                    return SymbolKind.SubsetOrEqualTo;
                 case "supset":
-                    return TokenKind.Superset;
+                    return SymbolKind.Superset;
                 case "supseteq":
-                    return TokenKind.SupersetOrEqualTo;
+                    return SymbolKind.SupersetOrEqualTo;
                 case "sqsubset":
-                    return TokenKind.SquareSubset;
+                    return SymbolKind.SquareSubset;
                 case "sqsubseteq":
-                    return TokenKind.SquareSubsetOrEqualTo;
+                    return SymbolKind.SquareSubsetOrEqualTo;
                 case "sqsupset":
-                    return TokenKind.SquareSuperset;
+                    return SymbolKind.SquareSuperset;
                 case "sqsupseteq":
-                    return TokenKind.SquareSupersetOrEqualTo;
+                    return SymbolKind.SquareSupersetOrEqualTo;
                 case "in":
-                    return TokenKind.Member;
+                    return SymbolKind.Member;
                 case "nin":
-                    return TokenKind.NotMember;
+                    return SymbolKind.NotMember;
                 case "ni":
-                    return TokenKind.Contains;
+                    return SymbolKind.Contains;
                 case "nni":
-                    return TokenKind.NotContains;
+                    return SymbolKind.NotContains;
                 case "smile":
-                    return TokenKind.Smile;
+                    return SymbolKind.Smile;
                 case "frown":
-                    return TokenKind.Frown;
+                    return SymbolKind.Frown;
                 case "vdash":
-                    return TokenKind.VLineDash;
+                    return SymbolKind.VLineDash;
                 case "dashv":
-                    return TokenKind.DashVLine;
+                    return SymbolKind.DashVLine;
                 #endregion
 
                 #region Operators
                 case "pm":
-                    return TokenKind.PlusMinus;
+                    return SymbolKind.PlusMinus;
                 case "mp":
-                    return TokenKind.MinusPlus;
+                    return SymbolKind.MinusPlus;
                 case "times":
-                    return TokenKind.Cross;
+                    return SymbolKind.Cross;
                 case "cdot":
-                    return TokenKind.Dot;
+                    return SymbolKind.Dot;
                 case "div":
-                    return TokenKind.Divide;
+                    return SymbolKind.Divide;
                 case "frac":
-                    return TokenKind.Fraction;
+                    return SymbolKind.Fraction;
                 case "sqrt":
-                    return TokenKind.Root;
+                    return SymbolKind.Root;
                 case "sin":
-                    return TokenKind.Sine;
+                    return SymbolKind.Sine;
                 case "cos":
-                    return TokenKind.Cosine;
+                    return SymbolKind.Cosine;
                 case "tan":
-                    return TokenKind.Tangent;
+                    return SymbolKind.Tangent;
                 case "sec":
-                    return TokenKind.Secant;
+                    return SymbolKind.Secant;
                 case "csc":
-                    return TokenKind.Cosecant;
+                    return SymbolKind.Cosecant;
                 case "cot":
-                    return TokenKind.Cotangent;
+                    return SymbolKind.Cotangent;
                 case "arcsin":
-                    return TokenKind.ArcSine;
+                    return SymbolKind.ArcSine;
                 case "arccos":
-                    return TokenKind.ArcCosine;
+                    return SymbolKind.ArcCosine;
                 case "arctan":
-                    return TokenKind.ArcTangent;
+                    return SymbolKind.ArcTangent;
                 case "arcsec":
-                    return TokenKind.ArcSecant;
+                    return SymbolKind.ArcSecant;
                 case "arccsc":
-                    return TokenKind.ArcCosecant;
+                    return SymbolKind.ArcCosecant;
                 case "arccot":
-                    return TokenKind.ArcCotangent;
+                    return SymbolKind.ArcCotangent;
                 case "sinh":
-                    return TokenKind.Sine;
+                    return SymbolKind.Sine;
                 case "cosh":
-                    return TokenKind.Cosine;
+                    return SymbolKind.Cosine;
                 case "tanh":
-                    return TokenKind.Tangent;
+                    return SymbolKind.Tangent;
                 case "sech":
-                    return TokenKind.Secant;
+                    return SymbolKind.Secant;
                 case "csch":
-                    return TokenKind.Cosecant;
+                    return SymbolKind.Cosecant;
                 case "coth":
-                    return TokenKind.Cotangent;
+                    return SymbolKind.Cotangent;
                 case "arcsinh":
-                    return TokenKind.ArcSine;
+                    return SymbolKind.ArcSine;
                 case "arccosh":
-                    return TokenKind.ArcCosine;
+                    return SymbolKind.ArcCosine;
                 case "arctanh":
-                    return TokenKind.ArcTangent;
+                    return SymbolKind.ArcTangent;
                 case "arcsech":
-                    return TokenKind.ArcSecant;
+                    return SymbolKind.ArcSecant;
                 case "arccsch":
-                    return TokenKind.ArcCosecant;
+                    return SymbolKind.ArcCosecant;
                 case "arccoth":
-                    return TokenKind.ArcCotangent;
+                    return SymbolKind.ArcCotangent;
                 case "bmod":
-                    return TokenKind.InlineModulo;
+                    return SymbolKind.InlineModulo;
                 case "pmod":
-                    return TokenKind.IdentityModulo;
+                    return SymbolKind.IdentityModulo;
                 case "sum":
-                    return TokenKind.Sum;
+                    return SymbolKind.Sum;
                 case "prod":
-                    return TokenKind.Product;
+                    return SymbolKind.Product;
                 case "coprod":
-                    return TokenKind.Coproduct;
+                    return SymbolKind.Coproduct;
                 case "int":
-                    return TokenKind.Integral;
+                    return SymbolKind.Integral;
                 case "iint":
-                    return TokenKind.DoubleIntegral;
+                    return SymbolKind.DoubleIntegral;
                 case "iiint":
-                    return TokenKind.TripleIntegral;
+                    return SymbolKind.TripleIntegral;
                 case "iiiint":
-                    return TokenKind.QuadrupleIntegral;
+                    return SymbolKind.QuadrupleIntegral;
                 case "idotsint":
-                    return TokenKind.NtupleIntegral;
+                    return SymbolKind.NtupleIntegral;
                 case "oint":
-                    return TokenKind.ClosedIntegral;
+                    return SymbolKind.ClosedIntegral;
                 case "oiint":
-                    return TokenKind.ClosedDoubleIntegral;
+                    return SymbolKind.ClosedDoubleIntegral;
                 case "oiiint":
-                    return TokenKind.ClosedTripleIntegral;
+                    return SymbolKind.ClosedTripleIntegral;
                 case "oiiiint":
-                    return TokenKind.ClosedQuadrupleIntegral;
+                    return SymbolKind.ClosedQuadrupleIntegral;
                 case "oidotsint":
-                    return TokenKind.ClosedNtupleIntegral;
+                    return SymbolKind.ClosedNtupleIntegral;
                 case "bigoplus":
-                    return TokenKind.BigOPlus;
+                    return SymbolKind.BigOPlus;
                 case "bigotimes":
-                    return TokenKind.BigOTimes;
+                    return SymbolKind.BigOTimes;
                 case "bigodot":
-                    return TokenKind.BigODot;
+                    return SymbolKind.BigODot;
                 case "bigcup":
-                    return TokenKind.BigCup;
+                    return SymbolKind.BigCup;
                 case "bigcap":
-                    return TokenKind.BigCap;
+                    return SymbolKind.BigCap;
                 case "bigcupplus":
-                    return TokenKind.BigCupPlus;
+                    return SymbolKind.BigCupPlus;
                 case "bigsqcup":
-                    return TokenKind.BigSquareCup;
+                    return SymbolKind.BigSquareCup;
                 case "bigsqcap":
-                    return TokenKind.BigSquareCap;
+                    return SymbolKind.BigSquareCap;
                 case "bigveee":
-                    return TokenKind.BigVee;
+                    return SymbolKind.BigVee;
                 case "bigwedge":
-                    return TokenKind.BigWedge;
+                    return SymbolKind.BigWedge;
                 #endregion
 
                 #region Formatting
                 case "left":
-                    return TokenKind.Left;
+                    return SymbolKind.Left;
                 case "right":
-                    return TokenKind.Right;
+                    return SymbolKind.Right;
                 #endregion
 
                 default:
                     if (this.IgnoreUnknownSymbols)
-                        return TokenKind.UnknownSymbol;
+                        return SymbolKind.Unknown;
                     throw new LexerException(reader.Position, string.Format(
                         "Illegal symbol '{0}'.", symbol));
             }

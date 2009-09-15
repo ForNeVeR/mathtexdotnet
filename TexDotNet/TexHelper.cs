@@ -5,6 +5,8 @@ using System.Text;
 
 namespace TexDotNet
 {
+    using TokenStream = IEnumerator<Token>;
+
     public static class TexHelper
     {
         public static ExpressionTree CreateExpressionTree(string expression)
@@ -14,10 +16,14 @@ namespace TexDotNet
 
         public static ParseTree CreateParseTree(string expression)
         {
-            var lexer = new TexLexer();
             var parser = new TexParser();
-            var tokenStream = lexer.Tokenise(expression);
-            return parser.Parse(tokenStream);
+            return parser.Parse(CreateTokenStream(expression));
+        }
+
+        public static TokenStream CreateTokenStream(string expression)
+        {
+            var lexer = new TexLexer();
+            return lexer.Tokenise(expression);
         }
     }
 }
