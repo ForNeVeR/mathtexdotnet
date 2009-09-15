@@ -55,7 +55,7 @@ namespace TexDotNet.Tests
         [TestMethod()]
         public void QuickParserTest()
         {
-            TexHelper.BuildParseTree("");
+            TexHelper.CreateParseTree("");
         }
     }
 }

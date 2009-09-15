@@ -118,6 +118,15 @@ namespace TexDotNet
                 case TokenKind.CurlyBracketOpen:
                     bracketCloseToken = TokenKind.CurlyBracketClose;
                     break;
+                case TokenKind.AngleBracketOpen:
+                    bracketCloseToken = TokenKind.AngleBracketClose;
+                    break;
+                case TokenKind.FloorBracketOpen:
+                    bracketCloseToken = TokenKind.FloorBracketClose;
+                    break;
+                case TokenKind.CeilingBracketOpen:
+                    bracketCloseToken = TokenKind.CeilingBracketClose;
+                    break;
                 default:
                     if (ignoreFailure)
                         return null;
