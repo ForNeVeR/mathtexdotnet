@@ -68,11 +68,8 @@ namespace TexDotNet
 
     public enum ParseNodeKind
     {
+        Operation,
+        FunctionCall,
         Token,
-        Expression,
-        Term,
-        IndexedValue,
-        Modifier,
-        Function,
     }
 }

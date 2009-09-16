@@ -25,7 +25,7 @@ namespace TexDotNet
 
         private ParseNode ParseExpression(TokenStream tokenStream)
         {
-            var node = new ParseNode(ParseNodeKind.Expression);
+            var node = new ParseNode(ParseNodeKind.Operation);
             node.Children.Add(ParseTerm(tokenStream));
             switch (tokenStream.Current.Symbol)
             {
@@ -45,7 +45,7 @@ namespace TexDotNet
 
         private ParseNode ParseTerm(TokenStream tokenStream)
         {
-            var node = new ParseNode(ParseNodeKind.Term);
+            var node = new ParseNode(ParseNodeKind.Operation);
             node.Children.Add(ParseIndexedValue(tokenStream));
             switch (tokenStream.Current.Symbol)
             {
@@ -63,7 +63,7 @@ namespace TexDotNet
 
         private ParseNode ParseIndexedValue(TokenStream tokenStream)
         {
-            var node = new ParseNode(ParseNodeKind.IndexedValue);
+            var node = new ParseNode(ParseNodeKind.Operation);
             node.Children.Add(ParseValue(tokenStream));
             var firstSymbol = tokenStream.Current.Symbol;
             switch (tokenStream.Current.Symbol)
@@ -161,7 +161,7 @@ namespace TexDotNet
                     SymbolKind.Number, SymbolKind.Letter });
 
             if (hasModifier)
-                return new ParseNode(ParseNodeKind.Modifier, new[] { new ParseNode(modifierToken), node });
+                return new ParseNode(ParseNodeKind.FunctionCall, new[] { new ParseNode(modifierToken), node });
             else
                 return node;
         }
@@ -222,6 +222,9 @@ namespace TexDotNet
                     break;
                 case SymbolKind.CeilingBracketOpen:
                     bracketCloseToken = SymbolKind.CeilingBracketClose;
+                    break;
+                case SymbolKind.NormBracket:
+                    bracketCloseToken = SymbolKind.NormBracket;
                     break;
                 default:
                     return null;

@@ -8,9 +8,9 @@ namespace TexDotNet
 {
     using TokenStream = IEnumerator<Token>;
 
-    public class TexDecomposer
+    public class TexComposer
     {
-        public TexDecomposer(TextWriter writer)
+        public TexComposer(TextWriter writer)
         {
         }
 

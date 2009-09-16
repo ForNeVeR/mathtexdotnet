@@ -7,21 +7,19 @@ namespace TexDotNet
 {
     public class ExpressionNode
     {
-        private const string errorMesssageWrongNumberOfChildren =
+        private const string errMsgWrongNumberOfChildren =
             "An parse node of kind {0} cannot have {1} children.";
+
+        #region Conversion from Parse Tree
 
         public static ExpressionNode FromParseNode(ParseNode parseNode)
         {
             switch (parseNode.Kind)
             {
-                case ParseNodeKind.Expression:
-                    return FromExpressionParseNode(parseNode);
-                case ParseNodeKind.Term:
-                    return FromTermParseNode(parseNode);
-                case ParseNodeKind.IndexedValue:
-                    return FromIndexedValueParseNode(parseNode);
-                case ParseNodeKind.Modifier:
-                    return FromModifierParseNode(parseNode);
+                case ParseNodeKind.Operation:
+                    return FromOperationParseNode(parseNode);
+                case ParseNodeKind.FunctionCall:
+                    return FromFunctionCallParseNode(parseNode);
                 case ParseNodeKind.Token:
                     return new ExpressionNode(parseNode.Token.Symbol, parseNode.Token.Value);
                 default:
@@ -30,7 +28,7 @@ namespace TexDotNet
             }
         }
 
-        public static ExpressionNode FromExpressionParseNode(ParseNode parseNode)
+        public static ExpressionNode FromOperationParseNode(ParseNode parseNode)
         {
             if (parseNode.Children.Count == 1)
             {
@@ -39,55 +37,17 @@ namespace TexDotNet
             else if (parseNode.Children.Count == 3)
             {
                 var node = new ExpressionNode(parseNode.Children[1].Token.Symbol, new[] {
-                            FromParseNode(parseNode.Children[0]), FromParseNode(parseNode.Children[2])});
+                    FromParseNode(parseNode.Children[0]), FromParseNode(parseNode.Children[2])});
                 return node;
             }
             else
             {
                 throw new InvalidOperationException(string.Format(
-                    errorMesssageWrongNumberOfChildren, parseNode.Kind, parseNode.Children.Count));
+                    errMsgWrongNumberOfChildren, parseNode.Kind, parseNode.Children.Count));
             }
         }
 
-        public static ExpressionNode FromTermParseNode(ParseNode parseNode)
-        {
-            if (parseNode.Children.Count == 1)
-            {
-                return FromParseNode(parseNode.Children[0]);
-            }
-            else if (parseNode.Children.Count == 3)
-            {
-                var node = new ExpressionNode(parseNode.Children[1].Token.Symbol, new[] {
-                            FromParseNode(parseNode.Children[0]), FromParseNode(parseNode.Children[2])});
-                return node;
-            }
-            else
-            {
-                throw new InvalidOperationException(string.Format(
-                    errorMesssageWrongNumberOfChildren, parseNode.Kind, parseNode.Children.Count));
-            }
-        }
-
-        public static ExpressionNode FromIndexedValueParseNode(ParseNode parseNode)
-        {
-            if (parseNode.Children.Count == 1)
-            {
-                return FromParseNode(parseNode.Children[0]);
-            }
-            else if (parseNode.Children.Count == 3)
-            {
-                var node = new ExpressionNode(parseNode.Children[1].Token.Symbol, new[] {
-                            FromParseNode(parseNode.Children[0]), FromParseNode(parseNode.Children[2])});
-                return node;
-            }
-            else
-            {
-                throw new InvalidOperationException(string.Format(
-                    errorMesssageWrongNumberOfChildren, parseNode.Kind, parseNode.Children.Count));
-            }
-        }
-
-        public static ExpressionNode FromModifierParseNode(ParseNode parseNode)
+        public static ExpressionNode FromFunctionCallParseNode(ParseNode parseNode)
         {
             if (parseNode.Children.Count >= 2)
             {
@@ -100,9 +60,11 @@ namespace TexDotNet
             else
             {
                 throw new InvalidOperationException(string.Format(
-                    errorMesssageWrongNumberOfChildren, parseNode.Kind, parseNode.Children.Count));
+                    errMsgWrongNumberOfChildren, parseNode.Kind, parseNode.Children.Count));
             }
         }
+
+        #endregion
 
         public ExpressionNode(SymbolKind symbol, object value)
         {
@@ -142,6 +104,16 @@ namespace TexDotNet
             get;
             private set;
         }
+
+        #region Conversion to Parse Tree
+
+        public ParseNode ToParseNode()
+        {
+            // TODO
+            throw new NotImplementedException();
+        }
+
+        #endregion
 
         public override string ToString()
         {

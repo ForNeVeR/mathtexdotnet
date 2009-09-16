@@ -22,5 +22,10 @@ namespace TexDotNet
             get;
             private set;
         }
+
+        public ParseTree ToParseTree()
+        {
+            return new ParseTree(this.RootNode.ToParseNode());
+        }
     }
 }
