@@ -7,10 +7,6 @@ namespace TexDotNet
 {
     public class ExpressionTree
     {
-        public static ExpressionTree FromParseTree(ParseTree parseTree)
-        {
-            return new ExpressionTree(ExpressionNode.FromParseNode(parseTree.RootNode));
-        }
 
         public ExpressionTree(ExpressionNode rootNode)
         {

@@ -13,7 +13,7 @@ namespace TexDotNet.CommandLine
             Console.WindowHeight = 40;
 #endif
 
-            const string testExpr = @"\frac{1}{3}+2^{-6+\alpha}*8-\sqrt[4]{3}/27+4-13*([4-2]*5)";
+            const string testExpr = @"\frac{1}{3}+2^{-6+\alpha}*8-\sqrt[4]{\cos 3}/27+4-13*([4-2]*5)";
 
             var treeRenderer = new TreeTextRenderer(Console.Out);
 
@@ -21,15 +21,12 @@ namespace TexDotNet.CommandLine
             Console.WriteLine(testExpr);
             Console.WriteLine();
 
-            Console.WriteLine(TexHelper.CreateTokenStream(testExpr).ToTokenString());
+            var tokenStream = TexHelper.CreateTokenStream(testExpr).ToTokenString();
+            Console.WriteLine("Token stream:");
+            Console.WriteLine(tokenStream);
             Console.WriteLine();
 
-            var parseTree = TexHelper.CreateParseTree(testExpr);
-            Console.WriteLine("Parse tree:");
-            treeRenderer.Render(parseTree);
-            Console.Out.WriteLine();
-
-            var exprTree = ExpressionTree.FromParseTree(parseTree);
+            var exprTree = TexHelper.CreateExpressionTree(testExpr);
             Console.WriteLine("Expression tree:");
             treeRenderer.Render(exprTree);
             Console.Out.WriteLine();

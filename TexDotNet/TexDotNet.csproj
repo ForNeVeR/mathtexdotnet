@@ -48,6 +48,7 @@
     <Compile Include="ExpressionNodeCollection.cs" />
     <Compile Include="ExpressionNode.cs" />
     <Compile Include="ExpressionTree.cs" />
+    <Compile Include="ExpressionTreeBuilder.cs" />
     <Compile Include="SymbolKind.cs" />
     <Compile Include="Semantics\IParser.cs" />
     <Compile Include="Semantics\ParseNode.cs" />

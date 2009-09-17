@@ -32,14 +32,24 @@ namespace TexDotNet
 
         public static ExpressionTree CreateExpressionTree(string expression)
         {
-            return ExpressionTree.FromParseTree(CreateParseTree(expression));
+            return ExpressionTreeBuilder.FromParseTree(CreateParseTree(expression));
+        }
+
+        public static ExpressionTree CreateExpressionTree(TokenStream tokenStream)
+        {
+            return ExpressionTreeBuilder.FromParseTree(CreateParseTree(tokenStream));
         }
 
         public static ParseTree CreateParseTree(string expression)
         {
-            var parser = new TexParser();
-            return parser.Parse(CreateTokenStream(expression));
+            return CreateParseTree(CreateTokenStream(expression));
         }
+        public static ParseTree CreateParseTree(TokenStream tokenStream)
+        {
+            var parser = new TexParser();
+            return parser.Parse(tokenStream);
+        }
+
 
         public static TokenStream CreateTokenStream(string expression)
         {

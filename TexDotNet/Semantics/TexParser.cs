@@ -164,6 +164,8 @@ namespace TexDotNet
             if (node == null)
                 node = ParseRootOptional(tokenStream);
             if (node == null)
+                node = ParseFunctionOptional(tokenStream);
+            if (node == null)
                 throw new ParserException(tokenStream.Current, new[] {
                     SymbolKind.Number, SymbolKind.Letter });
 
@@ -281,6 +283,31 @@ namespace TexDotNet
                 node.Children.Add(argumentNode);
             node.Children.Add(ParseGroup(tokenStream));
             return node;
+        }
+
+        private ParseNode ParseFunctionOptional(TokenStream tokenStream)
+        {
+            switch (tokenStream.Current.Symbol)
+            {
+                case SymbolKind.Sine:
+                case SymbolKind.Cosine:
+                case SymbolKind.Tangent:
+                case SymbolKind.Cosecant:
+                case SymbolKind.Secant:
+                case SymbolKind.Cotangent:
+                case SymbolKind.ArcSine:
+                case SymbolKind.ArcCosine:
+                case SymbolKind.ArcTangent:
+                case SymbolKind.ArcCosecant:
+                case SymbolKind.ArcSecant:
+                case SymbolKind.ArcCotangent:
+                    var functionNode = new ParseNode(tokenStream.Current);
+                    tokenStream.ForceMoveNext();
+                    return new ParseNode(ParseNodeKind.FunctionCall, new[] {
+                        functionNode, ParseExpression(tokenStream) });
+                default:
+                    return null;
+            }
         }
 
         private ParseNode ParseArgumentOptional(TokenStream tokenStream)
