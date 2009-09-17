@@ -136,10 +136,13 @@ namespace TexDotNet
                 #endregion
 
                 default:
-                    value = chr;
-                    return SymbolKind.Letter;
-                //throw new LexerException(reader.Position, string.Format(
-                //    "Illegal character '{0}'.", chr));
+                    if (char.IsLetter(chr))
+                    {
+                        value = chr;
+                        return SymbolKind.Letter;
+                    }
+                    throw new LexerException(reader.Position, string.Format(
+                        "Illegal character '{0}'.", chr));
             }
         }
 
@@ -337,6 +340,8 @@ namespace TexDotNet
                     return SymbolKind.Divide;
                 case "frac":
                     return SymbolKind.Fraction;
+                case "binom":
+                    return SymbolKind.Binomial;
                 case "sqrt":
                     return SymbolKind.Root;
                 case "sin":

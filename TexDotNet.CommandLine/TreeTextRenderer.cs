@@ -21,23 +21,31 @@ namespace TexDotNet.CommandLine
 
         public void Render(ExpressionTree tree)
         {
-            Render(tree.RootNode, node => node.Children, 0);
+            Render(tree.RootNode, false, node => node.Arguments, node => node.Children, 0);
         }
 
         public void Render(ParseTree tree)
         {
-            Render(tree.RootNode, node => node.Children, 0);
+            Render(tree.RootNode, false, null, node => node.Children, 0);
         }
 
-        private void Render<TNode>(TNode node, Func<TNode, IEnumerable<TNode>> getChildren, int level)
+        private void Render<TNode>(TNode node, bool isAttribute, Func<TNode, IEnumerable<TNode>> getAttributes,
+            Func<TNode, IEnumerable<TNode>> getChildren, int level)
         {
+            // Prefix attribute nodes with '@'.
             var indentation = new string(' ', level * 2);
-            this.Writer.WriteLine(indentation + node.ToString());
+            this.Writer.WriteLine(indentation + (isAttribute ? "@" : string.Empty) + node.ToString());
+            var attributes = getAttributes == null ? null : getAttributes(node);
             var children = getChildren(node);
             if (children != null)
             {
+                if (attributes != null)
+                {
+                    foreach (var childNode in attributes)
+                        Render(childNode, true, getAttributes, getChildren, level + 1);
+                }
                 foreach (var childNode in children)
-                    Render(childNode, getChildren, level + 1);
+                    Render(childNode, false, getAttributes, getChildren, level + 1);
             }
         }
     }

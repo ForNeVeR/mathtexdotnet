@@ -94,6 +94,7 @@ namespace TexDotNet
         Divide,
         Factorial,
         Fraction,
+        Binomial,
         Root,
         Sine,
         Cosine,

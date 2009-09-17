@@ -13,7 +13,7 @@ namespace TexDotNet.CommandLine
             Console.WindowHeight = 40;
 #endif
 
-            const string testExpr = @"1+2^{-6}*8-3/27+4-13*([4-2]*5)";
+            const string testExpr = @"\frac{1}{3}+2^{-6+\alpha}*8-\sqrt[4]{3}/27+4-13*([4-2]*5)";
 
             var treeRenderer = new TreeTextRenderer(Console.Out);
 

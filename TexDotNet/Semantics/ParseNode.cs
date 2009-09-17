@@ -8,6 +8,7 @@ namespace TexDotNet
     public class ParseNode
     {
         public ParseNode(Token token, IList<ParseNode> children)
+            : this()
         {
             this.Kind = ParseNodeKind.Token;
             this.Token = token;
@@ -15,6 +16,7 @@ namespace TexDotNet
         }
 
         public ParseNode(Token token)
+            : this()
         {
             this.Kind = ParseNodeKind.Token;
             this.Token = token;
@@ -22,6 +24,7 @@ namespace TexDotNet
         }
 
         public ParseNode(ParseNodeKind kind, IList<ParseNode> children)
+            : this()
         {
             this.Kind = kind;
             this.Token = Token.Null;
@@ -29,10 +32,16 @@ namespace TexDotNet
         }
 
         public ParseNode(ParseNodeKind kind)
+            : this()
         {
             this.Kind = kind;
             this.Token = Token.Null;
             this.Children = new ParseNodeCollection();
+        }
+
+        private ParseNode()
+        {
+            this.IsArgument = false;
         }
 
         public ParseNodeKind Kind
@@ -42,6 +51,12 @@ namespace TexDotNet
         }
 
         public Token Token
+        {
+            get;
+            set;
+        }
+
+        public bool IsArgument
         {
             get;
             set;

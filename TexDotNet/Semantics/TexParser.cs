@@ -15,7 +15,7 @@ namespace TexDotNet
 
         public ParseTree Parse(TokenStream tokenStream)
         {
-            tokenStream.MoveNext();
+            tokenStream.ForceMoveNext();
             var rootNode = ParseExpression(tokenStream);
             if (tokenStream.Current.Symbol != SymbolKind.EndOfStream)
                 throw new ParserException(tokenStream.Current,
@@ -32,7 +32,7 @@ namespace TexDotNet
                 case SymbolKind.Plus:
                 case SymbolKind.Minus:
                     node.Children.Add(new ParseNode(tokenStream.Current));
-                    tokenStream.MoveNext();
+                    tokenStream.ForceMoveNext();
                     break;
                 case SymbolKind.EndOfStream:
                     return node;
@@ -54,7 +54,7 @@ namespace TexDotNet
                 case SymbolKind.Star:
                 case SymbolKind.Divide:
                     node.Children.Add(new ParseNode(tokenStream.Current));
-                    tokenStream.MoveNext();
+                    tokenStream.ForceMoveNext();
                     node.Children.Add(ParseTerm(tokenStream));
                     break;
             }
@@ -71,7 +71,7 @@ namespace TexDotNet
                 case SymbolKind.RaiseToIndex:
                 case SymbolKind.LowerToIndex:
                     node.Children.Add(new ParseNode(tokenStream.Current));
-                    tokenStream.MoveNext();
+                    tokenStream.ForceMoveNext();
                     node.Children.Add(ParseIndex(tokenStream));
                     break;
                 default:
@@ -90,7 +90,7 @@ namespace TexDotNet
                     else
                     {
                         node.Children.Add(new ParseNode(tokenStream.Current));
-                        tokenStream.MoveNext();
+                        tokenStream.ForceMoveNext();
                         node.Children.Add(ParseIndex(tokenStream));
                         return node;
                     }
@@ -112,11 +112,11 @@ namespace TexDotNet
 
         private ParseNode ParseGroup(TokenStream tokenStream)
         {
-            var node = ParseBracketedExpressionOptional(tokenStream);
+            var node = ParseGroupOptional(tokenStream);
             if (node == null)
                 throw new ParserException(tokenStream.Current, new[] {
                     SymbolKind.GroupOpen });
-            return null;
+            return node;
         }
 
         private ParseNode ParseGroupOptional(TokenStream tokenStream)
@@ -124,12 +124,12 @@ namespace TexDotNet
             switch (tokenStream.Current.Symbol)
             {
                 case SymbolKind.GroupOpen:
-                    tokenStream.MoveNext();
+                    tokenStream.ForceMoveNext();
                     var node = ParseExpression(tokenStream);
                     if (tokenStream.Current.Symbol != SymbolKind.GroupClose)
                         throw new ParserException(tokenStream.Current, new[] {
                             SymbolKind.GroupClose });
-                    tokenStream.MoveNext();
+                    tokenStream.ForceMoveNext();
                     return node;
                 default:
                     return null;
@@ -140,14 +140,15 @@ namespace TexDotNet
         {
             bool hasModifier = false;
             var modifierToken = tokenStream.Current;
-            if (tokenStream.Current.Symbol == SymbolKind.Plus)
+            switch (tokenStream.Current.Symbol)
             {
-                tokenStream.MoveNext();
-            }
-            if (tokenStream.Current.Symbol == SymbolKind.Minus)
-            {
-                hasModifier = true;
-                tokenStream.MoveNext();
+                case SymbolKind.Plus:
+                    tokenStream.ForceMoveNext();
+                    break;
+                case SymbolKind.Minus:
+                    hasModifier = true;
+                    tokenStream.ForceMoveNext();
+                    break;
             }
 
             ParseNode node;
@@ -156,6 +157,12 @@ namespace TexDotNet
                 node = ParseGroupOptional(tokenStream);
             if (node == null)
                 node = ParseBracketedExpressionOptional(tokenStream);
+            if (node == null)
+                node = ParseFractionOptional(tokenStream);
+            if (node == null)
+                node = ParseBinomialOptional(tokenStream);
+            if (node == null)
+                node = ParseRootOptional(tokenStream);
             if (node == null)
                 throw new ParserException(tokenStream.Current, new[] {
                     SymbolKind.Number, SymbolKind.Letter });
@@ -166,14 +173,14 @@ namespace TexDotNet
                 return node;
         }
 
-        private ParseNode ParseRawValue(TokenStream tokenStream)
-        {
-            var node = ParseRawValueOptional(tokenStream);
-            if (node == null)
-                throw new ParserException(tokenStream.Current, new[] {
-                    SymbolKind.Number, SymbolKind.Letter });
-            return node;
-        }
+        //private ParseNode ParseRawValue(TokenStream tokenStream)
+        //{
+        //    var node = ParseRawValueOptional(tokenStream);
+        //    if (node == null)
+        //        throw new ParserException(tokenStream.Current, new[] {
+        //            SymbolKind.Number, SymbolKind.Letter });
+        //    return node;
+        //}
 
         private ParseNode ParseRawValueOptional(TokenStream tokenStream)
         {
@@ -182,8 +189,9 @@ namespace TexDotNet
             {
                 case SymbolKind.Number:
                 case SymbolKind.Letter:
+                case SymbolKind.GreekLetter:
                     node = new ParseNode(tokenStream.Current);
-                    tokenStream.MoveNext();
+                    tokenStream.ForceMoveNext();
                     break;
                 default:
                     return null;
@@ -191,14 +199,14 @@ namespace TexDotNet
             return node;
         }
 
-        private ParseNode ParseBracketedExpression(TokenStream tokenStream)
-        {
-            var node = ParseBracketedExpressionOptional(tokenStream);
-            if (node == null)
-                throw new ParserException(tokenStream.Current, new[] {
-                    SymbolKind.RoundBracketOpen, SymbolKind.SquareBracketOpen, SymbolKind.CurlyBracketOpen });
-            return node;
-        }
+        //private ParseNode ParseBracketedExpression(TokenStream tokenStream)
+        //{
+        //    var node = ParseBracketedExpressionOptional(tokenStream);
+        //    if (node == null)
+        //        throw new ParserException(tokenStream.Current, new[] {
+        //            SymbolKind.RoundBracketOpen, SymbolKind.SquareBracketOpen, SymbolKind.CurlyBracketOpen });
+        //    return node;
+        //}
 
         private ParseNode ParseBracketedExpressionOptional(TokenStream tokenStream)
         {
@@ -229,13 +237,68 @@ namespace TexDotNet
                 default:
                     return null;
             }
-            tokenStream.MoveNext();
+            tokenStream.ForceMoveNext();
             var node = ParseExpression(tokenStream);
             if (tokenStream.Current.Symbol != bracketCloseToken)
                 throw new ParserException(tokenStream.Current, new[] {
                     bracketCloseToken });
-            tokenStream.MoveNext();
+            tokenStream.ForceMoveNext();
             return node;
+        }
+
+        private ParseNode ParseFractionOptional(TokenStream tokenStream)
+        {
+            if (tokenStream.Current.Symbol != SymbolKind.Fraction)
+                return null;
+            var functionNode = new ParseNode(tokenStream.Current);
+            tokenStream.ForceMoveNext();
+            var node = new ParseNode(ParseNodeKind.FunctionCall, new[] {
+                functionNode, ParseGroup(tokenStream), ParseGroup(tokenStream)});
+            return node;
+        }
+
+        private ParseNode ParseBinomialOptional(TokenStream tokenStream)
+        {
+            if (tokenStream.Current.Symbol != SymbolKind.Binomial)
+                return null;
+            var functionNode = new ParseNode(tokenStream.Current);
+            tokenStream.ForceMoveNext();
+            var node = new ParseNode(ParseNodeKind.FunctionCall, new[] {
+                functionNode, ParseGroup(tokenStream), ParseGroup(tokenStream)});
+            return node;
+        }
+
+        private ParseNode ParseRootOptional(TokenStream tokenStream)
+        {
+            if (tokenStream.Current.Symbol != SymbolKind.Root)
+                return null;
+            var functionNode = new ParseNode(tokenStream.Current);
+            tokenStream.ForceMoveNext();
+            var node = new ParseNode(ParseNodeKind.FunctionCall);
+            node.Children.Add(functionNode);
+            var argumentNode = ParseArgumentOptional(tokenStream);
+            if (argumentNode != null)
+                node.Children.Add(argumentNode);
+            node.Children.Add(ParseGroup(tokenStream));
+            return node;
+        }
+
+        private ParseNode ParseArgumentOptional(TokenStream tokenStream)
+        {
+            switch (tokenStream.Current.Symbol)
+            {
+                case SymbolKind.SquareBracketOpen:
+                    tokenStream.ForceMoveNext();
+                    var node = ParseExpression(tokenStream);
+                    if (tokenStream.Current.Symbol != SymbolKind.SquareBracketClose)
+                        throw new ParserException(tokenStream.Current, new[] {
+                            SymbolKind.SquareBracketClose });
+                    tokenStream.ForceMoveNext();
+                    node.IsArgument = true;
+                    return node;
+                default:
+                    return null;
+            }
         }
     }
 }

@@ -10,6 +10,7 @@ namespace TexDotNet
         private const string errMsgWrongNumberOfChildren =
             "An parse node of kind {0} cannot have {1} children.";
 
+        // TODO: Refactor into ExpressionTreeBuilder class.
         #region Conversion from Parse Tree
 
         public static ExpressionNode FromParseNode(ParseNode parseNode)
@@ -51,11 +52,18 @@ namespace TexDotNet
         {
             if (parseNode.Children.Count >= 2)
             {
-                var children = new ExpressionNode[parseNode.Children.Count - 1];
-                for (int i = 0; i < children.Length; i++)
-                    children[i] = new ExpressionNode(parseNode.Children[i + 1].Token.Symbol,
-                        parseNode.Children[i + 1].Token.Value);
-                return new ExpressionNode(parseNode.Children[0].Token.Symbol, children);
+                var children = new List<ExpressionNode>(parseNode.Children.Count - 1);
+                var arguments = new List<ExpressionNode>(parseNode.Children.Count - 1);
+                ParseNode childParseNode;
+                for (int i = 1; i < parseNode.Children.Count; i++)
+                {
+                    childParseNode = parseNode.Children[i];
+                    if (childParseNode.IsArgument)
+                        arguments.Add(FromParseNode(childParseNode));
+                    else
+                        children.Add(FromParseNode(childParseNode));
+                }
+                return new ExpressionNode(parseNode.Children[0].Token.Symbol, children, arguments);
             }
             else
             {
@@ -67,24 +75,43 @@ namespace TexDotNet
         #endregion
 
         public ExpressionNode(SymbolKind symbol, object value)
+            : this()
         {
             this.Symbol = symbol;
             this.Value = value;
             this.Children = null;
+            this.Arguments = null;
         }
 
-        public ExpressionNode(SymbolKind symbol, IList<ExpressionNode> children)
+        public ExpressionNode(SymbolKind symbol, IList<ExpressionNode> children, IList<ExpressionNode> arguments)
+            : this()
         {
             this.Symbol = symbol;
             this.Value = null;
             this.Children = new ExpressionNodeCollection(children);
+            this.Arguments = new ExpressionNodeCollection(arguments);
+        }
+
+        public ExpressionNode(SymbolKind symbol, IList<ExpressionNode> children)
+            : this()
+        {
+            this.Symbol = symbol;
+            this.Value = null;
+            this.Children = new ExpressionNodeCollection(children);
+            this.Arguments = new ExpressionNodeCollection();
         }
 
         public ExpressionNode(SymbolKind symbol)
+            : this()
         {
             this.Symbol = symbol;
             this.Value = null;
             this.Children = new ExpressionNodeCollection();
+            this.Arguments = new ExpressionNodeCollection();
+        }
+
+        public ExpressionNode()
+        {
         }
 
         public SymbolKind Symbol
@@ -105,15 +132,11 @@ namespace TexDotNet
             private set;
         }
 
-        #region Conversion to Parse Tree
-
-        public ParseNode ToParseNode()
+        public ExpressionNodeCollection Arguments
         {
-            // TODO
-            throw new NotImplementedException();
+            get;
+            private set;
         }
-
-        #endregion
 
         public override string ToString()
         {
