@@ -25,7 +25,7 @@ namespace TexDotNet
 
         private ParseNode ParseExpression(TokenStream tokenStream)
         {
-            var node = new ParseNode(ParseNodeKind.Operation);
+            var node = new ParseNode(ParseNodeKind.InfixOperator);
             node.Children.Add(ParseTerm(tokenStream));
             switch (tokenStream.Current.Symbol)
             {
@@ -45,8 +45,8 @@ namespace TexDotNet
 
         private ParseNode ParseTerm(TokenStream tokenStream)
         {
-            var node = new ParseNode(ParseNodeKind.Operation);
-            node.Children.Add(ParseIndexedValue(tokenStream));
+            var node = new ParseNode(ParseNodeKind.InfixOperator);
+            node.Children.Add(ParseSignedValueOptional(tokenStream));
             switch (tokenStream.Current.Symbol)
             {
                 case SymbolKind.Cross:
@@ -61,9 +61,38 @@ namespace TexDotNet
             return node;
         }
 
+        private ParseNode ParseSignedValueOptional(TokenStream tokenStream)
+        {
+            var node = new ParseNode(ParseNodeKind.PrefixOperator);
+            switch (tokenStream.Current.Symbol)
+            {
+                case SymbolKind.Plus:
+                case SymbolKind.Minus:
+                    var signNode = new ParseNode(tokenStream.Current);
+                    tokenStream.ForceMoveNext();
+                    break;
+            }
+            node.Children.Add(ParseFactorialValue(tokenStream));
+            return node;
+        }
+
+        private ParseNode ParseFactorialValue(TokenStream tokenStream)
+        {
+            var node = new ParseNode(ParseNodeKind.PostfixOperator);
+            node.Children.Add(ParseIndexedValue(tokenStream));
+            switch (tokenStream.Current.Symbol)
+            {
+                case SymbolKind.Factorial:
+                    node.Children.Add(new ParseNode(tokenStream.Current));
+                    tokenStream.ForceMoveNext();
+                    break;
+            }
+            return node;
+        }
+
         private ParseNode ParseIndexedValue(TokenStream tokenStream)
         {
-            var node = new ParseNode(ParseNodeKind.Operation);
+            var node = new ParseNode(ParseNodeKind.InfixOperator);
             node.Children.Add(ParseValue(tokenStream));
             var firstSymbol = tokenStream.Current.Symbol;
             switch (tokenStream.Current.Symbol)
@@ -87,15 +116,49 @@ namespace TexDotNet
                             firstSymbol == SymbolKind.RaiseToIndex ? SymbolKind.LowerToIndex : 
                             SymbolKind.RaiseToIndex});
                     }
-                    else
-                    {
-                        node.Children.Add(new ParseNode(tokenStream.Current));
-                        tokenStream.ForceMoveNext();
-                        node.Children.Add(ParseIndex(tokenStream));
-                        return node;
-                    }
-                default:
+                    node.Children.Add(new ParseNode(tokenStream.Current));
+                    tokenStream.ForceMoveNext();
+                    node.Children.Add(ParseIndex(tokenStream));
+                    break;
+            }
+            return node;
+        }
+
+        private ParseNode ParseValue(TokenStream tokenStream)
+        {
+            ParseNode node;
+            node = ParseRawValueOptional(tokenStream);
+            if (node == null)
+                node = ParseGroupOptional(tokenStream);
+            if (node == null)
+                node = ParseBracketedExpressionOptional(tokenStream);
+            if (node == null)
+                node = ParseFractionOptional(tokenStream);
+            if (node == null)
+                node = ParseBinomialOptional(tokenStream);
+            if (node == null)
+                node = ParseRootOptional(tokenStream);
+            if (node == null)
+                node = ParseFunctionOptional(tokenStream);
+            if (node == null)
+                throw new ParserException(tokenStream.Current,
+                    "Expected one of the following: number, letter, open bracket, fraction, binomial, root " +
+                    "function.");
+            return node;
+        }
+
+        private ParseNode ParseRawValueOptional(TokenStream tokenStream)
+        {
+            switch (tokenStream.Current.Symbol)
+            {
+                case SymbolKind.Number:
+                case SymbolKind.Letter:
+                case SymbolKind.GreekLetter:
+                    var node = new ParseNode(tokenStream.Current);
+                    tokenStream.ForceMoveNext();
                     return node;
+                default:
+                    return null;
             }
         }
 
@@ -106,7 +169,8 @@ namespace TexDotNet
             if (node == null)
                 node = ParseGroupOptional(tokenStream);
             if (node == null)
-                throw new ParserException(tokenStream.Current, "Expected a single value or group expression.");
+                throw new ParserException(tokenStream.Current,
+                    "Expected a single value or group expression.");
             return node;
         }
 
@@ -135,80 +199,6 @@ namespace TexDotNet
                     return null;
             }
         }
-
-        private ParseNode ParseValue(TokenStream tokenStream)
-        {
-            bool hasModifier = false;
-            var modifierToken = tokenStream.Current;
-            switch (tokenStream.Current.Symbol)
-            {
-                case SymbolKind.Plus:
-                    tokenStream.ForceMoveNext();
-                    break;
-                case SymbolKind.Minus:
-                    hasModifier = true;
-                    tokenStream.ForceMoveNext();
-                    break;
-            }
-
-            ParseNode node;
-            node = ParseRawValueOptional(tokenStream);
-            if (node == null)
-                node = ParseGroupOptional(tokenStream);
-            if (node == null)
-                node = ParseBracketedExpressionOptional(tokenStream);
-            if (node == null)
-                node = ParseFractionOptional(tokenStream);
-            if (node == null)
-                node = ParseBinomialOptional(tokenStream);
-            if (node == null)
-                node = ParseRootOptional(tokenStream);
-            if (node == null)
-                node = ParseFunctionOptional(tokenStream);
-            if (node == null)
-                throw new ParserException(tokenStream.Current, new[] {
-                    SymbolKind.Number, SymbolKind.Letter });
-
-            if (hasModifier)
-                return new ParseNode(ParseNodeKind.FunctionCall, new[] { new ParseNode(modifierToken), node });
-            else
-                return node;
-        }
-
-        //private ParseNode ParseRawValue(TokenStream tokenStream)
-        //{
-        //    var node = ParseRawValueOptional(tokenStream);
-        //    if (node == null)
-        //        throw new ParserException(tokenStream.Current, new[] {
-        //            SymbolKind.Number, SymbolKind.Letter });
-        //    return node;
-        //}
-
-        private ParseNode ParseRawValueOptional(TokenStream tokenStream)
-        {
-            ParseNode node;
-            switch (tokenStream.Current.Symbol)
-            {
-                case SymbolKind.Number:
-                case SymbolKind.Letter:
-                case SymbolKind.GreekLetter:
-                    node = new ParseNode(tokenStream.Current);
-                    tokenStream.ForceMoveNext();
-                    break;
-                default:
-                    return null;
-            }
-            return node;
-        }
-
-        //private ParseNode ParseBracketedExpression(TokenStream tokenStream)
-        //{
-        //    var node = ParseBracketedExpressionOptional(tokenStream);
-        //    if (node == null)
-        //        throw new ParserException(tokenStream.Current, new[] {
-        //            SymbolKind.RoundBracketOpen, SymbolKind.SquareBracketOpen, SymbolKind.CurlyBracketOpen });
-        //    return node;
-        //}
 
         private ParseNode ParseBracketedExpressionOptional(TokenStream tokenStream)
         {
@@ -254,7 +244,7 @@ namespace TexDotNet
                 return null;
             var functionNode = new ParseNode(tokenStream.Current);
             tokenStream.ForceMoveNext();
-            var node = new ParseNode(ParseNodeKind.FunctionCall, new[] {
+            var node = new ParseNode(ParseNodeKind.PrefixOperator, new[] {
                 functionNode, ParseGroup(tokenStream), ParseGroup(tokenStream)});
             return node;
         }
@@ -265,7 +255,7 @@ namespace TexDotNet
                 return null;
             var functionNode = new ParseNode(tokenStream.Current);
             tokenStream.ForceMoveNext();
-            var node = new ParseNode(ParseNodeKind.FunctionCall, new[] {
+            var node = new ParseNode(ParseNodeKind.PrefixOperator, new[] {
                 functionNode, ParseGroup(tokenStream), ParseGroup(tokenStream)});
             return node;
         }
@@ -276,7 +266,7 @@ namespace TexDotNet
                 return null;
             var functionNode = new ParseNode(tokenStream.Current);
             tokenStream.ForceMoveNext();
-            var node = new ParseNode(ParseNodeKind.FunctionCall);
+            var node = new ParseNode(ParseNodeKind.PrefixOperator);
             node.Children.Add(functionNode);
             var argumentNode = ParseArgumentOptional(tokenStream);
             if (argumentNode != null)
@@ -289,6 +279,17 @@ namespace TexDotNet
         {
             switch (tokenStream.Current.Symbol)
             {
+                case SymbolKind.Minimum:
+                case SymbolKind.Maximum:
+                case SymbolKind.GreatestCommonDenominator:
+                case SymbolKind.LowestCommonMultiple:
+                case SymbolKind.Exponent:
+                case SymbolKind.Log:
+                case SymbolKind.NaturalLog:
+                case SymbolKind.Argument:
+                case SymbolKind.Limit:
+                case SymbolKind.LimitInferior:
+                case SymbolKind.LimitSuperior:
                 case SymbolKind.Sine:
                 case SymbolKind.Cosine:
                 case SymbolKind.Tangent:
@@ -303,7 +304,7 @@ namespace TexDotNet
                 case SymbolKind.ArcCotangent:
                     var functionNode = new ParseNode(tokenStream.Current);
                     tokenStream.ForceMoveNext();
-                    return new ParseNode(ParseNodeKind.FunctionCall, new[] {
+                    return new ParseNode(ParseNodeKind.PrefixOperator, new[] {
                         functionNode, ParseExpression(tokenStream) });
                 default:
                     return null;

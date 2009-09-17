@@ -1,10 +1,12 @@
 expr = term , [ ( "+" | "-" ) , epxr ] ;
-term = indexed value , [ ( "*" | "/" ) , term ] ;
+term = signed value , [ ( "*" | "/" ) , term ] ;
+signed value = [ "+" | "-" ] , factorial value ;
+factorial value = indexed value , [ "!" ] ;
 indexed value = value , ( [ "^" , index ] , [ "_" , index ] ) | ( [ "_" , index ] , [ "^" , index ] ) ;
-index = raw value | group ;
-group = "{" , ` , "}" ;
-value = [ "+" | "-" ] , ( raw value | group | bracket expr | fraction | binomial | root | function ) ;
+value = raw value | group | bracket expr | factorial | fraction | binomial | root | function ; 
 raw value = ? number ? | ? letter ? | ? greek letter ? ;
+index = raw value | group ;
+group = "{" , expr , "}" ;
 bracket expr = "{" , expr , "}" | "(" , expr , ")" | "[" , expr , "]" | "\{" , expr , "\}" ;
 fraction = "\frac" , group , group ;
 binomial = "\binom" , group , group ;

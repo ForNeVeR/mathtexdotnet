@@ -19,10 +19,12 @@ namespace TexDotNet
         {
             switch (parseNode.Kind)
             {
-                case ParseNodeKind.Operation:
-                    return FromOperationParseNode(parseNode);
-                case ParseNodeKind.FunctionCall:
-                    return FromFunctionCallParseNode(parseNode);
+                case ParseNodeKind.PrefixOperator:
+                    return FromPrefixCallParseNode(parseNode);
+                case ParseNodeKind.InfixOperator:
+                    return FromInfixOperatorParseNode(parseNode);
+                case ParseNodeKind.PostfixOperator:
+                    return FromPostfixOperatorParseNode(parseNode);
                 case ParseNodeKind.Token:
                     return new ExpressionNode(parseNode.Token.Symbol, parseNode.Token.Value);
                 default:
@@ -31,7 +33,35 @@ namespace TexDotNet
             }
         }
 
-        public static ExpressionNode FromOperationParseNode(ParseNode parseNode)
+        public static ExpressionNode FromPrefixCallParseNode(ParseNode parseNode)
+        {
+            if (parseNode.Children.Count == 1)
+            {
+                return FromParseNode(parseNode.Children[0]);
+            }
+            else if (parseNode.Children.Count >= 2)
+            {
+                var children = new List<ExpressionNode>(parseNode.Children.Count - 1);
+                var arguments = new List<ExpressionNode>(parseNode.Children.Count - 1);
+                ParseNode childParseNode;
+                for (int i = 1; i < parseNode.Children.Count; i++)
+                {
+                    childParseNode = parseNode.Children[i];
+                    if (childParseNode.IsArgument)
+                        arguments.Add(FromParseNode(childParseNode));
+                    else
+                        children.Add(FromParseNode(childParseNode));
+                }
+                return new ExpressionNode(parseNode.Children[0].Token.Symbol, children, arguments);
+            }
+            else
+            {
+                throw new InvalidOperationException(string.Format(
+                    errMsgWrongNumberOfChildren, parseNode.Kind, parseNode.Children.Count));
+            }
+        }
+
+        public static ExpressionNode FromInfixOperatorParseNode(ParseNode parseNode)
         {
             if (parseNode.Children.Count == 1)
             {
@@ -50,22 +80,22 @@ namespace TexDotNet
             }
         }
 
-        public static ExpressionNode FromFunctionCallParseNode(ParseNode parseNode)
+        public static ExpressionNode FromPostfixOperatorParseNode(ParseNode parseNode)
         {
-            if (parseNode.Children.Count >= 2)
+            if (parseNode.Children.Count == 1)
+            {
+                return FromParseNode(parseNode.Children[0]);
+            }
+            else if (parseNode.Children.Count >= 2)
             {
                 var children = new List<ExpressionNode>(parseNode.Children.Count - 1);
-                var arguments = new List<ExpressionNode>(parseNode.Children.Count - 1);
                 ParseNode childParseNode;
-                for (int i = 1; i < parseNode.Children.Count; i++)
+                for (int i = 0; i < parseNode.Children.Count - 1; i++)
                 {
                     childParseNode = parseNode.Children[i];
-                    if (childParseNode.IsArgument)
-                        arguments.Add(FromParseNode(childParseNode));
-                    else
-                        children.Add(FromParseNode(childParseNode));
+                    children.Add(FromParseNode(childParseNode));
                 }
-                return new ExpressionNode(parseNode.Children[0].Token.Symbol, children, arguments);
+                return new ExpressionNode(parseNode.Children[parseNode.Children.Count - 1].Token.Symbol, children);
             }
             else
             {

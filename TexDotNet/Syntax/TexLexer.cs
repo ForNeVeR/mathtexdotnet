@@ -73,7 +73,7 @@ namespace TexDotNet
                 sb.Append((char)reader.Read());
             if (reader.Peek() == '.')
             {
-                sb.Append(reader.Read());
+                sb.Append((char)reader.Read());
                 while (Char.IsDigit((char)reader.Peek()))
                     sb.Append((char)reader.Read());
             }
@@ -338,12 +338,37 @@ namespace TexDotNet
                     return SymbolKind.Dot;
                 case "div":
                     return SymbolKind.Divide;
+                #endregion
+
+                #region Functions
                 case "frac":
                     return SymbolKind.Fraction;
                 case "binom":
                     return SymbolKind.Binomial;
                 case "sqrt":
                     return SymbolKind.Root;
+                case "min":
+                    return SymbolKind.Minimum;
+                case "max":
+                    return SymbolKind.Maximum;
+                case "gcd":
+                    return SymbolKind.GreatestCommonDenominator;
+                case "lcm":
+                    return SymbolKind.LowestCommonMultiple;
+                case "exp":
+                    return SymbolKind.Exponent;
+                case "log":
+                    return SymbolKind.Log;
+                case "ln":
+                    return SymbolKind.NaturalLog;
+                case "arg":
+                    return SymbolKind.Argument;
+                case "lim":
+                    return SymbolKind.Limit;
+                case "liminf":
+                    return SymbolKind.LimitInferior;
+                case "limsup":
+                    return SymbolKind.LimitSuperior;
                 case "sin":
                     return SymbolKind.Sine;
                 case "cos":

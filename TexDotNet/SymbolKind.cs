@@ -11,6 +11,7 @@ namespace TexDotNet
         Unknown,
         EndOfStream,
 
+        #region Mathematical Symbols
         Number,
         Letter,
         GreekLetter,
@@ -19,6 +20,7 @@ namespace TexDotNet
         Colon,
         RaiseToIndex,
         LowerToIndex,
+        #endregion
 
         #region Brackets
         GroupOpen,
@@ -83,19 +85,21 @@ namespace TexDotNet
         DashVLine,
         #endregion
 
-        #region Operators
-        Plus,
-        Minus,
-        PlusMinus,
-        MinusPlus,
-        Cross,
-        Dot,
-        Star,
-        Divide,
-        Factorial,
+        #region Prefix Operators
         Fraction,
         Binomial,
         Root,
+        Minimum,
+        Maximum,
+        GreatestCommonDenominator,
+        LowestCommonMultiple,
+        Exponent,
+        Log,
+        NaturalLog,
+        Argument,
+        Limit,
+        LimitInferior,
+        LimitSuperior,
         Sine,
         Cosine,
         Tangent,
@@ -108,18 +112,18 @@ namespace TexDotNet
         ArcSecant,
         ArcCosecant,
         ArcCotangent,
-        HSine,
-        HCosine,
-        HTangent,
-        HSecant,
-        HCosecant,
-        HCotangent,
-        ArHSine,
-        ArHCosine,
-        ArHTangent,
-        ArHSecant,
-        ArHCosecant,
-        ArHCotangent,
+        HypSine,
+        HypCosine,
+        HypTangent,
+        HypSecant,
+        HypCosecant,
+        HypCotangent,
+        ArHypSine,
+        ArHypCosine,
+        ArHypTangent,
+        ArHypSecant,
+        ArHypCosecant,
+        ArHypCotangent,
         InlineModulo,
         IdentityModulo,
         Sum,
@@ -145,6 +149,21 @@ namespace TexDotNet
         BigSquareCap,
         BigVee,
         BigWedge,
+        #endregion
+
+        #region Infix Operators
+        Plus,
+        Minus,
+        PlusMinus,
+        MinusPlus,
+        Cross,
+        Dot,
+        Star,
+        Divide,
+        #endregion
+
+        #region Postfix Operators
+        Factorial,
         #endregion
 
         #region Formatting
