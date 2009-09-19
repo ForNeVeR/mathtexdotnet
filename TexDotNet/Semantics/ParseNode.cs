@@ -5,6 +5,7 @@ using System.Text;
 
 namespace TexDotNet
 {
+    // TODO: Use SymbolKind and Value properties instead of Token?
     public class ParseNode
     {
         public ParseNode(Token token, IList<ParseNode> children)

@@ -17,7 +17,7 @@ namespace TexDotNet
         }
 
         public ParserException(Token tokenRead, string message)
-            : base(message + Environment.NewLine + string.Format("Token read: {0}", tokenRead))
+            : base(message)
         {
             this.TokenRead = tokenRead;
         }
@@ -26,6 +26,16 @@ namespace TexDotNet
         {
             get;
             private set;
+        }
+
+        public override string Message
+        {
+            get 
+	        { 
+		        return base.Message +  Environment.NewLine + 
+                    string.Format("Token read: {0}", this.TokenRead) + Environment.NewLine +
+                    string.Format("Charcter position: {0}", this.TokenRead.Position);
+	        }
         }
     }
 }

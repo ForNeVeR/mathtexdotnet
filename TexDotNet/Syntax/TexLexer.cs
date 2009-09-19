@@ -50,22 +50,22 @@ namespace TexDotNet
                 }
                 else if (char.IsDigit(nextChar))
                 {
-                    yield return Token.FromNumber(ScanReal(reader));
+                    yield return Token.FromNumber(ScanReal(reader), reader.Position);
                 }
                 else if (nextChar == '\\')
                 {
                     object value;
-                    var token = Token.FromValue(ScanLongSymbol(reader, out value), value);
+                    var token = Token.FromValue(ScanLongSymbol(reader, out value), value, reader.Position);
                     if (token.Symbol != SymbolKind.Unknown)
                         yield return token;
                 }
                 else
                 {
                     object value;
-                    yield return Token.FromValue(ScanShortSymbol(reader, out value), value);
+                    yield return Token.FromValue(ScanShortSymbol(reader, out value), value, reader.Position);
                 }
             }
-            yield return Token.FromKind(SymbolKind.EndOfStream);
+            yield return Token.FromKind(SymbolKind.EndOfStream, reader.Position);
         }
 
         protected double ScanReal(TrackedTextReader reader)

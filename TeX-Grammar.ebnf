@@ -4,7 +4,7 @@ implicit term = signed value , { value } ;
 signed value = [ "+" | "-" ] , factorial value ;
 factorial value = indexed value , [ "!" ] ;
 indexed value = value , ( [ "^" , index ] , [ "_" , index ] ) | ( [ "_" , index ] , [ "^" , index ] ) ;
-value = raw value | group | bracket expr | factorial | fraction | binomial | root | function | text ;
+value = raw value | group | bracket expr | factorial | fraction | binomial | root | function | big op | text ;
 raw value = ? number ? | ? letter ? | ? greek letter ? ;
 index = raw value | group ;
 group = "{" , expr , "}" ;
@@ -14,4 +14,10 @@ binomial = "\binom" , group , group ;
 root = "\sqrt" , [ argument ] , group ;
 function = ? function name ? , expr ;
 argument = "[" , expr , "]" ;
+big op = ? big op ? , expr ;
 text =  "{" , { ? letter ? }- , "}" ;
+
+(*
+- Add optional subscript argument to `log`.
+- Add optional superscript/subscript arguments to `big op`.
+*)

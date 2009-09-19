@@ -68,7 +68,7 @@ namespace TexDotNet
             ParseNode valueNode;
             while ((valueNode = ParseValueOptional(tokenStream)) != null)
                 node.Children.Add(valueNode);
-            node.Children.Add(new ParseNode(Token.FromKind(SymbolKind.Dot)));
+            node.Children.Add(new ParseNode(Token.FromKind(SymbolKind.Dot, tokenStream.Current.Position)));
             return node;
         }
 
@@ -169,6 +169,8 @@ namespace TexDotNet
                 node = ParseRootOptional(tokenStream);
             if (node == null)
                 node = ParseFunctionOptional(tokenStream);
+            if (node == null)
+                node = ParseBigOperatorOptional(tokenStream);
             if (node == null)
                 node = ParseTextOptional(tokenStream);
             return node;
@@ -356,6 +358,42 @@ namespace TexDotNet
             }
         }
 
+        private ParseNode ParseBigOperatorOptional(TokenStream tokenStream)
+        {
+            switch (tokenStream.Current.Symbol)
+            {
+                case SymbolKind.Sum:
+                case SymbolKind.Product:
+                case SymbolKind.Coproduct:
+                case SymbolKind.Integral:
+                case SymbolKind.DoubleIntegral:
+                case SymbolKind.TripleIntegral:
+                case SymbolKind.QuadrupleIntegral:
+                case SymbolKind.NtupleIntegral:
+                case SymbolKind.ClosedIntegral:
+                case SymbolKind.ClosedDoubleIntegral:
+                case SymbolKind.ClosedTripleIntegral:
+                case SymbolKind.ClosedQuadrupleIntegral:
+                case SymbolKind.ClosedNtupleIntegral:
+                case SymbolKind.BigOPlus:
+                case SymbolKind.BigOTimes:
+                case SymbolKind.BigODot:
+                case SymbolKind.BigCup:
+                case SymbolKind.BigCap:
+                case SymbolKind.BigCupPlus:
+                case SymbolKind.BigSquareCup:
+                case SymbolKind.BigSquareCap:
+                case SymbolKind.BigVee:
+                case SymbolKind.BigWedge:
+                    var opNode = new ParseNode(tokenStream.Current);
+                    tokenStream.ForceMoveNext();
+                    return new ParseNode(ParseNodeKind.PrefixOperator, new[] {
+                        opNode, ParseExpression(tokenStream) });
+                default:
+                    return null;
+            }
+        }
+
         private ParseNode ParseTextOptional(TokenStream tokenStream)
         {
             if (tokenStream.Current.Symbol != SymbolKind.Text)
@@ -375,7 +413,7 @@ namespace TexDotNet
                         throw new ParserException(tokenStream.Current,
                             "A text value must contain at least one character.");
                     tokenStream.ForceMoveNext();
-                    return new ParseNode(Token.FromValue(SymbolKind.Text, sb.ToString()));
+                    return new ParseNode(Token.FromValue(SymbolKind.Text, sb.ToString(), tokenStream.Current.Position));
                 default:
                     throw new ParserException(tokenStream.Current, new[] {
                         SymbolKind.GroupOpen});

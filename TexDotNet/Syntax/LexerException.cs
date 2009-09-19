@@ -24,7 +24,7 @@ namespace TexDotNet
             get
             {
                 return base.Message + Environment.NewLine +
-                    string.Format("Position of character: {0}", this.Position);
+                    string.Format("Charcter position: {0}", this.Position);
             }
         }
     }

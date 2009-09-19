@@ -68,12 +68,12 @@ namespace TexDotNet.Tests
             var text = streamReader.ReadLine();
             if (text == null)
                 return null;
-            
+
             var expectedTokenString = streamReader.ReadLine();
             var expectedTokens = expectedTokenString.Split(' ').Select(tokenString =>
-            {
-                return Token.FromKind(SymbolKind.Unknown);
-            }).ToArray();
+                {
+                    return Token.FromKind(SymbolKind.Unknown, -1);
+                }).ToArray();
 
             streamReader.ReadLine();
 
