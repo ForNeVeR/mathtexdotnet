@@ -1,5 +1,6 @@
 expr = term , [ ( "+" | "-" ) , epxr ] ;
-term = signed value , [ ( "*" | "/" ) , term ] ;
+term = implicit term , [ ( "*" | "/" ) , term ] ;
+implicit term = signed value , { value } ;
 signed value = [ "+" | "-" ] , factorial value ;
 factorial value = indexed value , [ "!" ] ;
 indexed value = value , ( [ "^" , index ] , [ "_" , index ] ) | ( [ "_" , index ] , [ "^" , index ] ) ;

@@ -36,11 +36,6 @@ namespace TexDotNet
                     node.Children.Add(new ParseNode(tokenStream.Current));
                     tokenStream.ForceMoveNext();
                     break;
-                case SymbolKind.Letter:
-                case SymbolKind.GreekLetter:
-                    // Implicitly multiply adjacent letter tokens.
-                    node.Children.Add(new ParseNode(Token.FromKind(SymbolKind.Dot)));
-                    break;
                 default:
                     return node;
             }
@@ -51,7 +46,7 @@ namespace TexDotNet
         private ParseNode ParseTerm(TokenStream tokenStream)
         {
             var node = new ParseNode(ParseNodeKind.InfixOperator);
-            node.Children.Add(ParseSignedValueOptional(tokenStream));
+            node.Children.Add(ParseImplicitTermOptional(tokenStream));
             switch (tokenStream.Current.Symbol)
             {
                 case SymbolKind.Cross:
@@ -66,6 +61,26 @@ namespace TexDotNet
             return node;
         }
 
+        private ParseNode ParseImplicitTermOptional(TokenStream tokenStream)
+        {
+            var node = new ParseNode(ParseNodeKind.PostfixOperator);
+            node.Children.Add(ParseSignedValue(tokenStream));
+            ParseNode valueNode;
+            while ((valueNode = ParseValueOptional(tokenStream)) != null)
+                node.Children.Add(valueNode);
+            node.Children.Add(new ParseNode(Token.FromKind(SymbolKind.Dot)));
+            return node;
+        }
+
+        private ParseNode ParseSignedValue(TokenStream tokenStream)
+        {
+            var node = ParseSignedValueOptional(tokenStream);
+            if (node == null)
+                throw new ParserException(tokenStream.Current,
+                    "Expected a value.");
+            return node;
+        }
+
         private ParseNode ParseSignedValueOptional(TokenStream tokenStream)
         {
             var node = new ParseNode(ParseNodeKind.PrefixOperator);
@@ -73,7 +88,7 @@ namespace TexDotNet
             {
                 case SymbolKind.Plus:
                 case SymbolKind.Minus:
-                    var signNode = new ParseNode(tokenStream.Current);
+                    node.Children.Add(new ParseNode(tokenStream.Current));
                     tokenStream.ForceMoveNext();
                     break;
             }
@@ -131,6 +146,15 @@ namespace TexDotNet
 
         private ParseNode ParseValue(TokenStream tokenStream)
         {
+            var node = ParseValueOptional(tokenStream);
+            if (node == null)
+                throw new ParserException(tokenStream.Current,
+                    "Expected one of the following: number, letter, open bracket, fraction, binomial, root, function.");
+            return node;
+        }
+
+        private ParseNode ParseValueOptional(TokenStream tokenStream)
+        {
             ParseNode node;
             node = ParseRawValueOptional(tokenStream);
             if (node == null)
@@ -147,10 +171,6 @@ namespace TexDotNet
                 node = ParseFunctionOptional(tokenStream);
             if (node == null)
                 node = ParseTextOptional(tokenStream);
-            if (node == null)
-                throw new ParserException(tokenStream.Current,
-                    "Expected one of the following: number, letter, open bracket, fraction, binomial, root " +
-                    "function.");
             return node;
         }
 
@@ -339,8 +359,7 @@ namespace TexDotNet
         private ParseNode ParseTextOptional(TokenStream tokenStream)
         {
             if (tokenStream.Current.Symbol != SymbolKind.Text)
-                throw new ParserException(tokenStream.Current, new[] {
-                    SymbolKind.Text });
+                return null;
             tokenStream.ForceMoveNext();
             switch (tokenStream.Current.Symbol)
             {
@@ -352,10 +371,14 @@ namespace TexDotNet
                         sb.Append((char)tokenStream.Current.Value);
                         tokenStream.ForceMoveNext();
                     }
+                    if (sb.Length == 0)
+                        throw new ParserException(tokenStream.Current,
+                            "A text value must contain at least one character.");
                     tokenStream.ForceMoveNext();
                     return new ParseNode(Token.FromValue(SymbolKind.Text, sb.ToString()));
                 default:
-                    return null;
+                    throw new ParserException(tokenStream.Current, new[] {
+                        SymbolKind.GroupOpen});
             }
         }
     }

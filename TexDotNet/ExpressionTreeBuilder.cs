@@ -86,6 +86,11 @@ namespace TexDotNet
             {
                 return FromParseNode(parent, parseNode.Children[0]);
             }
+            else if (parseNode.Children.Count == 2 &&
+                parseNode.Children[parseNode.Children.Count - 1].Token.Symbol == SymbolKind.Dot)
+            {
+                return FromParseNode(parent, parseNode.Children[0]);
+            }
             else if (parseNode.Children.Count >= 2)
             {
                 var node = new ExpressionNode(parent, parseNode.Children[parseNode.Children.Count - 1].Token.Symbol);
