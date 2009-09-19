@@ -7,8 +7,8 @@ namespace TexDotNet
 {
     public class ExpressionNode
     {
-        public ExpressionNode(SymbolKind symbol, object value)
-            : this()
+        public ExpressionNode(ExpressionNode parent, SymbolKind symbol, object value)
+            : this(parent)
         {
             this.Symbol = symbol;
             this.Value = value;
@@ -16,8 +16,9 @@ namespace TexDotNet
             this.Arguments = null;
         }
 
-        public ExpressionNode(SymbolKind symbol, IList<ExpressionNode> children, IList<ExpressionNode> arguments)
-            : this()
+        public ExpressionNode(ExpressionNode parent, SymbolKind symbol, IList<ExpressionNode> children,
+            IList<ExpressionNode> arguments)
+            : this(parent)
         {
             this.Symbol = symbol;
             this.Value = null;
@@ -25,8 +26,8 @@ namespace TexDotNet
             this.Arguments = new ExpressionNodeCollection(arguments);
         }
 
-        public ExpressionNode(SymbolKind symbol, IList<ExpressionNode> children)
-            : this()
+        public ExpressionNode(ExpressionNode parent, SymbolKind symbol, IList<ExpressionNode> children)
+            : this(parent)
         {
             this.Symbol = symbol;
             this.Value = null;
@@ -34,8 +35,8 @@ namespace TexDotNet
             this.Arguments = new ExpressionNodeCollection();
         }
 
-        public ExpressionNode(SymbolKind symbol)
-            : this()
+        public ExpressionNode(ExpressionNode parent, SymbolKind symbol)
+            : this(parent)
         {
             this.Symbol = symbol;
             this.Value = null;
@@ -43,8 +44,9 @@ namespace TexDotNet
             this.Arguments = new ExpressionNodeCollection();
         }
 
-        public ExpressionNode()
+        public ExpressionNode(ExpressionNode parent)
         {
+            this.Parent = parent;
         }
 
         public SymbolKind Symbol
@@ -57,6 +59,12 @@ namespace TexDotNet
         {
             get;
             set;
+        }
+
+        public ExpressionNode Parent
+        {
+            get;
+            internal set;
         }
 
         public ExpressionNodeCollection Children

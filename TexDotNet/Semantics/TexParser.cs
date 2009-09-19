@@ -29,13 +29,18 @@ namespace TexDotNet
             node.Children.Add(ParseTerm(tokenStream));
             switch (tokenStream.Current.Symbol)
             {
+                case SymbolKind.EndOfStream:
+                    return node;
                 case SymbolKind.Plus:
                 case SymbolKind.Minus:
                     node.Children.Add(new ParseNode(tokenStream.Current));
                     tokenStream.ForceMoveNext();
                     break;
-                case SymbolKind.EndOfStream:
-                    return node;
+                case SymbolKind.Letter:
+                case SymbolKind.GreekLetter:
+                    // Implicitly multiply adjacent letter tokens.
+                    node.Children.Add(new ParseNode(Token.FromKind(SymbolKind.Dot)));
+                    break;
                 default:
                     return node;
             }
@@ -140,6 +145,8 @@ namespace TexDotNet
                 node = ParseRootOptional(tokenStream);
             if (node == null)
                 node = ParseFunctionOptional(tokenStream);
+            if (node == null)
+                node = ParseTextOptional(tokenStream);
             if (node == null)
                 throw new ParserException(tokenStream.Current,
                     "Expected one of the following: number, letter, open bracket, fraction, binomial, root " +
@@ -324,6 +331,29 @@ namespace TexDotNet
                     tokenStream.ForceMoveNext();
                     node.IsArgument = true;
                     return node;
+                default:
+                    return null;
+            }
+        }
+
+        private ParseNode ParseTextOptional(TokenStream tokenStream)
+        {
+            if (tokenStream.Current.Symbol != SymbolKind.Text)
+                throw new ParserException(tokenStream.Current, new[] {
+                    SymbolKind.Text });
+            tokenStream.ForceMoveNext();
+            switch (tokenStream.Current.Symbol)
+            {
+                case SymbolKind.GroupOpen:
+                    tokenStream.ForceMoveNext();
+                    var sb = new StringBuilder();
+                    while (tokenStream.Current.Symbol != SymbolKind.GroupClose)
+                    {
+                        sb.Append((char)tokenStream.Current.Value);
+                        tokenStream.ForceMoveNext();
+                    }
+                    tokenStream.ForceMoveNext();
+                    return new ParseNode(Token.FromValue(SymbolKind.Text, sb.ToString()));
                 default:
                     return null;
             }

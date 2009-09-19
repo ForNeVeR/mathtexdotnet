@@ -55,7 +55,9 @@ namespace TexDotNet
                 else if (nextChar == '\\')
                 {
                     object value;
-                    yield return Token.FromValue(ScanLongSymbol(reader, out value), value);
+                    var token = Token.FromValue(ScanLongSymbol(reader, out value), value);
+                    if (token.Symbol != SymbolKind.Unknown)
+                        yield return token;
                 }
                 else
                 {
