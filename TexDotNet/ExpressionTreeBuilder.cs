@@ -26,8 +26,6 @@ namespace TexDotNet
                     return FromPrefixCallParseNode(parent, parseNode);
                 case ParseNodeKind.PostfixOperator:
                     return FromPostfixOperatorParseNode(parent, parseNode);
-                case ParseNodeKind.Indices:
-                    return FromIndicesParseNode(parent, parseNode);
                 case ParseNodeKind.Token:
                     return new ExpressionNode(parent, parseNode.Token.Symbol, parseNode.Token.Value);
                 default:
@@ -44,10 +42,10 @@ namespace TexDotNet
             }
             else if (parseNode.Children.Count == 3)
             {
-                var node = new ExpressionNode(parent, parseNode.Children[1].Token.Symbol);
-                node.Children.Add(FromParseNode(node, parseNode.Children[0]));
-                node.Children.Add(FromParseNode(node, parseNode.Children[2]));
-                return node;
+                var exprNode = new ExpressionNode(parent, parseNode.Children[1].Token.Symbol);
+                exprNode.Children.Add(FromParseNode(exprNode, parseNode.Children[0]));
+                exprNode.Children.Add(FromParseNode(exprNode, parseNode.Children[2]));
+                return exprNode;
             }
             else
             {
@@ -64,25 +62,28 @@ namespace TexDotNet
             }
             else if (parseNode.Children.Count >= 2)
             {
-                var node = FromParseNode(parent, parseNode.Children[0]);
-                if (node == null && parseNode.Children.Count == 2)
-                    return FromParseNode(parent, parseNode.Children[1]);
-
+                var exprNode = FromParseNode(parent, parseNode.Children[0]);
                 ParseNode childParseNode;
                 ExpressionNode childExprNode;
                 for (int i = 1; i < parseNode.Children.Count; i++)
                 {
                     childParseNode = parseNode.Children[i];
-                    childExprNode = FromParseNode(node, childParseNode);
+                    if (childParseNode.Kind == ParseNodeKind.Indices)
+                    {
+                        foreach (var argNode in FromPrefixOperatorIndicesParseNode(exprNode, childParseNode))
+                            exprNode.Arguments.Add(argNode);
+                        continue;
+                    }
+                    childExprNode = FromParseNode(exprNode, childParseNode);
                     if (childExprNode != null)
                     {
                         if (childParseNode.IsArgument)
-                            node.Arguments.Add(childExprNode);
+                            exprNode.Arguments.Add(childExprNode);
                         else
-                            node.Children.Add(childExprNode);
+                            exprNode.Children.Add(childExprNode);
                     }
                 }
-                return node;
+                return exprNode;
             }
             else
             {
@@ -97,32 +98,30 @@ namespace TexDotNet
             {
                 return FromParseNode(parent, parseNode.Children[0]);
             }
-            else if (parseNode.Children.Count == 2 &&
-                parseNode.Children[parseNode.Children.Count - 1].Token.Symbol == SymbolKind.Dot)
+            else if (parseNode.Children.Count == 2 && parseNode.Children[1].Token.Symbol == SymbolKind.Dot)
             {
+                // Implicit multiplication with only one term.
                 return FromParseNode(parent, parseNode.Children[0]);
+            }
+            else if (parseNode.Children.Count == 2 && parseNode.Children[1].Kind == ParseNodeKind.Indices)
+            {
+                return FromPostfixOperatorIndicesParseNode(parent, parseNode.Children[1], parseNode.Children[0]);
             }
             else if (parseNode.Children.Count >= 2)
             {
-                var node = FromParseNode(parent, parseNode.Children[parseNode.Children.Count - 1]);
-                if (node == null && parseNode.Children.Count == 2)
-                    return FromParseNode(parent, parseNode.Children[0]);
-
-                // Handle index nodes specially: add children to inner index node.
-                var innerNode = node.Symbol == SymbolKind.RaiseToIndex && node.Children.Count == 2 ?
-                    node.Children[1] : node;
+                var exprNode = FromParseNode(parent, parseNode.Children[parseNode.Children.Count - 1]);
                 ParseNode childParseNode;
                 ExpressionNode childExprNode;
                 for (int i = 0; i < parseNode.Children.Count - 1; i++)
                 {
                     childParseNode = parseNode.Children[i];
-                    childExprNode = FromParseNode(node, childParseNode);
+                    childExprNode = FromParseNode(exprNode, childParseNode);
                     if (childExprNode != null)
                     {
-                        innerNode.Children.Add(childExprNode);
+                        exprNode.Children.Add(childExprNode);
                     }
                 }
-                return node;
+                return exprNode;
             }
             else
             {
@@ -131,25 +130,53 @@ namespace TexDotNet
             }
         }
 
-        public static ExpressionNode FromIndicesParseNode(ExpressionNode parent, ParseNode parseNode)
+        public static IEnumerable<ExpressionNode> FromPrefixOperatorIndicesParseNode(ExpressionNode parent,
+            ParseNode parseNode)
+        {
+            ExpressionNode indexNode = null;
+            if (parseNode.Children.Count == 0)
+            {
+                yield break;
+            }
+            else if (parseNode.Children.Count == 2)
+            {
+                indexNode = new ExpressionNode(parent, parseNode.Children[0].Token.Symbol);
+                indexNode.Children.Add(FromParseNode(indexNode, parseNode.Children[1]));
+                yield return indexNode;
+            }
+            else if (parseNode.Children.Count == 4)
+            {
+                indexNode = new ExpressionNode(parent, parseNode.Children[0].Token.Symbol);
+                indexNode.Children.Add(FromParseNode(indexNode, parseNode.Children[1]));
+                yield return indexNode;
+                indexNode = new ExpressionNode(parent, parseNode.Children[2].Token.Symbol);
+                indexNode.Children.Add(FromParseNode(indexNode, parseNode.Children[3]));
+                yield return indexNode;
+            }
+            else
+            {
+                throw new InvalidOperationException(string.Format(
+                    errMsgUnexpectedNumberOfChildren, parseNode.Kind, parseNode.Children.Count));
+            }
+        }
+
+        public static ExpressionNode FromPostfixOperatorIndicesParseNode(ExpressionNode parent, ParseNode parseNode,
+            ParseNode childParseNode)
         {
             ExpressionNode firstIndexNode = null;
             ExpressionNode secondIndexNode = null;
             if (parseNode.Children.Count == 0)
             {
-                return null;
+                return FromParseNode(parent, childParseNode);
             }
             else if (parseNode.Children.Count == 2)
             {
                 firstIndexNode = new ExpressionNode(parent, parseNode.Children[0].Token.Symbol);
-                firstIndexNode.Children.Add(FromParseNode(parent, parseNode.Children[1]));
             }
             else if (parseNode.Children.Count == 4)
             {
                 firstIndexNode = new ExpressionNode(parent, parseNode.Children[0].Token.Symbol);
-                firstIndexNode.Children.Add(FromParseNode(parent, parseNode.Children[1]));
                 secondIndexNode = new ExpressionNode(parent, parseNode.Children[2].Token.Symbol);
-                firstIndexNode.Children.Add(FromParseNode(parent, parseNode.Children[3]));
             }
             else
             {
@@ -164,24 +191,37 @@ namespace TexDotNet
                 secondIndexNode.Symbol == SymbolKind.LowerToIndex,
                 "Second index node is not RaiseToIndex or LowerToIndex.");
 
+            ExpressionNode outerIndexNode;
+            ExpressionNode innerIndexNode;
+
             if (secondIndexNode == null)
             {
-                return firstIndexNode;
+                outerIndexNode = firstIndexNode;
+                innerIndexNode = firstIndexNode;
             }
             else
             {
-                // Use raised index as outer node.
+                // Use raised index as outer exprNode.
                 if (firstIndexNode.Symbol == SymbolKind.RaiseToIndex)
                 {
-                    firstIndexNode.Children.Add(secondIndexNode);
-                    return firstIndexNode;
+                    outerIndexNode = firstIndexNode;
+                    innerIndexNode = secondIndexNode;
                 }
                 else
                 {
-                    secondIndexNode.Children.Add(firstIndexNode);
-                    return secondIndexNode;
+                    outerIndexNode = secondIndexNode;
+                    innerIndexNode = firstIndexNode;
                 }
+                outerIndexNode.Children.Add(innerIndexNode);
             }
+
+            // Add child nodes, and then nodes for indices.
+            innerIndexNode.Children.Add(FromParseNode(innerIndexNode, childParseNode));
+            firstIndexNode.Children.Add(FromParseNode(firstIndexNode, parseNode.Children[1]));
+            if (secondIndexNode != null)
+                secondIndexNode.Children.Add(FromParseNode(secondIndexNode, parseNode.Children[3]));
+
+            return outerIndexNode;
         }
     }
 }

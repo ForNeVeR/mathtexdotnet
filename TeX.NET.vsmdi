@@ -1,5 +1,4 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <TestLists xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2006">
-  <TestList name="TeX.NET" id="87620182-6e99-4309-be1a-48082a13a5e7" parentListId="8c43106b-9dc1-4907-a29f-aa66a61bf5b6" />
   <TestList name="Lists of Tests" id="8c43106b-9dc1-4907-a29f-aa66a61bf5b6" />
 </TestLists>

@@ -5,18 +5,18 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TexDotNet", "TexDotNet\TexD
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TexDotNet.Tests", "TexDotNet.Tests\TexDotNet.Tests.csproj", "{CE0E82EA-B6FC-4423-931E-C7061BDA20A3}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{F150812B-6212-49CA-A0C4-9D3657FA03DB}"
-	ProjectSection(SolutionItems) = preProject
-		LocalTestRun.testrunconfig = LocalTestRun.testrunconfig
-		TeX.NET.vsmdi = TeX.NET.vsmdi
-	EndProjectSection
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TexDotNet.CommandLine", "TexDotNet.CommandLine\TexDotNet.CommandLine.csproj", "{3CC61991-FCC0-4547-8538-615202DFFB31}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Project", "Project", "{1ECAC666-9FEE-456B-8D62-5FB3344E494C}"
 	ProjectSection(SolutionItems) = preProject
 		Authors.txt = Authors.txt
 		License.txt = License.txt
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{DB61A0CD-79F5-4659-91E8-16B037CE05B7}"
+	ProjectSection(SolutionItems) = preProject
+		LocalTestRun.testrunconfig = LocalTestRun.testrunconfig
+		TeX.NET.vsmdi = TeX.NET.vsmdi
 	EndProjectSection
 EndProject
 Global

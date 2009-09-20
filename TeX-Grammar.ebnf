@@ -17,8 +17,3 @@ function = ? function name ? , indices pair , expr ;
 argument = "[" , expr , "]" ;
 big op = ? big op ? , indices pair , expr ;
 text =  "{" , { ? letter ? }- , "}" ;
-
-(*
-- Add optional subscript argument to `log`.
-- Add optional superscript/subscript arguments to `big op`.
-*)
