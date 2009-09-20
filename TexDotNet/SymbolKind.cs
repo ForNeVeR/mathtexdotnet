@@ -18,6 +18,7 @@ namespace TexDotNet
         Text,
         Prime,
         Colon,
+        Comma,
         RaiseToIndex,
         LowerToIndex,
         #endregion
@@ -167,6 +168,7 @@ namespace TexDotNet
         #endregion
 
         #region Formatting
+        Separator,
         Left,
         Right,
         #endregion

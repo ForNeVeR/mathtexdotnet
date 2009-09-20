@@ -28,7 +28,7 @@ namespace TexDotNet
 
         public void Write(ExpressionNode node)
         {
-            // TODO: Write text for given exprNode, and repeat for children recursively.
+            // TODO: Write text for given node, and repeat for children recursively.
             throw new NotImplementedException();
         }
     }

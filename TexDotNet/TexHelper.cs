@@ -7,7 +7,7 @@ using System.Text;
 namespace TexDotNet
 {
     using TokenStream = IEnumerator<Token>;
-    
+
     public static class TexHelper
     {
         public static string CreateText(this ExpressionTree tree)
@@ -59,8 +59,29 @@ namespace TexDotNet
 
         internal static void ForceMoveNext(this TokenStream tokenStream)
         {
+            do
+            {
+                ForceMoveNextIncludeFormatting(tokenStream);
+            } while (tokenStream.Current.Symbol.IsFormattingSymbol());
+        }
+
+        internal static void ForceMoveNextIncludeFormatting(this TokenStream tokenStream)
+        {
             if (!tokenStream.MoveNext())
                 throw new ParserException(Token.Null, "Unexpected end of token stream.");
+        }
+
+        internal static bool IsFormattingSymbol(this SymbolKind symbol)
+        {
+            switch (symbol)
+            {
+                case SymbolKind.Separator:
+                case SymbolKind.Left:
+                case SymbolKind.Right:
+                    return true;
+                default:
+                    return false;
+            }
         }
     }
 }

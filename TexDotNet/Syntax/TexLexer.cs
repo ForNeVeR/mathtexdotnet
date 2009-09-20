@@ -97,6 +97,8 @@ namespace TexDotNet
                     return SymbolKind.Prime;
                 case ':':
                     return SymbolKind.Colon;
+                case ',':
+                    return SymbolKind.Comma;
 
                 #region Relations
                 case '=':
@@ -157,6 +159,11 @@ namespace TexDotNet
                 nextChr = (char)reader.Peek();
                 if (char.IsWhiteSpace(nextChr))
                     break;
+                if (nextChr == ',')
+                {
+                    sb.Append((char)reader.Read());
+                    break;
+                }
                 if (sb.Length > 0 && !char.IsLetter(nextChr))
                     break;
 
@@ -236,8 +243,6 @@ namespace TexDotNet
                     return SymbolKind.CurlyBracketOpen;
                 case "}":
                     return SymbolKind.CurlyBracketClose;
-                case "|":
-                    return SymbolKind.NormBracket;
                 case "langle":
                     return SymbolKind.AngleBracketOpen;
                 case "rangle":
@@ -250,6 +255,8 @@ namespace TexDotNet
                     return SymbolKind.CeilingBracketOpen;
                 case "rceil":
                     return SymbolKind.CeilingBracketClose;
+                case "|":
+                    return SymbolKind.NormBracket;
                 #endregion
 
                 #region Relations
@@ -339,6 +346,8 @@ namespace TexDotNet
                 case "cdot":
                     return SymbolKind.Dot;
                 case "div":
+                    return SymbolKind.Divide;
+                case "over":
                     return SymbolKind.Divide;
                 #endregion
 
@@ -472,6 +481,8 @@ namespace TexDotNet
                 #endregion
 
                 #region Formatting
+                case ",":
+                    return SymbolKind.Separator;
                 case "left":
                     return SymbolKind.Left;
                 case "right":

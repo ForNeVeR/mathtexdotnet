@@ -14,7 +14,7 @@ namespace TexDotNet.CommandLine
 #endif
 
             const string testExpr = @"xyz-{\int x^2+2y}+\frac{1}{3}+2^{{\log_7 -6.12}+\alpha}*8-\sqrt[4!]{\cos 3}/27+\text{foobar}-13/([4-2]*5)";
-
+            
             var treeRenderer = new TreeTextRenderer(Console.Out);
 
             Console.WriteLine("Input:");
