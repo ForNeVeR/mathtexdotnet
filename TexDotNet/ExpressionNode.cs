@@ -12,8 +12,8 @@ namespace TexDotNet
         {
             this.Symbol = symbol;
             this.Value = value;
-            this.Children = null;
-            this.Arguments = null;
+            this.Children = new ExpressionNodeCollection();
+            this.Arguments = new ExpressionNodeCollection();
         }
 
         public ExpressionNode(ExpressionNode parent, SymbolKind symbol, IList<ExpressionNode> children,

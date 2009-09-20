@@ -112,35 +112,9 @@ namespace TexDotNet
 
         private ParseNode ParseIndexedValue(TokenStream tokenStream)
         {
-            var node = new ParseNode(ParseNodeKind.InfixOperator);
+            var node = new ParseNode(ParseNodeKind.PostfixOperator);
             node.Children.Add(ParseValue(tokenStream));
-            var firstSymbol = tokenStream.Current.Symbol;
-            switch (tokenStream.Current.Symbol)
-            {
-                case SymbolKind.RaiseToIndex:
-                case SymbolKind.LowerToIndex:
-                    node.Children.Add(new ParseNode(tokenStream.Current));
-                    tokenStream.ForceMoveNext();
-                    node.Children.Add(ParseIndex(tokenStream));
-                    break;
-                default:
-                    return node;
-            }
-            switch (tokenStream.Current.Symbol)
-            {
-                case SymbolKind.RaiseToIndex:
-                case SymbolKind.LowerToIndex:
-                    if (tokenStream.Current.Symbol == firstSymbol)
-                    {
-                        throw new ParserException(tokenStream.Current, new[] {
-                            firstSymbol == SymbolKind.RaiseToIndex ? SymbolKind.LowerToIndex : 
-                            SymbolKind.RaiseToIndex});
-                    }
-                    node.Children.Add(new ParseNode(tokenStream.Current));
-                    tokenStream.ForceMoveNext();
-                    node.Children.Add(ParseIndex(tokenStream));
-                    break;
-            }
+            node.Children.Add(ParseIndicesPairOptional(tokenStream));
             return node;
         }
 
@@ -189,6 +163,39 @@ namespace TexDotNet
                 default:
                     return null;
             }
+        }
+
+        private ParseNode ParseIndicesPairOptional(TokenStream tokenStream)
+        {
+            var node = new ParseNode(ParseNodeKind.Indices);
+            var firstSymbol = tokenStream.Current.Symbol;
+            switch (tokenStream.Current.Symbol)
+            {
+                case SymbolKind.RaiseToIndex:
+                case SymbolKind.LowerToIndex:
+                    node.Children.Add(new ParseNode(tokenStream.Current));
+                    tokenStream.ForceMoveNext();
+                    node.Children.Add(ParseIndex(tokenStream));
+                    break;
+                default:
+                    return node;
+            }
+            switch (tokenStream.Current.Symbol)
+            {
+                case SymbolKind.RaiseToIndex:
+                case SymbolKind.LowerToIndex:
+                    if (tokenStream.Current.Symbol == firstSymbol)
+                    {
+                        throw new ParserException(tokenStream.Current, new[] {
+                            firstSymbol == SymbolKind.RaiseToIndex ? SymbolKind.LowerToIndex : 
+                            SymbolKind.RaiseToIndex});
+                    }
+                    node.Children.Add(new ParseNode(tokenStream.Current));
+                    tokenStream.ForceMoveNext();
+                    node.Children.Add(ParseIndex(tokenStream));
+                    break;
+            }
+            return node;
         }
 
         private ParseNode ParseIndex(TokenStream tokenStream)
@@ -331,10 +338,14 @@ namespace TexDotNet
                 case SymbolKind.ArcCosecant:
                 case SymbolKind.ArcSecant:
                 case SymbolKind.ArcCotangent:
-                    var functionNode = new ParseNode(tokenStream.Current);
+                    var node = new ParseNode(ParseNodeKind.PrefixOperator);
+                    node.Children.Add(new ParseNode(tokenStream.Current));
                     tokenStream.ForceMoveNext();
-                    return new ParseNode(ParseNodeKind.PrefixOperator, new[] {
-                        functionNode, ParseExpression(tokenStream) });
+                    var indicesNode = ParseIndicesPairOptional(tokenStream);
+                    indicesNode.IsArgument = true;
+                    node.Children.Add(indicesNode);
+                    node.Children.Add(ParseExpression(tokenStream));
+                    return node;
                 default:
                     return null;
             }
@@ -385,10 +396,14 @@ namespace TexDotNet
                 case SymbolKind.BigSquareCap:
                 case SymbolKind.BigVee:
                 case SymbolKind.BigWedge:
-                    var opNode = new ParseNode(tokenStream.Current);
+                    var node = new ParseNode(ParseNodeKind.PrefixOperator);
+                    node.Children.Add(new ParseNode(tokenStream.Current));
                     tokenStream.ForceMoveNext();
-                    return new ParseNode(ParseNodeKind.PrefixOperator, new[] {
-                        opNode, ParseExpression(tokenStream) });
+                    var indicesNode = ParseIndicesPairOptional(tokenStream);
+                    indicesNode.IsArgument = true;
+                    node.Children.Add(indicesNode);
+                    node.Children.Add(ParseExpression(tokenStream));
+                    return node;
                 default:
                     return null;
             }

@@ -84,9 +84,10 @@ namespace TexDotNet
 
     public enum ParseNodeKind
     {
-        PrefixOperator,
         InfixOperator,
+        PrefixOperator,
         PostfixOperator,
+        Indices,
         Token,
     }
 }
