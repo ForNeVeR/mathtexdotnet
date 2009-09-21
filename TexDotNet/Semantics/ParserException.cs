@@ -32,7 +32,8 @@ namespace TexDotNet
         {
             get 
 	        { 
-		        return base.Message +  Environment.NewLine + 
+		        return
+                    base.Message +  Environment.NewLine + 
                     string.Format("Token read: {0}", this.TokenRead) + Environment.NewLine +
                     string.Format("Charcter position: {0}", this.TokenRead.Position);
 	        }

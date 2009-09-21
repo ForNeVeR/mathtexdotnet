@@ -8,12 +8,11 @@ namespace TexDotNet
     // TODO: Use SymbolKind and Value properties instead of Token?
     public class ParseNode
     {
-        public ParseNode(Token token, IList<ParseNode> children)
-            : this()
+        public ParseNode(Token token, IEnumerable<ParseNode> children)
+            : this(token)
         {
-            this.Kind = ParseNodeKind.Token;
-            this.Token = token;
-            this.Children = new ParseNodeCollection(children);
+            foreach (var childNode in children)
+                this.Children.Add(childNode);
         }
 
         public ParseNode(Token token)
@@ -21,15 +20,14 @@ namespace TexDotNet
         {
             this.Kind = ParseNodeKind.Token;
             this.Token = token;
-            this.Children = null;
+            this.Children = new ParseNodeCollection();
         }
 
-        public ParseNode(ParseNodeKind kind, IList<ParseNode> children)
-            : this()
+        public ParseNode(ParseNodeKind kind, IEnumerable<ParseNode> children)
+            : this(kind)
         {
-            this.Kind = kind;
-            this.Token = Token.Null;
-            this.Children = new ParseNodeCollection(children);
+            foreach (var childNode in children)
+                this.Children.Add(childNode);
         }
 
         public ParseNode(ParseNodeKind kind)

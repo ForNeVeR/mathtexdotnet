@@ -55,7 +55,7 @@ namespace TexDotNet
         private ParseNode ParseTerm(TokenStream tokenStream, ref ParserState state)
         {
             var node = new ParseNode(ParseNodeKind.InfixOperator);
-            node.Children.Add(ParseImplicitTermOptional(tokenStream, ref state));
+            node.Children.Add(ParseFirstImplicitTermOptional(tokenStream, ref state));
             switch (tokenStream.Current.Symbol)
             {
                 case SymbolKind.Cross:
@@ -70,14 +70,28 @@ namespace TexDotNet
             return node;
         }
 
+        private ParseNode ParseFirstImplicitTermOptional(TokenStream tokenStream, ref ParserState state)
+        {
+            var node = new ParseNode(ParseNodeKind.PrefixOperator);
+            node.Children.Add(new ParseNode(Token.FromKind(SymbolKind.Dot, tokenStream.Current.Position)));
+            node.Children.Add(ParseSignedValue(tokenStream, ref state));
+            var implicitTermNode = ParseImplicitTermOptional(tokenStream, ref state);
+            if (implicitTermNode != null)
+                node.Children.Add(implicitTermNode);
+            return node;
+        }
+
         private ParseNode ParseImplicitTermOptional(TokenStream tokenStream, ref ParserState state)
         {
-            var node = new ParseNode(ParseNodeKind.PostfixOperator);
-            node.Children.Add(ParseSignedValue(tokenStream, ref state));
-            ParseNode valueNode;
-            while ((valueNode = ParseValueOptional(tokenStream, ref state)) != null)
-                node.Children.Add(valueNode);
+            var valueNode = ParseValueOptional(tokenStream, ref state);
+            if (valueNode == null)
+                return null;
+            var node = new ParseNode(ParseNodeKind.PrefixOperator);
             node.Children.Add(new ParseNode(Token.FromKind(SymbolKind.Dot, tokenStream.Current.Position)));
+            node.Children.Add(valueNode);
+            var implicitTermNode = ParseImplicitTermOptional(tokenStream, ref state);
+            if (implicitTermNode != null)
+                node.Children.Add(implicitTermNode);
             return node;
         }
 

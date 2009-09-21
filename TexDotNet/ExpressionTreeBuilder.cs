@@ -60,6 +60,11 @@ namespace TexDotNet
             {
                 return FromParseNode(parent, parseNode.Children[0]);
             }
+            else if (parseNode.Children.Count == 2 && parseNode.Children[0].Token.Symbol == SymbolKind.Dot)
+            {
+                // Implicit multiplication with only one term.
+                return FromParseNode(parent, parseNode.Children[1]);
+            }
             else if (parseNode.Children.Count >= 2)
             {
                 var exprNode = FromParseNode(parent, parseNode.Children[0]);
@@ -98,13 +103,9 @@ namespace TexDotNet
             {
                 return FromParseNode(parent, parseNode.Children[0]);
             }
-            else if (parseNode.Children.Count == 2 && parseNode.Children[1].Token.Symbol == SymbolKind.Dot)
-            {
-                // Implicit multiplication with only one term.
-                return FromParseNode(parent, parseNode.Children[0]);
-            }
             else if (parseNode.Children.Count == 2 && parseNode.Children[1].Kind == ParseNodeKind.Indices)
             {
+                // Indices for value.
                 return FromPostfixOperatorIndicesParseNode(parent, parseNode.Children[1], parseNode.Children[0]);
             }
             else if (parseNode.Children.Count >= 2)

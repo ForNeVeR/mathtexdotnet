@@ -7,6 +7,13 @@ namespace TexDotNet
 {
     public class ExpressionNode
     {
+        public ExpressionNode(ExpressionNode parent, SymbolKind symbol, IEnumerable<ExpressionNode> children)
+            : this(parent, symbol)
+        {
+            foreach (var childNode in children)
+                this.Children.Add(childNode);
+        }
+
         public ExpressionNode(ExpressionNode parent, SymbolKind symbol, object value)
             : this(parent)
         {
