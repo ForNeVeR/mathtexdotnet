@@ -17,7 +17,7 @@ namespace TexDotNet
         public ParseNode(TexToken token)
             : this()
         {
-            this.Kind = ParseNodeKind.Token;
+            this.Symbol = ParseNodeKind.Token;
             this.Token = token;
             this.Children = new ParseNodeCollection();
         }
@@ -32,7 +32,7 @@ namespace TexDotNet
         public ParseNode(ParseNodeKind kind)
             : this()
         {
-            this.Kind = kind;
+            this.Symbol = kind;
             this.Token = TexToken.Null;
             this.Children = new ParseNodeCollection();
         }
@@ -52,7 +52,7 @@ namespace TexDotNet
             get { return this.Token.SourceText; }
         }
 
-        public ParseNodeKind Kind
+        public ParseNodeKind Symbol
         {
             get;
             set;
@@ -78,13 +78,13 @@ namespace TexDotNet
 
         public override string ToString()
         {
-            if (this.Kind == ParseNodeKind.Token)
+            if (this.Symbol == ParseNodeKind.Token)
             {
                 return this.Token.ToString();
             }
             else
             {
-                return this.Kind.ToString();
+                return this.Symbol.ToString();
             }
         }
     }

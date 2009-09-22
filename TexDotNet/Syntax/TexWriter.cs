@@ -41,8 +41,16 @@ namespace TexDotNet
                 var str = GetLongSymbol(tokenStream.Current);
                 if (str != null)
                 {
-                    this.TextWriter.Write('\\' + chr);
+                    this.TextWriter.Write('\\' + str);
                     continue;
+                }
+                if (tokenStream.Current.Symbol == TexSymbolKind.Number)
+                {
+                    var value = (double)tokenStream.Current.Value;
+                    if (double.IsPositiveInfinity(value))
+                        this.TextWriter.Write("infty");
+                    else
+                        this.TextWriter.Write(value.ToString());
                 }
 
                 if (!this.IgnoreUnknownSymbols)
@@ -106,6 +114,11 @@ namespace TexDotNet
                     return '|';
                 #endregion
 
+                #region Formatting
+                case TexSymbolKind.Space:
+                    return ' ';
+                #endregion
+
                 default:
                     return null;
             }
@@ -115,14 +128,8 @@ namespace TexDotNet
         {
             switch (token.Symbol)
             {
-                case TexSymbolKind.Number:
-                    var value = (double)token.Value;
-                    if (double.IsPositiveInfinity(value))
-                        return "infty";
-                    else
-                        return value.ToString();
                 case TexSymbolKind.Text:
-                    return string.Format("text{{0}}", (string)token.Value);
+                    return string.Format("text{{{0}}}", (string)token.Value);
                 case TexSymbolKind.GreekLetter:
                     return (string)token.Value;
 

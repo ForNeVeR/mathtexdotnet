@@ -67,7 +67,7 @@ namespace TexDotNet
                         nextChar.ToString());
                 }
             }
-            yield return TexToken.FromKind(TexSymbolKind.EndOfStream, reader.Position, null);
+            yield return TexToken.FromSymbol(TexSymbolKind.EndOfStream, reader.Position, null);
         }
 
         protected double ScanReal(TrackedTextReader reader)

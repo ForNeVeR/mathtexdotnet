@@ -9,14 +9,29 @@ namespace TexDotNet
     {
         public static readonly TexToken Null = new TexToken(TexSymbolKind.Null, -1, null);
 
+        public static TexToken FromNumber(double value)
+        {
+            return new TexToken(TexSymbolKind.Number, value);
+        }
+
         public static TexToken FromNumber(double value, int sourcePosition, string sourceText)
         {
             return new TexToken(TexSymbolKind.Number, value, sourcePosition, sourceText);
         }
 
-        public static TexToken FromKind(TexSymbolKind kind, int sourcePosition, string sourceText)
+        public static TexToken FromSymbol(TexSymbolKind symbol)
         {
-            return new TexToken(kind, sourcePosition, sourceText);
+            return new TexToken(symbol);
+        }
+
+        public static TexToken FromSymbol(TexSymbolKind symbol, int sourcePosition, string sourceText)
+        {
+            return new TexToken(symbol, sourcePosition, sourceText);
+        }
+
+        public static TexToken FromValue(TexSymbolKind kind, object value)
+        {
+            return new TexToken(kind, value);
         }
 
         public static TexToken FromValue(TexSymbolKind kind, object value, int sourcePosition, string sourceText)
@@ -31,14 +46,24 @@ namespace TexDotNet
         public readonly TexSymbolKind Symbol;
         public readonly object Value;
 
-        private TexToken(TexSymbolKind kind, int sourcePosition, string sourceText)
-            : this(kind, null, sourcePosition, sourceText)
+        private TexToken(TexSymbolKind symbol)
+            : this(symbol, -1, null)
         {
         }
 
-        private TexToken(TexSymbolKind kind, object value, int sourcePosition, string sourceText)
+        private TexToken(TexSymbolKind symbol, object value)
+            : this(symbol, value, -1, null)
         {
-            this.Symbol = kind;
+        }
+
+        private TexToken(TexSymbolKind symbol, int sourcePosition, string sourceText)
+            : this(symbol, null, sourcePosition, sourceText)
+        {
+        }
+
+        private TexToken(TexSymbolKind symbol, object value, int sourcePosition, string sourceText)
+        {
+            this.Symbol = symbol;
             this.Value = value;
 
             this.sourcePosition = sourcePosition;

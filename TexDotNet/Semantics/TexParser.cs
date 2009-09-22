@@ -74,7 +74,7 @@ namespace TexDotNet
         private ParseNode ParseFirstImplicitTermOptional(TokenStream tokenStream, ref ParserState state)
         {
             var node = new ParseNode(ParseNodeKind.PrefixOperator);
-            node.Children.Add(new ParseNode(TexToken.FromKind(TexSymbolKind.Dot, tokenStream.Current.SourcePosition,
+            node.Children.Add(new ParseNode(TexToken.FromSymbol(TexSymbolKind.Dot, tokenStream.Current.SourcePosition,
                 null)));
             node.Children.Add(ParseSignedValue(tokenStream, ref state));
             var implicitTermNode = ParseImplicitTermOptional(tokenStream, ref state);
@@ -89,7 +89,7 @@ namespace TexDotNet
             if (valueNode == null)
                 return null;
             var node = new ParseNode(ParseNodeKind.PrefixOperator);
-            node.Children.Add(new ParseNode(TexToken.FromKind(TexSymbolKind.Dot, tokenStream.Current.SourcePosition,
+            node.Children.Add(new ParseNode(TexToken.FromSymbol(TexSymbolKind.Dot, tokenStream.Current.SourcePosition,
                 null)));
             node.Children.Add(valueNode);
             var implicitTermNode = ParseImplicitTermOptional(tokenStream, ref state);
