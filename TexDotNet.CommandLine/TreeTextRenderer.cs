@@ -19,14 +19,14 @@ namespace TexDotNet.CommandLine
             private set;
         }
 
-        public void Render(ExpressionTree tree)
+        public void Render(TexExpressionNode tree)
         {
-            Render(tree.RootNode, false, node => node.Arguments, node => node.Children, 0);
+            Render(tree, false, node => node.Arguments, node => node.Children, 0);
         }
 
-        public void Render(ParseTree tree)
+        public void Render(ParseNode tree)
         {
-            Render(tree.RootNode, false, null, node => node.Children, 0);
+            Render(tree, false, null, node => node.Children, 0);
         }
 
         private void Render<TNode>(TNode node, bool isAttribute, Func<TNode, IEnumerable<TNode>> getAttributes,

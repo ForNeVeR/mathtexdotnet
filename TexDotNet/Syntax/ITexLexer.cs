@@ -6,7 +6,7 @@ using System.Text;
 
 namespace TexDotNet
 {
-    using TokenStream = IEnumerator<Token>;
+    using TokenStream = IEnumerator<TexToken>;
 
     public interface ILexer
     {

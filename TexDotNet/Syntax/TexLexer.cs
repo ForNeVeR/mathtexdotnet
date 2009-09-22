@@ -7,7 +7,7 @@ using System.Text;
 
 namespace TexDotNet
 {
-    using TokenStream = IEnumerator<Token>;
+    using TokenStream = IEnumerator<TexToken>;
 
     public class TexLexer : ILexer
     {
@@ -50,22 +50,24 @@ namespace TexDotNet
                 }
                 else if (char.IsDigit(nextChar))
                 {
-                    yield return Token.FromNumber(ScanReal(reader), reader.Position);
+                    yield return TexToken.FromNumber(ScanReal(reader), reader.Position, nextChar.ToString());
                 }
                 else if (nextChar == '\\')
                 {
                     object value;
-                    var token = Token.FromValue(ScanLongSymbol(reader, out value), value, reader.Position);
-                    if (token.Symbol != SymbolKind.Unknown)
+                    var token = TexToken.FromValue(ScanLongSymbol(reader, out value), value, reader.Position,
+                        nextChar.ToString());
+                    if (token.Symbol != TexSymbolKind.Unknown)
                         yield return token;
                 }
                 else
                 {
                     object value;
-                    yield return Token.FromValue(ScanShortSymbol(reader, out value), value, reader.Position);
+                    yield return TexToken.FromValue(ScanShortSymbol(reader, out value), value, reader.Position,
+                        nextChar.ToString());
                 }
             }
-            yield return Token.FromKind(SymbolKind.EndOfStream, reader.Position);
+            yield return TexToken.FromKind(TexSymbolKind.EndOfStream, reader.Position, null);
         }
 
         protected double ScanReal(TrackedTextReader reader)
@@ -83,74 +85,74 @@ namespace TexDotNet
                 CultureInfo.InvariantCulture.NumberFormat);
         }
 
-        protected SymbolKind ScanShortSymbol(TrackedTextReader reader, out object value)
+        protected TexSymbolKind ScanShortSymbol(TrackedTextReader reader, out object value)
         {
             char chr = (char)reader.Read();
             value = null;
             switch (chr)
             {
                 case '^':
-                    return SymbolKind.RaiseToIndex;
+                    return TexSymbolKind.RaiseToIndex;
                 case '_':
-                    return SymbolKind.LowerToIndex;
+                    return TexSymbolKind.LowerToIndex;
                 case '\'':
-                    return SymbolKind.Prime;
+                    return TexSymbolKind.Prime;
                 case ':':
-                    return SymbolKind.Colon;
+                    return TexSymbolKind.Colon;
                 case ',':
-                    return SymbolKind.Comma;
+                    return TexSymbolKind.Comma;
 
                 #region Relations
                 case '=':
-                    return SymbolKind.Equals;
+                    return TexSymbolKind.Equals;
                 case '<':
-                    return SymbolKind.LessThan;
+                    return TexSymbolKind.LessThan;
                 case '>':
-                    return SymbolKind.GreaterThan;
+                    return TexSymbolKind.GreaterThan;
                 #endregion
 
                 #region Operators
                 case '+':
-                    return SymbolKind.Plus;
+                    return TexSymbolKind.Plus;
                 case '-':
-                    return SymbolKind.Minus;
+                    return TexSymbolKind.Minus;
                 case '*':
-                    return SymbolKind.Star;
+                    return TexSymbolKind.Star;
                 case '/':
-                    return SymbolKind.Divide;
+                    return TexSymbolKind.Divide;
                 case '!':
-                    return SymbolKind.Factorial;
+                    return TexSymbolKind.Factorial;
                 #endregion
 
                 #region Brackets
                 case '{':
-                    return SymbolKind.GroupOpen;
+                    return TexSymbolKind.GroupOpen;
                 case '}':
-                    return SymbolKind.GroupClose;
+                    return TexSymbolKind.GroupClose;
                 case '(':
-                    return SymbolKind.RoundBracketOpen;
+                    return TexSymbolKind.RoundBracketOpen;
                 case ')':
-                    return SymbolKind.RoundBracketClose;
+                    return TexSymbolKind.RoundBracketClose;
                 case '[':
-                    return SymbolKind.SquareBracketOpen;
+                    return TexSymbolKind.SquareBracketOpen;
                 case ']':
-                    return SymbolKind.SquareBracketClose;
+                    return TexSymbolKind.SquareBracketClose;
                 case '|':
-                    return SymbolKind.ModulusBracket;
+                    return TexSymbolKind.ModulusBracket;
                 #endregion
 
                 default:
                     if (char.IsLetter(chr))
                     {
                         value = chr;
-                        return SymbolKind.Letter;
+                        return TexSymbolKind.Letter;
                     }
-                    throw new LexerException(reader.Position, string.Format(
+                    throw new LexerException(reader.Position, chr.ToString(), string.Format(
                         "Illegal character '{0}'.", chr));
             }
         }
 
-        protected SymbolKind ScanLongSymbol(TrackedTextReader reader, out object value)
+        protected TexSymbolKind ScanLongSymbol(TrackedTextReader reader, out object value)
         {
             var sb = new StringBuilder();
             char nextChr;
@@ -176,9 +178,9 @@ namespace TexDotNet
             {
                 case "infty":
                     value = double.PositiveInfinity;
-                    return SymbolKind.Number;
+                    return TexSymbolKind.Number;
                 case "text":
-                    return SymbolKind.Text;
+                    return TexSymbolKind.Text;
 
                 #region Greek letters
                 case "alpha":
@@ -235,264 +237,264 @@ namespace TexDotNet
                 case "omega":
                 case "Omega":
                     value = symbol.Substring(1);
-                    return SymbolKind.GreekLetter;
+                    return TexSymbolKind.GreekLetter;
                 #endregion
 
                 #region Brackets
                 case "{":
-                    return SymbolKind.CurlyBracketOpen;
+                    return TexSymbolKind.CurlyBracketOpen;
                 case "}":
-                    return SymbolKind.CurlyBracketClose;
+                    return TexSymbolKind.CurlyBracketClose;
                 case "langle":
-                    return SymbolKind.AngleBracketOpen;
+                    return TexSymbolKind.AngleBracketOpen;
                 case "rangle":
-                    return SymbolKind.AngleBracketClose;
+                    return TexSymbolKind.AngleBracketClose;
                 case "lfloor":
-                    return SymbolKind.FloorBracketOpen;
+                    return TexSymbolKind.FloorBracketOpen;
                 case "rfloor":
-                    return SymbolKind.FloorBracketClose;
+                    return TexSymbolKind.FloorBracketClose;
                 case "lceil":
-                    return SymbolKind.CeilingBracketOpen;
+                    return TexSymbolKind.CeilingBracketOpen;
                 case "rceil":
-                    return SymbolKind.CeilingBracketClose;
+                    return TexSymbolKind.CeilingBracketClose;
                 case "|":
-                    return SymbolKind.NormBracket;
+                    return TexSymbolKind.NormBracket;
                 #endregion
 
                 #region Relations
                 case "neq":
-                    return SymbolKind.NotEquals;
+                    return TexSymbolKind.NotEquals;
                 case "doteq":
-                    return SymbolKind.DotEquals;
+                    return TexSymbolKind.DotEquals;
                 case "approx":
-                    return SymbolKind.Approximates;
+                    return TexSymbolKind.Approximates;
                 case "equiv":
-                    return SymbolKind.Equivalent;
+                    return TexSymbolKind.Equivalent;
                 case "leq":
-                    return SymbolKind.LessThanOrEqualTo;
+                    return TexSymbolKind.LessThanOrEqualTo;
                 case "geq":
-                    return SymbolKind.GreaterThanOrEqualTo;
+                    return TexSymbolKind.GreaterThanOrEqualTo;
                 case "ll":
-                    return SymbolKind.MuchLessThan;
+                    return TexSymbolKind.MuchLessThan;
                 case "gg":
-                    return SymbolKind.MuchGreaterThan;
+                    return TexSymbolKind.MuchGreaterThan;
                 case "propto":
-                    return SymbolKind.Proportional;
+                    return TexSymbolKind.Proportional;
                 case "asymp":
-                    return SymbolKind.Asymptotic;
+                    return TexSymbolKind.Asymptotic;
                 case "bowtie":
-                    return SymbolKind.Bowtie;
+                    return TexSymbolKind.Bowtie;
                 case "models":
-                    return SymbolKind.Models;
+                    return TexSymbolKind.Models;
                 case "prec":
-                    return SymbolKind.Precedes;
+                    return TexSymbolKind.Precedes;
                 case "preceq":
-                    return SymbolKind.PrecedesOrEquals;
+                    return TexSymbolKind.PrecedesOrEquals;
                 case "succ":
-                    return SymbolKind.Succedes;
+                    return TexSymbolKind.Succedes;
                 case "succeq":
-                    return SymbolKind.SuccedesOrEquals;
+                    return TexSymbolKind.SuccedesOrEquals;
                 case "cong":
-                    return SymbolKind.Congruent;
+                    return TexSymbolKind.Congruent;
                 case "sim":
-                    return SymbolKind.Similar;
+                    return TexSymbolKind.Similar;
                 case "simeq":
-                    return SymbolKind.SimilarOrEquals;
+                    return TexSymbolKind.SimilarOrEquals;
                 case "perp":
-                    return SymbolKind.Perpendicular;
+                    return TexSymbolKind.Perpendicular;
                 case "mid":
-                    return SymbolKind.Middle;
+                    return TexSymbolKind.Middle;
                 case "subset":
-                    return SymbolKind.Subset;
+                    return TexSymbolKind.Subset;
                 case "subseteq":
-                    return SymbolKind.SubsetOrEqualTo;
+                    return TexSymbolKind.SubsetOrEqualTo;
                 case "supset":
-                    return SymbolKind.Superset;
+                    return TexSymbolKind.Superset;
                 case "supseteq":
-                    return SymbolKind.SupersetOrEqualTo;
+                    return TexSymbolKind.SupersetOrEqualTo;
                 case "sqsubset":
-                    return SymbolKind.SquareSubset;
+                    return TexSymbolKind.SquareSubset;
                 case "sqsubseteq":
-                    return SymbolKind.SquareSubsetOrEqualTo;
+                    return TexSymbolKind.SquareSubsetOrEqualTo;
                 case "sqsupset":
-                    return SymbolKind.SquareSuperset;
+                    return TexSymbolKind.SquareSuperset;
                 case "sqsupseteq":
-                    return SymbolKind.SquareSupersetOrEqualTo;
+                    return TexSymbolKind.SquareSupersetOrEqualTo;
                 case "in":
-                    return SymbolKind.Member;
+                    return TexSymbolKind.Member;
                 case "nin":
-                    return SymbolKind.NotMember;
+                    return TexSymbolKind.NotMember;
                 case "ni":
-                    return SymbolKind.Contains;
+                    return TexSymbolKind.Contains;
                 case "nni":
-                    return SymbolKind.NotContains;
+                    return TexSymbolKind.NotContains;
                 case "smile":
-                    return SymbolKind.Smile;
+                    return TexSymbolKind.Smile;
                 case "frown":
-                    return SymbolKind.Frown;
+                    return TexSymbolKind.Frown;
                 case "vdash":
-                    return SymbolKind.VLineDash;
+                    return TexSymbolKind.VLineDash;
                 case "dashv":
-                    return SymbolKind.DashVLine;
+                    return TexSymbolKind.DashVLine;
                 #endregion
 
                 #region Operators
                 case "pm":
-                    return SymbolKind.PlusMinus;
+                    return TexSymbolKind.PlusMinus;
                 case "mp":
-                    return SymbolKind.MinusPlus;
+                    return TexSymbolKind.MinusPlus;
                 case "times":
-                    return SymbolKind.Cross;
+                    return TexSymbolKind.Cross;
                 case "cdot":
-                    return SymbolKind.Dot;
+                    return TexSymbolKind.Dot;
                 case "div":
-                    return SymbolKind.Divide;
+                    return TexSymbolKind.Divide;
                 case "over":
-                    return SymbolKind.Divide;
+                    return TexSymbolKind.Over;
                 #endregion
 
                 #region Functions
                 case "frac":
-                    return SymbolKind.Fraction;
+                    return TexSymbolKind.Fraction;
                 case "binom":
-                    return SymbolKind.Binomial;
+                    return TexSymbolKind.Binomial;
                 case "sqrt":
-                    return SymbolKind.Root;
+                    return TexSymbolKind.Root;
                 case "min":
-                    return SymbolKind.Minimum;
+                    return TexSymbolKind.Minimum;
                 case "max":
-                    return SymbolKind.Maximum;
+                    return TexSymbolKind.Maximum;
                 case "gcd":
-                    return SymbolKind.GreatestCommonDenominator;
+                    return TexSymbolKind.GreatestCommonDenominator;
                 case "lcm":
-                    return SymbolKind.LowestCommonMultiple;
+                    return TexSymbolKind.LowestCommonMultiple;
                 case "exp":
-                    return SymbolKind.Exponent;
+                    return TexSymbolKind.Exponent;
                 case "log":
-                    return SymbolKind.Log;
+                    return TexSymbolKind.Log;
                 case "ln":
-                    return SymbolKind.NaturalLog;
+                    return TexSymbolKind.NaturalLog;
                 case "arg":
-                    return SymbolKind.Argument;
+                    return TexSymbolKind.Argument;
                 case "lim":
-                    return SymbolKind.Limit;
+                    return TexSymbolKind.Limit;
                 case "liminf":
-                    return SymbolKind.LimitInferior;
+                    return TexSymbolKind.LimitInferior;
                 case "limsup":
-                    return SymbolKind.LimitSuperior;
+                    return TexSymbolKind.LimitSuperior;
                 case "sin":
-                    return SymbolKind.Sine;
+                    return TexSymbolKind.Sine;
                 case "cos":
-                    return SymbolKind.Cosine;
+                    return TexSymbolKind.Cosine;
                 case "tan":
-                    return SymbolKind.Tangent;
+                    return TexSymbolKind.Tangent;
                 case "sec":
-                    return SymbolKind.Secant;
+                    return TexSymbolKind.Secant;
                 case "csc":
-                    return SymbolKind.Cosecant;
+                    return TexSymbolKind.Cosecant;
                 case "cot":
-                    return SymbolKind.Cotangent;
+                    return TexSymbolKind.Cotangent;
                 case "arcsin":
-                    return SymbolKind.ArcSine;
+                    return TexSymbolKind.ArcSine;
                 case "arccos":
-                    return SymbolKind.ArcCosine;
+                    return TexSymbolKind.ArcCosine;
                 case "arctan":
-                    return SymbolKind.ArcTangent;
+                    return TexSymbolKind.ArcTangent;
                 case "arcsec":
-                    return SymbolKind.ArcSecant;
+                    return TexSymbolKind.ArcSecant;
                 case "arccsc":
-                    return SymbolKind.ArcCosecant;
+                    return TexSymbolKind.ArcCosecant;
                 case "arccot":
-                    return SymbolKind.ArcCotangent;
+                    return TexSymbolKind.ArcCotangent;
                 case "sinh":
-                    return SymbolKind.Sine;
+                    return TexSymbolKind.HypSine;
                 case "cosh":
-                    return SymbolKind.Cosine;
+                    return TexSymbolKind.HypCosine;
                 case "tanh":
-                    return SymbolKind.Tangent;
+                    return TexSymbolKind.HypTangent;
                 case "sech":
-                    return SymbolKind.Secant;
+                    return TexSymbolKind.HypSecant;
                 case "csch":
-                    return SymbolKind.Cosecant;
+                    return TexSymbolKind.HypCosecant;
                 case "coth":
-                    return SymbolKind.Cotangent;
+                    return TexSymbolKind.HypCotangent;
                 case "arcsinh":
-                    return SymbolKind.ArcSine;
+                    return TexSymbolKind.ArHypSine;
                 case "arccosh":
-                    return SymbolKind.ArcCosine;
+                    return TexSymbolKind.ArHypCosine;
                 case "arctanh":
-                    return SymbolKind.ArcTangent;
+                    return TexSymbolKind.ArHypTangent;
                 case "arcsech":
-                    return SymbolKind.ArcSecant;
+                    return TexSymbolKind.ArHypSecant;
                 case "arccsch":
-                    return SymbolKind.ArcCosecant;
+                    return TexSymbolKind.ArHypCosecant;
                 case "arccoth":
-                    return SymbolKind.ArcCotangent;
+                    return TexSymbolKind.ArHypCotangent;
                 case "bmod":
-                    return SymbolKind.InlineModulo;
+                    return TexSymbolKind.InlineModulo;
                 case "pmod":
-                    return SymbolKind.IdentityModulo;
+                    return TexSymbolKind.IdentityModulo;
                 case "sum":
-                    return SymbolKind.Sum;
+                    return TexSymbolKind.Sum;
                 case "prod":
-                    return SymbolKind.Product;
+                    return TexSymbolKind.Product;
                 case "coprod":
-                    return SymbolKind.Coproduct;
+                    return TexSymbolKind.Coproduct;
                 case "int":
-                    return SymbolKind.Integral;
+                    return TexSymbolKind.Integral;
                 case "iint":
-                    return SymbolKind.DoubleIntegral;
+                    return TexSymbolKind.DoubleIntegral;
                 case "iiint":
-                    return SymbolKind.TripleIntegral;
+                    return TexSymbolKind.TripleIntegral;
                 case "iiiint":
-                    return SymbolKind.QuadrupleIntegral;
+                    return TexSymbolKind.QuadrupleIntegral;
                 case "idotsint":
-                    return SymbolKind.NtupleIntegral;
+                    return TexSymbolKind.NtupleIntegral;
                 case "oint":
-                    return SymbolKind.ClosedIntegral;
+                    return TexSymbolKind.ClosedIntegral;
                 case "oiint":
-                    return SymbolKind.ClosedDoubleIntegral;
+                    return TexSymbolKind.ClosedDoubleIntegral;
                 case "oiiint":
-                    return SymbolKind.ClosedTripleIntegral;
+                    return TexSymbolKind.ClosedTripleIntegral;
                 case "oiiiint":
-                    return SymbolKind.ClosedQuadrupleIntegral;
+                    return TexSymbolKind.ClosedQuadrupleIntegral;
                 case "oidotsint":
-                    return SymbolKind.ClosedNtupleIntegral;
+                    return TexSymbolKind.ClosedNtupleIntegral;
                 case "bigoplus":
-                    return SymbolKind.BigOPlus;
+                    return TexSymbolKind.BigOPlus;
                 case "bigotimes":
-                    return SymbolKind.BigOTimes;
+                    return TexSymbolKind.BigOTimes;
                 case "bigodot":
-                    return SymbolKind.BigODot;
+                    return TexSymbolKind.BigODot;
                 case "bigcup":
-                    return SymbolKind.BigCup;
+                    return TexSymbolKind.BigCup;
                 case "bigcap":
-                    return SymbolKind.BigCap;
+                    return TexSymbolKind.BigCap;
                 case "bigcupplus":
-                    return SymbolKind.BigCupPlus;
+                    return TexSymbolKind.BigCupPlus;
                 case "bigsqcup":
-                    return SymbolKind.BigSquareCup;
+                    return TexSymbolKind.BigSquareCup;
                 case "bigsqcap":
-                    return SymbolKind.BigSquareCap;
+                    return TexSymbolKind.BigSquareCap;
                 case "bigveee":
-                    return SymbolKind.BigVee;
+                    return TexSymbolKind.BigVee;
                 case "bigwedge":
-                    return SymbolKind.BigWedge;
+                    return TexSymbolKind.BigWedge;
                 #endregion
 
                 #region Formatting
                 case ",":
-                    return SymbolKind.Separator;
+                    return TexSymbolKind.Separator;
                 case "left":
-                    return SymbolKind.Left;
+                    return TexSymbolKind.Left;
                 case "right":
-                    return SymbolKind.Right;
+                    return TexSymbolKind.Right;
                 #endregion
 
                 default:
                     if (this.IgnoreUnknownSymbols)
-                        return SymbolKind.Unknown;
-                    throw new LexerException(reader.Position, string.Format(
+                        return TexSymbolKind.Unknown;
+                    throw new LexerException(reader.Position, symbol, string.Format(
                         "Illegal symbol '{0}'.", symbol));
             }
         }

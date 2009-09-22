@@ -8,11 +8,6 @@ namespace TexDotNet
 {
     public class ParseNodeCollection : Collection<ParseNode>
     {
-        public ParseNodeCollection(IList<ParseNode> list)
-            : base(list)
-        {
-        }
-
         public ParseNodeCollection()
             : base()
         {

@@ -7,11 +7,11 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace TexDotNet.Tests
 {
-    using TokenStream = IEnumerable<Token>;
+    using TokenStream = IEnumerable<TexToken>;
 
     public class TestExample
     {
-        public TestExample(string text, Token[] expectedTokens)
+        public TestExample(string text, TexToken[] expectedTokens)
         {
             this.Text = text;
             this.ExpectedTokens = expectedTokens;
@@ -23,13 +23,13 @@ namespace TexDotNet.Tests
             private set;
         }
 
-        public Token[] Tokens
+        public TexToken[] Tokens
         {
             get;
             private set;
         }
 
-        public Token[] ExpectedTokens
+        public TexToken[] ExpectedTokens
         {
             get;
             private set;

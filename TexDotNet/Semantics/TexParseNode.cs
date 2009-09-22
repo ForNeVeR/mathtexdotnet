@@ -5,17 +5,16 @@ using System.Text;
 
 namespace TexDotNet
 {
-    // TODO: Use SymbolKind and Value properties instead of Token?
-    public class ParseNode
+    public class ParseNode : ITexErrorSourceInfo
     {
-        public ParseNode(Token token, IEnumerable<ParseNode> children)
+        public ParseNode(TexToken token, IEnumerable<ParseNode> children)
             : this(token)
         {
             foreach (var childNode in children)
                 this.Children.Add(childNode);
         }
 
-        public ParseNode(Token token)
+        public ParseNode(TexToken token)
             : this()
         {
             this.Kind = ParseNodeKind.Token;
@@ -34,7 +33,7 @@ namespace TexDotNet
             : this()
         {
             this.Kind = kind;
-            this.Token = Token.Null;
+            this.Token = TexToken.Null;
             this.Children = new ParseNodeCollection();
         }
 
@@ -43,13 +42,23 @@ namespace TexDotNet
             this.IsArgument = false;
         }
 
+        public int SourcePosition
+        {
+            get { return this.Token.SourcePosition; }
+        }
+
+        public string SourceText
+        {
+            get { return this.Token.SourceText; }
+        }
+
         public ParseNodeKind Kind
         {
             get;
             set;
         }
 
-        public Token Token
+        public TexToken Token
         {
             get;
             set;

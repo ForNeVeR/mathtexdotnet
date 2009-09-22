@@ -9,7 +9,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace TexDotNet.Tests
 {
-    using TokenStream = IEnumerable<Token>;
+    using TokenStream = IEnumerable<TexToken>;
 
     [TestClass]
     public class LexerTests

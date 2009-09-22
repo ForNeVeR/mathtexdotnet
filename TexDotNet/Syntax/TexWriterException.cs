@@ -5,15 +5,21 @@ using System.Text;
 
 namespace TexDotNet
 {
-    public class LexerException : Exception
+    public class WriterException : Exception
     {
-        public LexerException(int position, string message)
-            : base(message)
+        public WriterException(TexToken token)
+            : base(null)
         {
-            this.Position = position;
+            this.Token = token;
         }
 
-        public int Position
+        public WriterException(TexToken token, string message)
+            : base(message)
+        {
+            this.Token = token;
+        }
+
+        public TexToken Token
         {
             get;
             private set;
@@ -24,7 +30,7 @@ namespace TexDotNet
             get
             {
                 return base.Message + Environment.NewLine +
-                    string.Format("Charcter position: {0}", this.Position);
+                    string.Format("Unknown symbol kind: {0}", this.Token.Symbol);
             }
         }
     }

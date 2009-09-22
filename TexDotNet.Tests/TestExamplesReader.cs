@@ -6,7 +6,7 @@ using System.Text;
 
 namespace TexDotNet.Tests
 {
-    using TokenStream = IEnumerable<Token>;
+    using TokenStream = IEnumerable<TexToken>;
 
     public class TestExamplesReader : IDisposable
     {
@@ -72,7 +72,7 @@ namespace TexDotNet.Tests
             var expectedTokenString = streamReader.ReadLine();
             var expectedTokens = expectedTokenString.Split(' ').Select(tokenString =>
                 {
-                    return Token.FromKind(SymbolKind.Unknown, -1);
+                    return TexToken.FromKind(TexSymbolKind.Unknown, -1, null);
                 }).ToArray();
 
             streamReader.ReadLine();

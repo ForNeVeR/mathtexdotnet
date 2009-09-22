@@ -6,45 +6,41 @@ using System.Text;
 
 namespace TexDotNet
 {
-    using TokenStream = IEnumerator<Token>;
+    using TokenStream = IEnumerator<TexToken>;
 
     public static class TexHelper
     {
-        public static string CreateText(this ExpressionTree tree)
+        public static string CreateText(this TexExpressionNode tree)
         {
             using (var stringWriter = new StringWriter())
             {
                 var texWriter = new TexWriter(stringWriter);
-                texWriter.Write(tree);
+                texWriter.Write(CreateTokenSream(tree));
                 return stringWriter.ToString();
             }
         }
 
-        public static string CreateText(this ExpressionNode node)
+        public static TokenStream CreateTokenSream(this TexExpressionNode tree)
         {
-            using (var stringWriter = new StringWriter())
-            {
-                var texWriter = new TexWriter(stringWriter);
-                texWriter.Write(node);
-                return stringWriter.ToString();
-            }
+            var texComposer = new TexComposer();
+            return texComposer.Write(tree);
         }
 
-        public static ExpressionTree CreateExpressionTree(string expression)
+        public static TexExpressionNode CreateExpressionTree(string expression)
         {
-            return ExpressionTreeBuilder.FromParseTree(CreateParseTree(expression));
+            return TexExpressionTreeBuilder.FromParseTree(CreateParseTree(expression));
         }
 
-        public static ExpressionTree CreateExpressionTree(TokenStream tokenStream)
+        public static TexExpressionNode CreateExpressionTree(TokenStream tokenStream)
         {
-            return ExpressionTreeBuilder.FromParseTree(CreateParseTree(tokenStream));
+            return TexExpressionTreeBuilder.FromParseTree(CreateParseTree(tokenStream));
         }
 
-        public static ParseTree CreateParseTree(string expression)
+        public static ParseNode CreateParseTree(string expression)
         {
             return CreateParseTree(CreateTokenStream(expression));
         }
-        public static ParseTree CreateParseTree(TokenStream tokenStream)
+        public static ParseNode CreateParseTree(TokenStream tokenStream)
         {
             var parser = new TexParser();
             return parser.Parse(tokenStream);
@@ -68,16 +64,16 @@ namespace TexDotNet
         internal static void ForceMoveNextIncludeFormatting(this TokenStream tokenStream)
         {
             if (!tokenStream.MoveNext())
-                throw new ParserException(Token.Null, "Unexpected end of token stream.");
+                throw new ParserException(TexToken.Null, "Unexpected end of token stream.");
         }
 
-        internal static bool IsFormattingSymbol(this SymbolKind symbol)
+        internal static bool IsFormattingSymbol(this TexSymbolKind symbol)
         {
             switch (symbol)
             {
-                case SymbolKind.Separator:
-                case SymbolKind.Left:
-                case SymbolKind.Right:
+                case TexSymbolKind.Separator:
+                case TexSymbolKind.Left:
+                case TexSymbolKind.Right:
                     return true;
                 default:
                     return false;

@@ -5,10 +5,10 @@ using System.Text;
 
 namespace TexDotNet
 {
-    using TokenStream = IEnumerator<Token>;
+    using TokenStream = IEnumerator<TexToken>;
 
     public interface IParser
     {
-        ParseTree Parse(TokenStream tokenStream);
+        ParseNode Parse(TokenStream tokenStream);
     }
 }

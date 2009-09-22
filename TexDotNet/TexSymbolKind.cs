@@ -5,7 +5,7 @@ using System.Text;
 
 namespace TexDotNet
 {
-    public enum SymbolKind
+    public enum TexSymbolKind
     {
         Null,
         Unknown,
@@ -161,6 +161,7 @@ namespace TexDotNet
         Dot,
         Star,
         Divide,
+        Over,
         #endregion
 
         #region Postfix Operators

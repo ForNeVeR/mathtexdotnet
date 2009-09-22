@@ -45,24 +45,27 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ExpressionNodeCollection.cs" />
-    <Compile Include="ExpressionNode.cs" />
-    <Compile Include="ExpressionTree.cs" />
-    <Compile Include="ExpressionTreeBuilder.cs" />
-    <Compile Include="SymbolKind.cs" />
-    <Compile Include="Semantics\IParser.cs" />
-    <Compile Include="Semantics\ParseNode.cs" />
-    <Compile Include="Semantics\ParseNodeCollection.cs" />
-    <Compile Include="Semantics\ParserException.cs" />
-    <Compile Include="Syntax\ILexer.cs" />
-    <Compile Include="Syntax\LexerException.cs" />
-    <Compile Include="Semantics\ParseTree.cs" />
+    <Compile Include="ITexErrorSourceInfo.cs" />
+    <Compile Include="TexErrorSourceInfoException.cs" />
+    <Compile Include="Semantics\TexComposerException.cs" />
+    <Compile Include="Semantics\TexComposer.cs" />
+    <Compile Include="TexExpressionNodeCollection.cs" />
+    <Compile Include="TexExpressionNode.cs" />
+    <Compile Include="TexExpressionTreeBuilder.cs" />
+    <Compile Include="TexSymbolKind.cs" />
+    <Compile Include="Semantics\ITexParser.cs" />
+    <Compile Include="Semantics\TexParseNode.cs" />
+    <Compile Include="Semantics\TexParseNodeCollection.cs" />
+    <Compile Include="Semantics\TexParserException.cs" />
+    <Compile Include="Syntax\TexWriterException.cs" />
+    <Compile Include="Syntax\ITexLexer.cs" />
+    <Compile Include="Syntax\TexLexerException.cs" />
     <Compile Include="TexHelper.cs" />
     <Compile Include="Syntax\TexLexer.cs" />
     <Compile Include="Semantics\TexParser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TexWriter.cs" />
-    <Compile Include="Token.cs" />
+    <Compile Include="Syntax\TexWriter.cs" />
+    <Compile Include="TexToken.cs" />
     <Compile Include="Syntax\TrackedTextReader.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

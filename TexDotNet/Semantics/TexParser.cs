@@ -5,7 +5,7 @@ using System.Text;
 
 namespace TexDotNet
 {
-    using TokenStream = IEnumerator<Token>;
+    using TokenStream = IEnumerator<TexToken>;
 
     public class TexParser : IParser
     {
@@ -13,15 +13,15 @@ namespace TexDotNet
         {
         }
 
-        public ParseTree Parse(TokenStream tokenStream)
+        public ParseNode Parse(TokenStream tokenStream)
         {
             var state = CreateDefaultState();
             tokenStream.ForceMoveNext();
-            var rootNode = ParseExpression(tokenStream, ref state);
-            if (tokenStream.Current.Symbol != SymbolKind.EndOfStream)
+            var node = ParseExpression(tokenStream, ref state);
+            if (tokenStream.Current.Symbol != TexSymbolKind.EndOfStream)
                 throw new ParserException(tokenStream.Current,
                     "Expected end of token stream.");
-            return new ParseTree(rootNode);
+            return node;
         }
 
         private ParserState CreateDefaultState()
@@ -38,10 +38,10 @@ namespace TexDotNet
             node.Children.Add(ParseTerm(tokenStream, ref state));
             switch (tokenStream.Current.Symbol)
             {
-                case SymbolKind.EndOfStream:
+                case TexSymbolKind.EndOfStream:
                     return node;
-                case SymbolKind.Plus:
-                case SymbolKind.Minus:
+                case TexSymbolKind.Plus:
+                case TexSymbolKind.Minus:
                     node.Children.Add(new ParseNode(tokenStream.Current));
                     tokenStream.ForceMoveNext();
                     break;
@@ -58,10 +58,11 @@ namespace TexDotNet
             node.Children.Add(ParseFirstImplicitTermOptional(tokenStream, ref state));
             switch (tokenStream.Current.Symbol)
             {
-                case SymbolKind.Cross:
-                case SymbolKind.Dot:
-                case SymbolKind.Star:
-                case SymbolKind.Divide:
+                case TexSymbolKind.Cross:
+                case TexSymbolKind.Dot:
+                case TexSymbolKind.Star:
+                case TexSymbolKind.Divide:
+                case TexSymbolKind.Over:
                     node.Children.Add(new ParseNode(tokenStream.Current));
                     tokenStream.ForceMoveNext();
                     node.Children.Add(ParseTerm(tokenStream, ref state));
@@ -73,7 +74,8 @@ namespace TexDotNet
         private ParseNode ParseFirstImplicitTermOptional(TokenStream tokenStream, ref ParserState state)
         {
             var node = new ParseNode(ParseNodeKind.PrefixOperator);
-            node.Children.Add(new ParseNode(Token.FromKind(SymbolKind.Dot, tokenStream.Current.Position)));
+            node.Children.Add(new ParseNode(TexToken.FromKind(TexSymbolKind.Dot, tokenStream.Current.SourcePosition,
+                null)));
             node.Children.Add(ParseSignedValue(tokenStream, ref state));
             var implicitTermNode = ParseImplicitTermOptional(tokenStream, ref state);
             if (implicitTermNode != null)
@@ -87,7 +89,8 @@ namespace TexDotNet
             if (valueNode == null)
                 return null;
             var node = new ParseNode(ParseNodeKind.PrefixOperator);
-            node.Children.Add(new ParseNode(Token.FromKind(SymbolKind.Dot, tokenStream.Current.Position)));
+            node.Children.Add(new ParseNode(TexToken.FromKind(TexSymbolKind.Dot, tokenStream.Current.SourcePosition,
+                null)));
             node.Children.Add(valueNode);
             var implicitTermNode = ParseImplicitTermOptional(tokenStream, ref state);
             if (implicitTermNode != null)
@@ -109,8 +112,8 @@ namespace TexDotNet
             var node = new ParseNode(ParseNodeKind.PrefixOperator);
             switch (tokenStream.Current.Symbol)
             {
-                case SymbolKind.Plus:
-                case SymbolKind.Minus:
+                case TexSymbolKind.Plus:
+                case TexSymbolKind.Minus:
                     node.Children.Add(new ParseNode(tokenStream.Current));
                     tokenStream.ForceMoveNext();
                     break;
@@ -125,7 +128,7 @@ namespace TexDotNet
             node.Children.Add(ParseIndexedValue(tokenStream, ref state));
             switch (tokenStream.Current.Symbol)
             {
-                case SymbolKind.Factorial:
+                case TexSymbolKind.Factorial:
                     node.Children.Add(new ParseNode(tokenStream.Current));
                     tokenStream.ForceMoveNext();
                     break;
@@ -177,9 +180,9 @@ namespace TexDotNet
         {
             switch (tokenStream.Current.Symbol)
             {
-                case SymbolKind.Number:
-                case SymbolKind.Letter:
-                case SymbolKind.GreekLetter:
+                case TexSymbolKind.Number:
+                case TexSymbolKind.Letter:
+                case TexSymbolKind.GreekLetter:
                     var node = new ParseNode(tokenStream.Current);
                     tokenStream.ForceMoveNext();
                     return node;
@@ -194,8 +197,8 @@ namespace TexDotNet
             var firstSymbol = tokenStream.Current.Symbol;
             switch (tokenStream.Current.Symbol)
             {
-                case SymbolKind.RaiseToIndex:
-                case SymbolKind.LowerToIndex:
+                case TexSymbolKind.RaiseToIndex:
+                case TexSymbolKind.LowerToIndex:
                     node.Children.Add(new ParseNode(tokenStream.Current));
                     tokenStream.ForceMoveNext();
                     node.Children.Add(ParseIndex(tokenStream, ref state));
@@ -205,13 +208,13 @@ namespace TexDotNet
             }
             switch (tokenStream.Current.Symbol)
             {
-                case SymbolKind.RaiseToIndex:
-                case SymbolKind.LowerToIndex:
+                case TexSymbolKind.RaiseToIndex:
+                case TexSymbolKind.LowerToIndex:
                     if (tokenStream.Current.Symbol == firstSymbol)
                     {
                         throw new ParserException(tokenStream.Current, new[] {
-                            firstSymbol == SymbolKind.RaiseToIndex ? SymbolKind.LowerToIndex : 
-                            SymbolKind.RaiseToIndex});
+                            firstSymbol == TexSymbolKind.RaiseToIndex ? TexSymbolKind.LowerToIndex : 
+                            TexSymbolKind.RaiseToIndex});
                     }
                     node.Children.Add(new ParseNode(tokenStream.Current));
                     tokenStream.ForceMoveNext();
@@ -238,7 +241,7 @@ namespace TexDotNet
             var node = ParseGroupOptional(tokenStream, ref state);
             if (node == null)
                 throw new ParserException(tokenStream.Current, new[] {
-                    SymbolKind.GroupOpen });
+                    TexSymbolKind.GroupOpen });
             return node;
         }
 
@@ -246,12 +249,12 @@ namespace TexDotNet
         {
             switch (tokenStream.Current.Symbol)
             {
-                case SymbolKind.GroupOpen:
+                case TexSymbolKind.GroupOpen:
                     tokenStream.ForceMoveNext();
                     var node = ParseExpression(tokenStream, ref state);
-                    if (tokenStream.Current.Symbol != SymbolKind.GroupClose)
+                    if (tokenStream.Current.Symbol != TexSymbolKind.GroupClose)
                         throw new ParserException(tokenStream.Current, new[] {
-                            SymbolKind.GroupClose });
+                            TexSymbolKind.GroupClose });
                     tokenStream.ForceMoveNext();
                     return node;
                 default:
@@ -262,37 +265,37 @@ namespace TexDotNet
         private ParseNode ParseBracketedExpressionOptional(TokenStream tokenStream, ref ParserState state)
         {
             var newState = state;
-            SymbolKind bracketCloseToken;
+            TexSymbolKind bracketCloseToken;
             switch (tokenStream.Current.Symbol)
             {
-                case SymbolKind.RoundBracketOpen:
-                    bracketCloseToken = SymbolKind.RoundBracketClose;
+                case TexSymbolKind.RoundBracketOpen:
+                    bracketCloseToken = TexSymbolKind.RoundBracketClose;
                     break;
-                case SymbolKind.SquareBracketOpen:
-                    bracketCloseToken = SymbolKind.SquareBracketClose;
+                case TexSymbolKind.SquareBracketOpen:
+                    bracketCloseToken = TexSymbolKind.SquareBracketClose;
                     break;
-                case SymbolKind.CurlyBracketOpen:
-                    bracketCloseToken = SymbolKind.CurlyBracketClose;
+                case TexSymbolKind.CurlyBracketOpen:
+                    bracketCloseToken = TexSymbolKind.CurlyBracketClose;
                     break;
-                case SymbolKind.AngleBracketOpen:
-                    bracketCloseToken = SymbolKind.AngleBracketClose;
+                case TexSymbolKind.AngleBracketOpen:
+                    bracketCloseToken = TexSymbolKind.AngleBracketClose;
                     break;
-                case SymbolKind.FloorBracketOpen:
-                    bracketCloseToken = SymbolKind.FloorBracketClose;
+                case TexSymbolKind.FloorBracketOpen:
+                    bracketCloseToken = TexSymbolKind.FloorBracketClose;
                     break;
-                case SymbolKind.CeilingBracketOpen:
-                    bracketCloseToken = SymbolKind.CeilingBracketClose;
+                case TexSymbolKind.CeilingBracketOpen:
+                    bracketCloseToken = TexSymbolKind.CeilingBracketClose;
                     break;
-                case SymbolKind.ModulusBracket:
+                case TexSymbolKind.ModulusBracket:
                     if (newState.IsModulusBracketOpen)
                         return null;
-                    bracketCloseToken = SymbolKind.ModulusBracket;
+                    bracketCloseToken = TexSymbolKind.ModulusBracket;
                     newState.IsModulusBracketOpen = true;
                     break;
-                case SymbolKind.NormBracket:
+                case TexSymbolKind.NormBracket:
                     if (newState.IsNormBracketOpen)
                         return null;
-                    bracketCloseToken = SymbolKind.NormBracket;
+                    bracketCloseToken = TexSymbolKind.NormBracket;
                     newState.IsNormBracketOpen = true;
                     break;
                 default:
@@ -309,7 +312,7 @@ namespace TexDotNet
 
         private ParseNode ParseFractionOptional(TokenStream tokenStream, ref ParserState state)
         {
-            if (tokenStream.Current.Symbol != SymbolKind.Fraction)
+            if (tokenStream.Current.Symbol != TexSymbolKind.Fraction)
                 return null;
             var functionNode = new ParseNode(tokenStream.Current);
             tokenStream.ForceMoveNext();
@@ -320,7 +323,7 @@ namespace TexDotNet
 
         private ParseNode ParseBinomialOptional(TokenStream tokenStream, ref ParserState state)
         {
-            if (tokenStream.Current.Symbol != SymbolKind.Binomial)
+            if (tokenStream.Current.Symbol != TexSymbolKind.Binomial)
                 return null;
             var functionNode = new ParseNode(tokenStream.Current);
             tokenStream.ForceMoveNext();
@@ -331,7 +334,7 @@ namespace TexDotNet
 
         private ParseNode ParseRootOptional(TokenStream tokenStream, ref ParserState state)
         {
-            if (tokenStream.Current.Symbol != SymbolKind.Root)
+            if (tokenStream.Current.Symbol != TexSymbolKind.Root)
                 return null;
             var functionNode = new ParseNode(tokenStream.Current);
             tokenStream.ForceMoveNext();
@@ -348,29 +351,29 @@ namespace TexDotNet
         {
             switch (tokenStream.Current.Symbol)
             {
-                case SymbolKind.Minimum:
-                case SymbolKind.Maximum:
-                case SymbolKind.GreatestCommonDenominator:
-                case SymbolKind.LowestCommonMultiple:
-                case SymbolKind.Exponent:
-                case SymbolKind.Log:
-                case SymbolKind.NaturalLog:
-                case SymbolKind.Argument:
-                case SymbolKind.Limit:
-                case SymbolKind.LimitInferior:
-                case SymbolKind.LimitSuperior:
-                case SymbolKind.Sine:
-                case SymbolKind.Cosine:
-                case SymbolKind.Tangent:
-                case SymbolKind.Cosecant:
-                case SymbolKind.Secant:
-                case SymbolKind.Cotangent:
-                case SymbolKind.ArcSine:
-                case SymbolKind.ArcCosine:
-                case SymbolKind.ArcTangent:
-                case SymbolKind.ArcCosecant:
-                case SymbolKind.ArcSecant:
-                case SymbolKind.ArcCotangent:
+                case TexSymbolKind.Minimum:
+                case TexSymbolKind.Maximum:
+                case TexSymbolKind.GreatestCommonDenominator:
+                case TexSymbolKind.LowestCommonMultiple:
+                case TexSymbolKind.Exponent:
+                case TexSymbolKind.Log:
+                case TexSymbolKind.NaturalLog:
+                case TexSymbolKind.Argument:
+                case TexSymbolKind.Limit:
+                case TexSymbolKind.LimitInferior:
+                case TexSymbolKind.LimitSuperior:
+                case TexSymbolKind.Sine:
+                case TexSymbolKind.Cosine:
+                case TexSymbolKind.Tangent:
+                case TexSymbolKind.Cosecant:
+                case TexSymbolKind.Secant:
+                case TexSymbolKind.Cotangent:
+                case TexSymbolKind.ArcSine:
+                case TexSymbolKind.ArcCosine:
+                case TexSymbolKind.ArcTangent:
+                case TexSymbolKind.ArcCosecant:
+                case TexSymbolKind.ArcSecant:
+                case TexSymbolKind.ArcCotangent:
                     var node = new ParseNode(ParseNodeKind.PrefixOperator);
                     node.Children.Add(new ParseNode(tokenStream.Current));
                     tokenStream.ForceMoveNext();
@@ -388,12 +391,12 @@ namespace TexDotNet
         {
             switch (tokenStream.Current.Symbol)
             {
-                case SymbolKind.SquareBracketOpen:
+                case TexSymbolKind.SquareBracketOpen:
                     tokenStream.ForceMoveNext();
                     var node = ParseExpression(tokenStream, ref state);
-                    if (tokenStream.Current.Symbol != SymbolKind.SquareBracketClose)
+                    if (tokenStream.Current.Symbol != TexSymbolKind.SquareBracketClose)
                         throw new ParserException(tokenStream.Current, new[] {
-                            SymbolKind.SquareBracketClose });
+                            TexSymbolKind.SquareBracketClose });
                     tokenStream.ForceMoveNext();
                     node.IsArgument = true;
                     return node;
@@ -406,29 +409,29 @@ namespace TexDotNet
         {
             switch (tokenStream.Current.Symbol)
             {
-                case SymbolKind.Sum:
-                case SymbolKind.Product:
-                case SymbolKind.Coproduct:
-                case SymbolKind.Integral:
-                case SymbolKind.DoubleIntegral:
-                case SymbolKind.TripleIntegral:
-                case SymbolKind.QuadrupleIntegral:
-                case SymbolKind.NtupleIntegral:
-                case SymbolKind.ClosedIntegral:
-                case SymbolKind.ClosedDoubleIntegral:
-                case SymbolKind.ClosedTripleIntegral:
-                case SymbolKind.ClosedQuadrupleIntegral:
-                case SymbolKind.ClosedNtupleIntegral:
-                case SymbolKind.BigOPlus:
-                case SymbolKind.BigOTimes:
-                case SymbolKind.BigODot:
-                case SymbolKind.BigCup:
-                case SymbolKind.BigCap:
-                case SymbolKind.BigCupPlus:
-                case SymbolKind.BigSquareCup:
-                case SymbolKind.BigSquareCap:
-                case SymbolKind.BigVee:
-                case SymbolKind.BigWedge:
+                case TexSymbolKind.Sum:
+                case TexSymbolKind.Product:
+                case TexSymbolKind.Coproduct:
+                case TexSymbolKind.Integral:
+                case TexSymbolKind.DoubleIntegral:
+                case TexSymbolKind.TripleIntegral:
+                case TexSymbolKind.QuadrupleIntegral:
+                case TexSymbolKind.NtupleIntegral:
+                case TexSymbolKind.ClosedIntegral:
+                case TexSymbolKind.ClosedDoubleIntegral:
+                case TexSymbolKind.ClosedTripleIntegral:
+                case TexSymbolKind.ClosedQuadrupleIntegral:
+                case TexSymbolKind.ClosedNtupleIntegral:
+                case TexSymbolKind.BigOPlus:
+                case TexSymbolKind.BigOTimes:
+                case TexSymbolKind.BigODot:
+                case TexSymbolKind.BigCup:
+                case TexSymbolKind.BigCap:
+                case TexSymbolKind.BigCupPlus:
+                case TexSymbolKind.BigSquareCup:
+                case TexSymbolKind.BigSquareCap:
+                case TexSymbolKind.BigVee:
+                case TexSymbolKind.BigWedge:
                     var node = new ParseNode(ParseNodeKind.PrefixOperator);
                     node.Children.Add(new ParseNode(tokenStream.Current));
                     tokenStream.ForceMoveNext();
@@ -444,15 +447,15 @@ namespace TexDotNet
 
         private ParseNode ParseTextOptional(TokenStream tokenStream, ref ParserState state)
         {
-            if (tokenStream.Current.Symbol != SymbolKind.Text)
+            if (tokenStream.Current.Symbol != TexSymbolKind.Text)
                 return null;
             tokenStream.ForceMoveNext();
             switch (tokenStream.Current.Symbol)
             {
-                case SymbolKind.GroupOpen:
+                case TexSymbolKind.GroupOpen:
                     tokenStream.ForceMoveNext();
                     var sb = new StringBuilder();
-                    while (tokenStream.Current.Symbol != SymbolKind.GroupClose)
+                    while (tokenStream.Current.Symbol != TexSymbolKind.GroupClose)
                     {
                         sb.Append((char)tokenStream.Current.Value);
                         tokenStream.ForceMoveNext();
@@ -461,10 +464,11 @@ namespace TexDotNet
                         throw new ParserException(tokenStream.Current,
                             "A text value must contain at least one character.");
                     tokenStream.ForceMoveNext();
-                    return new ParseNode(Token.FromValue(SymbolKind.Text, sb.ToString(), tokenStream.Current.Position));
+                    return new ParseNode(TexToken.FromValue(TexSymbolKind.Text, sb.ToString(),
+                        tokenStream.Current.SourcePosition, null));
                 default:
                     throw new ParserException(tokenStream.Current, new[] {
-                        SymbolKind.GroupOpen});
+                        TexSymbolKind.GroupOpen});
             }
         }
 
