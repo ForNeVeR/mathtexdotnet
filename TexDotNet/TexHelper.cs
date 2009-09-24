@@ -67,7 +67,46 @@ namespace TexDotNet
                 throw new ParserException(TexToken.Null, "Unexpected end of token stream.");
         }
 
-        internal static bool IsFormattingSymbol(this TexSymbolKind symbol)
+        public static bool IsBracket(this TexSymbolKind symbol)
+        {
+            return IsOpenBracket(symbol) || IsCloseBracket(symbol);
+        }
+
+        public static bool IsOpenBracket(this TexSymbolKind symbol)
+        {
+            switch (symbol)
+            {
+                case TexSymbolKind.GroupOpen:
+                    return true;
+                case TexSymbolKind.RoundBracketOpen:
+                    return true;
+                case TexSymbolKind.SquareBracketOpen:
+                    return true;
+                case TexSymbolKind.ModulusBracket:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        public static bool IsCloseBracket(this TexSymbolKind symbol)
+        {
+            switch (symbol)
+            {
+                case TexSymbolKind.GroupClose:
+                    return true;
+                case TexSymbolKind.RoundBracketClose:
+                    return true;
+                case TexSymbolKind.SquareBracketClose:
+                    return true;
+                case TexSymbolKind.ModulusBracket:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        public static bool IsFormattingSymbol(this TexSymbolKind symbol)
         {
             switch (symbol)
             {

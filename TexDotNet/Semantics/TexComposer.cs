@@ -17,22 +17,98 @@ namespace TexDotNet
 
         public TexComposer()
         {
+            this.PadPlusAndMinusSigns = true;
+        }
+
+        public bool PadPlusAndMinusSigns
+        {
+            get;
+            set;
         }
 
         public TokenStream Write(TexExpressionNode tree)
         {
             using (var tokenStream = new ComposedTokenStream())
             {
-                WriteNode(tokenStream, tree);
+                WriteNode(tokenStream, tree, new ComposerState());
                 return tokenStream;
             }
         }
 
-        private void WriteNode(ComposedTokenStream tokenStream, TexExpressionNode node)
+        private void WriteNode(ComposedTokenStream tokenStream, TexExpressionNode node, ComposerState state)
         {
-            var hasChildren = node.Children.Count > 0;
-            if (hasChildren)
-                tokenStream.Write(TexToken.FromSymbol(TexSymbolKind.GroupOpen));
+            var openBracketSymbol = TexSymbolKind.Null;
+            var closeBracketSymbol = TexSymbolKind.Null;
+            switch (node.Symbol)
+            {
+                case TexSymbolKind.Plus:
+                case TexSymbolKind.Minus:
+                case TexSymbolKind.Dot:
+                case TexSymbolKind.Cross:
+                case TexSymbolKind.Star:
+                case TexSymbolKind.Divide:
+                case TexSymbolKind.Over:
+                    if (node.Parent != null && node.Symbol != node.Parent.Symbol)
+                    {
+                        switch (node.Parent.Symbol)
+                        {
+                            case TexSymbolKind.Dot:
+                            case TexSymbolKind.Cross:
+                            case TexSymbolKind.Star:
+                            case TexSymbolKind.Divide:
+                            case TexSymbolKind.Over:
+                                openBracketSymbol = TexSymbolKind.RoundBracketOpen;
+                                closeBracketSymbol = TexSymbolKind.RoundBracketClose;
+                                break;
+                        }
+                    }
+                    break;
+                // TODO: Very incomplete list of symbol kinds.
+                case TexSymbolKind.Integral:
+                case TexSymbolKind.Log:
+                case TexSymbolKind.Cosine:
+                    openBracketSymbol = TexSymbolKind.GroupOpen;
+                    closeBracketSymbol = TexSymbolKind.GroupClose;
+                    break;
+                case TexSymbolKind.Number:
+                case TexSymbolKind.Letter:
+                case TexSymbolKind.GreekLetter:
+                    break;
+                default:
+                    break;
+            }
+            if (openBracketSymbol == TexSymbolKind.Null)
+            {
+                if (node.Parent != null)
+                {
+                    switch (node.Parent.Symbol)
+                    {
+                        // TODO: Very incomplete list of symbol kinds.
+                        case TexSymbolKind.LowerToIndex:
+                        case TexSymbolKind.RaiseToIndex:
+                            if (node.Children.Count >= 2 && node.Parent.Children.IndexOf(node) == 1)
+                            {
+                                openBracketSymbol = TexSymbolKind.GroupOpen;
+                                closeBracketSymbol = TexSymbolKind.GroupClose;
+                            }
+                            break;
+                    }
+                }
+            }
+            if (state.IsParentNodeGroupOpen)
+            {
+                openBracketSymbol = TexSymbolKind.Null;
+                closeBracketSymbol = TexSymbolKind.Null;
+                state.IsParentNodeGroupOpen = false;
+            }
+            else if (!state.IsParentNodeGroupOpen && openBracketSymbol == TexSymbolKind.GroupOpen)
+            {
+                state.IsParentNodeGroupOpen = true;
+            }
+
+            if (openBracketSymbol != TexSymbolKind.Null)
+                tokenStream.Write(TexToken.FromSymbol(openBracketSymbol));
+
             switch (node.Symbol)
             {
                 case TexSymbolKind.Plus:
@@ -44,12 +120,12 @@ namespace TexDotNet
                 case TexSymbolKind.Over:
                 case TexSymbolKind.RaiseToIndex:
                 case TexSymbolKind.LowerToIndex:
-                    WriteInfixOperatorNode(tokenStream, node);
+                    WriteInfixOperatorNode(tokenStream, node, state);
                     break;
                 case TexSymbolKind.Fraction:
                 case TexSymbolKind.Binomial:
                 case TexSymbolKind.Root:
-                    WriteBracketedFunction(tokenStream, node);
+                    WriteBracketedFunction(tokenStream, node, state);
                     break;
                 case TexSymbolKind.Minimum:
                 case TexSymbolKind.Maximum:
@@ -74,6 +150,8 @@ namespace TexDotNet
                 case TexSymbolKind.ArcCosecant:
                 case TexSymbolKind.ArcSecant:
                 case TexSymbolKind.ArcCotangent:
+                    WritePrefixOperatorNode(tokenStream, node, state);
+                    break;
                 case TexSymbolKind.Sum:
                 case TexSymbolKind.Product:
                 case TexSymbolKind.Coproduct:
@@ -97,26 +175,28 @@ namespace TexDotNet
                 case TexSymbolKind.BigSquareCap:
                 case TexSymbolKind.BigVee:
                 case TexSymbolKind.BigWedge:
-                    WritePrefixOperatorNode(tokenStream, node);
+                    WritePrefixOperatorNode(tokenStream, node, state);
                     break;
                 case TexSymbolKind.Factorial:
-                    WritePostfixOperatorNode(tokenStream, node);
+                    WritePostfixOperatorNode(tokenStream, node, state);
                     break;
                 case TexSymbolKind.Number:
                 case TexSymbolKind.Letter:
                 case TexSymbolKind.GreekLetter:
                 case TexSymbolKind.Text:
-                    WriteValueNode(tokenStream, node);
+                    WriteValueNode(tokenStream, node, state);
                     break;
                 default:
                     throw new TexComposerException(node,
                         "Unrecognised node symbol.");
             }
-            if (hasChildren)
-                tokenStream.Write(TexToken.FromSymbol(TexSymbolKind.GroupClose));
+
+            if (closeBracketSymbol != TexSymbolKind.Null)
+                tokenStream.Write(TexToken.FromSymbol(closeBracketSymbol));
         }
 
-        private void WriteBracketedFunction(ComposedTokenStream tokenStream, TexExpressionNode node)
+        private void WriteBracketedFunction(ComposedTokenStream tokenStream, TexExpressionNode node,
+            ComposerState state)
         {
             if (node.Children.Count >= 1)
             {
@@ -124,13 +204,15 @@ namespace TexDotNet
                 foreach (var argNode in node.Arguments)
                 {
                     tokenStream.Write(TexToken.FromSymbol(TexSymbolKind.SquareBracketOpen));
-                    WriteNode(tokenStream, argNode);
+                    state.IsParentNodeGroupOpen = true;
+                    WriteNode(tokenStream, argNode, state);
                     tokenStream.Write(TexToken.FromSymbol(TexSymbolKind.SquareBracketClose));
                 }
                 foreach (var childNode in node.Children)
                 {
                     tokenStream.Write(TexToken.FromSymbol(TexSymbolKind.GroupOpen));
-                    WriteNode(tokenStream, childNode);
+                    state.IsParentNodeGroupOpen = true;
+                    WriteNode(tokenStream, childNode, state);
                     tokenStream.Write(TexToken.FromSymbol(TexSymbolKind.GroupClose));
                 }
             }
@@ -141,18 +223,43 @@ namespace TexDotNet
             }
         }
 
-        private void WriteInfixOperatorNode(ComposedTokenStream tokenStream, TexExpressionNode node)
+        private void WriteInfixOperatorNode(ComposedTokenStream tokenStream, TexExpressionNode node,
+            ComposerState state)
         {
             if (node.Children.Count == 1)
             {
                 tokenStream.Write(TexToken.FromSymbol(node.Symbol));
-                WriteNode(tokenStream, node.Children[0]);
+                WriteNode(tokenStream, node.Children[0], state);
             }
             else if (node.Children.Count == 2)
             {
-                WriteNode(tokenStream, node.Children[0]);
-                tokenStream.Write(TexToken.FromSymbol(node.Symbol));
-                WriteNode(tokenStream, node.Children[1]);
+                WriteNode(tokenStream, node.Children[0], state);
+
+                var padSymbol = this.PadPlusAndMinusSigns && (node.Symbol == TexSymbolKind.Plus ||
+                    node.Symbol == TexSymbolKind.Minus);
+                if (padSymbol)
+                    tokenStream.Write(TexToken.FromSymbol(TexSymbolKind.Space));
+                if (node.Symbol == TexSymbolKind.Dot)
+                {
+                    // If terms can be multipled implicitly, do not write operator token.
+                    switch (node.Children[1].Symbol)
+                    {
+                        case TexSymbolKind.Number:
+                        case TexSymbolKind.Text:
+                            tokenStream.Write(TexToken.FromSymbol(node.Symbol));
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                else
+                {
+                    tokenStream.Write(TexToken.FromSymbol(node.Symbol));
+                }
+                if (padSymbol)
+                    tokenStream.Write(TexToken.FromSymbol(TexSymbolKind.Space));
+
+                WriteNode(tokenStream, node.Children[1], state);
             }
             else
             {
@@ -161,7 +268,8 @@ namespace TexDotNet
             }
         }
 
-        private void WritePrefixOperatorNode(ComposedTokenStream tokenStream, TexExpressionNode node)
+        private void WritePrefixOperatorNode(ComposedTokenStream tokenStream, TexExpressionNode node,
+            ComposerState state)
         {
             if (node.Children.Count >= 1)
             {
@@ -172,10 +280,11 @@ namespace TexDotNet
                         throw new TexComposerException(argNode, string.Format(
                             errMsgUnexpectedNumberOfChildren, argNode.Symbol, argNode.Children.Count));
                     tokenStream.Write(TexToken.FromSymbol(argNode.Symbol));
-                    WriteNode(tokenStream, argNode.Children[0]);
+                    WriteNode(tokenStream, argNode.Children[0], state);
                 }
+                tokenStream.Write(TexToken.FromSymbol(TexSymbolKind.Space));
                 foreach (var childNode in node.Children)
-                    WriteNode(tokenStream, childNode);
+                    WriteNode(tokenStream, childNode, state);
             }
             else
             {
@@ -184,12 +293,13 @@ namespace TexDotNet
             }
         }
 
-        private void WritePostfixOperatorNode(ComposedTokenStream tokenStream, TexExpressionNode node)
+        private void WritePostfixOperatorNode(ComposedTokenStream tokenStream, TexExpressionNode node,
+            ComposerState state)
         {
             if (node.Children.Count >= 1)
             {
                 foreach (var childNode in node.Children)
-                    WriteNode(tokenStream, childNode);
+                    WriteNode(tokenStream, childNode, state);
                 tokenStream.Write(TexToken.FromSymbol(node.Symbol));
             }
             else
@@ -199,7 +309,8 @@ namespace TexDotNet
             }
         }
 
-        private void WriteValueNode(ComposedTokenStream tokenStream, TexExpressionNode node)
+        private void WriteValueNode(ComposedTokenStream tokenStream, TexExpressionNode node,
+            ComposerState state)
         {
             tokenStream.Write(TexToken.FromValue(node.Symbol, node.Value));
         }
@@ -213,6 +324,11 @@ namespace TexDotNet
             {
                 this.tokenList = new LinkedList<TexToken>();
                 this.curToken = null;
+            }
+
+            internal LinkedList<TexToken> TokenList
+            {
+                get { return this.tokenList; }
             }
 
             public TexToken Current
@@ -250,6 +366,11 @@ namespace TexDotNet
             {
                 this.curToken = this.tokenList.First;
             }
+        }
+
+        private struct ComposerState
+        {
+            public bool IsParentNodeGroupOpen;
         }
     }
 }

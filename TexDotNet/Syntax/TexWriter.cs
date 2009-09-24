@@ -30,6 +30,7 @@ namespace TexDotNet
 
         public void Write(TokenStream tokenStream)
         {
+            // True to insert space before the next token, if it is required to make syntax correct.
             while (tokenStream.MoveNext())
             {
                 var chr = GetShortSymbol(tokenStream.Current);

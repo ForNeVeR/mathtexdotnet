@@ -6,7 +6,6 @@ using System.Text;
 
 namespace TexDotNet
 {
-    // TODO: Create associated TexExpressionTreeBuilderException class?
     public static class TexExpressionTreeBuilder
     {
         private const string errMsgUnexpectedNumberOfChildren =
@@ -25,7 +24,7 @@ namespace TexDotNet
                 case ParseNodeKind.Token:
                     return new TexExpressionNode(parseTree.Token.Symbol, parseTree.Token.Value);
                 default:
-                    throw new InvalidOperationException(string.Format(
+                    throw new TexExpressionTreeBuilderException(parseTree, string.Format(
                         "Invalid parse node kind: {0}.", parseTree.Symbol));
             }
         }
@@ -45,7 +44,7 @@ namespace TexDotNet
             }
             else
             {
-                throw new InvalidOperationException(string.Format(
+                throw new TexExpressionTreeBuilderException(parseNode, string.Format(
                     errMsgUnexpectedNumberOfChildren, parseNode.Symbol, parseNode.Children.Count));
             }
         }
@@ -88,7 +87,7 @@ namespace TexDotNet
             }
             else
             {
-                throw new InvalidOperationException(string.Format(
+                throw new TexExpressionTreeBuilderException(parseNode, string.Format(
                     errMsgUnexpectedNumberOfChildren, parseNode.Symbol, parseNode.Children.Count));
             }
         }
@@ -122,7 +121,7 @@ namespace TexDotNet
             }
             else
             {
-                throw new InvalidOperationException(string.Format(
+                throw new TexExpressionTreeBuilderException(parseNode, string.Format(
                     errMsgUnexpectedNumberOfChildren, parseNode.Symbol, parseNode.Children.Count));
             }
         }
@@ -151,7 +150,7 @@ namespace TexDotNet
             }
             else
             {
-                throw new InvalidOperationException(string.Format(
+                throw new TexExpressionTreeBuilderException(parseNode, string.Format(
                     errMsgUnexpectedNumberOfChildren, parseNode.Symbol, parseNode.Children.Count));
             }
         }
@@ -175,7 +174,7 @@ namespace TexDotNet
             }
             else
             {
-                throw new InvalidOperationException(string.Format(
+                throw new TexExpressionTreeBuilderException(parseNode, string.Format(
                     errMsgUnexpectedNumberOfChildren, parseNode.Symbol, parseNode.Children.Count));
             }
 

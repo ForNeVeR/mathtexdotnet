@@ -169,7 +169,9 @@ namespace TexDotNet
         #endregion
 
         #region Formatting
+        // Only used by writer
         Space,
+        
         Separator,
         Left,
         Right,

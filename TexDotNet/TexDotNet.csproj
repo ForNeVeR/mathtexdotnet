@@ -46,6 +46,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ITexErrorSourceInfo.cs" />
+    <Compile Include="TexExpressionTreeBuilderException.cs" />
     <Compile Include="TexErrorSourceInfoException.cs" />
     <Compile Include="Semantics\TexComposerException.cs" />
     <Compile Include="Semantics\TexComposer.cs" />

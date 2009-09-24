@@ -10,10 +10,10 @@ namespace TexDotNet.CommandLine
         private static void Main(string[] args)
         {
 #if DEBUG
-            Console.WindowHeight = 40;
+            Console.WindowHeight = 50;
 #endif
 
-            const string testInput = @"xyz-{\int x^2+2y}+\frac{1}{3}+2^{{\log_7 -6.12}+\alpha}*8-\sqrt[4!]{\cos 3}/27+\text{foobar}-13/([4-2]*5)";
+            const string testInput = @"xyz-{\int x^2+2y}+\frac{1}{3}+2^{{\log_7 -6.12}+\alpha}*8-\sqrt[4!]{\cos 3}/27+\text{foobar}-13/([4-2.2]*5)";
             
             var treeRenderer = new TreeTextRenderer(Console.Out);
 
