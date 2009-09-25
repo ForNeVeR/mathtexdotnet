@@ -43,6 +43,8 @@ namespace TexDotNet
             {
                 case TexSymbolKind.Plus:
                 case TexSymbolKind.Minus:
+                case TexSymbolKind.PlusMinus:
+                case TexSymbolKind.MinusPlus:
                 case TexSymbolKind.Dot:
                 case TexSymbolKind.Cross:
                 case TexSymbolKind.Star:
@@ -52,6 +54,10 @@ namespace TexDotNet
                     {
                         switch (node.Parent.Symbol)
                         {
+                            case TexSymbolKind.Plus:
+                            case TexSymbolKind.Minus:
+                            case TexSymbolKind.PlusMinus:
+                            case TexSymbolKind.MinusPlus:
                             case TexSymbolKind.Dot:
                             case TexSymbolKind.Cross:
                             case TexSymbolKind.Star:
@@ -63,10 +69,52 @@ namespace TexDotNet
                         }
                     }
                     break;
-                // TODO: Very incomplete list of symbol kinds.
-                case TexSymbolKind.Integral:
+                case TexSymbolKind.Minimum:
+                case TexSymbolKind.Maximum:
+                case TexSymbolKind.GreatestCommonDenominator:
+                case TexSymbolKind.LowestCommonMultiple:
+                case TexSymbolKind.Exponent:
                 case TexSymbolKind.Log:
+                case TexSymbolKind.NaturalLog:
+                case TexSymbolKind.Argument:
+                case TexSymbolKind.Limit:
+                case TexSymbolKind.LimitInferior:
+                case TexSymbolKind.LimitSuperior:
+                case TexSymbolKind.Sine:
                 case TexSymbolKind.Cosine:
+                case TexSymbolKind.Tangent:
+                case TexSymbolKind.Cosecant:
+                case TexSymbolKind.Secant:
+                case TexSymbolKind.Cotangent:
+                case TexSymbolKind.ArcSine:
+                case TexSymbolKind.ArcCosine:
+                case TexSymbolKind.ArcTangent:
+                case TexSymbolKind.ArcCosecant:
+                case TexSymbolKind.ArcSecant:
+                case TexSymbolKind.ArcCotangent:
+                case TexSymbolKind.Sum:
+                case TexSymbolKind.Product:
+                case TexSymbolKind.Coproduct:
+                case TexSymbolKind.Integral:
+                case TexSymbolKind.DoubleIntegral:
+                case TexSymbolKind.TripleIntegral:
+                case TexSymbolKind.QuadrupleIntegral:
+                case TexSymbolKind.NtupleIntegral:
+                case TexSymbolKind.ClosedIntegral:
+                case TexSymbolKind.ClosedDoubleIntegral:
+                case TexSymbolKind.ClosedTripleIntegral:
+                case TexSymbolKind.ClosedQuadrupleIntegral:
+                case TexSymbolKind.ClosedNtupleIntegral:
+                case TexSymbolKind.BigOPlus:
+                case TexSymbolKind.BigOTimes:
+                case TexSymbolKind.BigODot:
+                case TexSymbolKind.BigCup:
+                case TexSymbolKind.BigCap:
+                case TexSymbolKind.BigCupPlus:
+                case TexSymbolKind.BigSquareCup:
+                case TexSymbolKind.BigSquareCap:
+                case TexSymbolKind.BigVee:
+                case TexSymbolKind.BigWedge:
                     openBracketSymbol = TexSymbolKind.GroupOpen;
                     closeBracketSymbol = TexSymbolKind.GroupClose;
                     break;
@@ -83,10 +131,16 @@ namespace TexDotNet
                 {
                     switch (node.Parent.Symbol)
                     {
-                        // TODO: Very incomplete list of symbol kinds.
                         case TexSymbolKind.LowerToIndex:
                         case TexSymbolKind.RaiseToIndex:
-                            if (node.Children.Count >= 2 && node.Parent.Children.IndexOf(node) == 1)
+                            if (node.Parent.Children.Count == 2 && node.Parent.Children.IndexOf(node) == 1)
+                            {
+                                openBracketSymbol = TexSymbolKind.GroupOpen;
+                                closeBracketSymbol = TexSymbolKind.GroupClose;
+                            }
+                            break;
+                        case TexSymbolKind.Factorial:
+                            if (node.Parent.Children.Count == 1)
                             {
                                 openBracketSymbol = TexSymbolKind.GroupOpen;
                                 closeBracketSymbol = TexSymbolKind.GroupClose;
@@ -95,7 +149,7 @@ namespace TexDotNet
                     }
                 }
             }
-            if (state.IsParentNodeGroupOpen)
+            if (state.IsParentNodeGroupOpen && node.Parent.Children.Count == 1)
             {
                 openBracketSymbol = TexSymbolKind.Null;
                 closeBracketSymbol = TexSymbolKind.Null;
@@ -235,10 +289,8 @@ namespace TexDotNet
             {
                 WriteNode(tokenStream, node.Children[0], state);
 
-                var padSymbol = this.PadPlusAndMinusSigns && (node.Symbol == TexSymbolKind.Plus ||
-                    node.Symbol == TexSymbolKind.Minus);
-                if (padSymbol)
-                    tokenStream.Write(TexToken.FromSymbol(TexSymbolKind.Space));
+                var padSymbol = ((this.PadPlusAndMinusSigns && (node.Symbol == TexSymbolKind.Plus ||
+                    node.Symbol == TexSymbolKind.Minus))) || node.Symbol.IsLongOperator();
                 if (node.Symbol == TexSymbolKind.Dot)
                 {
                     // If terms can be multipled implicitly, do not write operator token.
@@ -254,6 +306,8 @@ namespace TexDotNet
                 }
                 else
                 {
+                    if (padSymbol)
+                        tokenStream.Write(TexToken.FromSymbol(TexSymbolKind.Space));
                     tokenStream.Write(TexToken.FromSymbol(node.Symbol));
                 }
                 if (padSymbol)

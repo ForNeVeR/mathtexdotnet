@@ -1,7 +1,7 @@
 expr = term , [ ( "+" | "-" ) , epxr ] ;
 term = first implicit term , [ ( "*" | "/" ) , term ] ;
 first implicit term = signed value , [ implicit term ] ;
-implicit term = value , [ implicit term ] ;
+implicit term = indexed value , [ implicit term ] ;
 signed value = [ "+" | "-" ] , factorial value ;
 factorial value = indexed value , [ "!" ] ;
 indexed value = value , indices pair ;

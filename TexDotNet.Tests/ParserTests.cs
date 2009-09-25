@@ -14,6 +14,19 @@ namespace TexDotNet.Tests
     [TestClass]
     public class ParserTests
     {
+        private static TestCaseSet testCaseSet;
+
+        [ClassInitialize()]
+        public static void ClassInitialize(TestContext testContext)
+        {
+            testCaseSet = TestCaseSet.FromStream(SystemHelper.GetResourceStream("Input.TestCases1.txt"));
+        }
+
+        [ClassCleanup()]
+        public static void ClassCleanup()
+        {
+        }
+
         public ParserTests()
         {
         }
@@ -22,16 +35,6 @@ namespace TexDotNet.Tests
         {
             get;
             set;
-        }
-
-        [ClassInitialize()]
-        public static void ClassInitialize(TestContext testContext)
-        {
-        }
-
-        [ClassCleanup()]
-        public static void ClassCleanup()
-        {
         }
 
         [TestInitialize()]
@@ -53,9 +56,51 @@ namespace TexDotNet.Tests
         }
 
         [TestMethod()]
-        public void QuickParserTest()
+        public void TestParserBasic()
         {
-            TexHelper.CreateParseTree("");
+            TestGroup("Basic");
+        }
+
+        [TestMethod()]
+        public void TestParserText()
+        {
+            TestGroup("Text");
+        }
+
+        [TestMethod()]
+        public void TestParserGroups()
+        {
+            TestGroup("Groups");
+        }
+
+        [TestMethod()]
+        public void TestParserBrackets()
+        {
+            TestGroup("Brackets");
+        }
+
+        private void TestGroup(string groupName)
+        {
+            var group = testCaseSet[groupName];
+            foreach (var testCase in group)
+            {
+                try
+                {
+                    var text = testCase.ExpressionText;
+                    var exprTree = TexHelper.CreateExpressionTree(text);
+                    var recreatedText = TexHelper.CreateText(exprTree);
+                    var recreatedExprTree = TexHelper.CreateExpressionTree(recreatedText);
+                    Assert.AreEqual(exprTree, recreatedExprTree);
+                }
+                catch (LexerException exLexer)
+                {
+                    Assert.Fail(string.Format("Lexer error. {0}", exLexer.Message));
+                }
+                catch (ParserException exParser)
+                {
+                    Assert.Fail(string.Format("Parser error. {0}", exParser.Message));
+                }
+            }
         }
     }
 }

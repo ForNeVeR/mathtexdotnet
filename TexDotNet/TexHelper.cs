@@ -40,6 +40,7 @@ namespace TexDotNet
         {
             return CreateParseTree(CreateTokenStream(expression));
         }
+
         public static ParseNode CreateParseTree(TokenStream tokenStream)
         {
             var parser = new TexParser();
@@ -65,6 +66,17 @@ namespace TexDotNet
         {
             if (!tokenStream.MoveNext())
                 throw new ParserException(TexToken.Null, "Unexpected end of token stream.");
+        }
+
+        public static bool IsLongOperator(this TexSymbolKind symbol)
+        {
+            switch (symbol)
+            {
+                case TexSymbolKind.Dot:
+                    return true;
+                default:
+                    return false;
+            }
         }
 
         public static bool IsBracket(this TexSymbolKind symbol)

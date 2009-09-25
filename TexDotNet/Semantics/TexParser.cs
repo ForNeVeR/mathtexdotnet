@@ -42,6 +42,8 @@ namespace TexDotNet
                     return node;
                 case TexSymbolKind.Plus:
                 case TexSymbolKind.Minus:
+                case TexSymbolKind.PlusMinus:
+                case TexSymbolKind.MinusPlus:
                     node.Children.Add(new ParseNode(tokenStream.Current));
                     tokenStream.ForceMoveNext();
                     break;
@@ -74,8 +76,8 @@ namespace TexDotNet
         private ParseNode ParseFirstImplicitTermOptional(TokenStream tokenStream, ref ParserState state)
         {
             var node = new ParseNode(ParseNodeKind.PrefixOperator);
-            node.Children.Add(new ParseNode(TexToken.FromSymbol(TexSymbolKind.Dot, tokenStream.Current.SourcePosition,
-                null)));
+            node.Children.Add(new ParseNode(TexToken.FromSymbol(TexSymbolKind.Dot,
+                tokenStream.Current.SourcePosition, null)));
             node.Children.Add(ParseSignedValue(tokenStream, ref state));
             var implicitTermNode = ParseImplicitTermOptional(tokenStream, ref state);
             if (implicitTermNode != null)
@@ -85,7 +87,7 @@ namespace TexDotNet
 
         private ParseNode ParseImplicitTermOptional(TokenStream tokenStream, ref ParserState state)
         {
-            var valueNode = ParseValueOptional(tokenStream, ref state);
+            var valueNode = ParseIndexedValueOptional(tokenStream, ref state);
             if (valueNode == null)
                 return null;
             var node = new ParseNode(ParseNodeKind.PrefixOperator);
@@ -114,6 +116,8 @@ namespace TexDotNet
             {
                 case TexSymbolKind.Plus:
                 case TexSymbolKind.Minus:
+                case TexSymbolKind.PlusMinus:
+                case TexSymbolKind.MinusPlus:
                     node.Children.Add(new ParseNode(tokenStream.Current));
                     tokenStream.ForceMoveNext();
                     break;
@@ -138,8 +142,20 @@ namespace TexDotNet
 
         private ParseNode ParseIndexedValue(TokenStream tokenStream, ref ParserState state)
         {
+            var node = ParseIndexedValueOptional(tokenStream, ref state);
+            if (node == null)
+                throw new ParserException(tokenStream.Current,
+                    "Expected a value.");
+            return node;
+        }
+
+        private ParseNode ParseIndexedValueOptional(TokenStream tokenStream, ref ParserState state)
+        {
+            var valueNode = ParseValueOptional(tokenStream, ref state);
+            if (valueNode == null)
+                return null;
             var node = new ParseNode(ParseNodeKind.PostfixOperator);
-            node.Children.Add(ParseValue(tokenStream, ref state));
+            node.Children.Add(valueNode);
             node.Children.Add(ParseIndicesPairOptional(tokenStream, ref state));
             return node;
         }

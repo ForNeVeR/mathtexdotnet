@@ -10,12 +10,16 @@ namespace TexDotNet
 {
     public static class CollectionsExtensions
     {
-        public static T[] ToArray<T>(this IEnumerator<T> source)
+        public static void AddRange<T>(this IList<T> source, IEnumerable<T> value)
         {
-            var list = new List<T>();
+            foreach (var item in value)
+                source.Add(item);
+        }
+
+        public static IEnumerable<T> AsEnumerable<T>(this IEnumerator<T> source)
+        {
             while (source.MoveNext())
-                list.Add(source.Current);
-            return list.ToArray();
+                yield return source.Current;
         }
     }
 }

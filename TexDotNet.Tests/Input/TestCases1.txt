@@ -1,0 +1,44 @@
+# Basic
+123
+-321
+1.23
+12 + 34
+34 - 12
+12 * 34
+34 / 12
+45 + -11/45
+2^13
+2_31
+x
+x + 3/4
+xy - 3zx
+4^x + -11
+x - 2y/3 + z^2
+yz + 5/2x - z_10
+82 \cdot 45
+71/(21 \cdot 31 - 2)
+
+# Text
+\text{foobar}
+1 - 3*\text{foo}
+\text{foo}^10*{\text{bar}-56}
+
+# Groups
+92*{45-34}/2
+y^{23-45}-x^2
+3x^{-y/2}+{y_2}z
+
+# Brackets
+34/(67+89)
+87 + 4[13-15]
+y - 2(5/x)
+2^{(7+3)/5}
+{2y + z/5}/(2[x/2-1])
+1 + \{67 \cdot (2^6-5)\}/7
+5 \cdot 4y + 7/(4+2x)
+
+# Bracketed Functions
+TODO
+
+# Functions
+TODO

@@ -11,7 +11,7 @@ namespace TexDotNet
     {
         public static string ToTokenString(this TokenStream stream)
         {
-            return ToTokenString(stream.ToArray());
+            return ToTokenString(stream.AsEnumerable().ToArray());
         }
 
         public static string ToTokenString(this IEnumerable<TexToken> stream)

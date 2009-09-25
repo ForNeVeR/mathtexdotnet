@@ -65,5 +65,32 @@ namespace TexDotNet
             return this.Symbol + (this.Value == null ? string.Empty :
                 "(" + this.Value.ToString() + ")");
         }
+
+        public override bool Equals(object obj)
+        {
+            return Equals((TexExpressionNode)obj);
+        }
+
+        public bool Equals(TexExpressionNode tree)
+        {
+            if (!this.Symbol.Equals(tree.Symbol))
+                return false;
+            if (this.Value != null && !this.Value.Equals(tree.Value))
+                return false;
+            if (!this.Children.Count.Equals(tree.Children.Count))
+                return false;
+            for (int i = 0; i < tree.Children.Count; i++)
+            {
+                if (!this.Children[i].Equals(tree.Children[i]))
+                    return false;
+            }
+            return true;
+        }
+
+        public override int GetHashCode()
+        {
+            // TODO
+            return base.GetHashCode();
+        }
     }
 }

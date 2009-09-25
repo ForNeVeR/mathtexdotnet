@@ -11,7 +11,10 @@ namespace TexDotNet.Tests
     {
         public static Stream GetResourceStream(string name)
         {
-            return Assembly.GetExecutingAssembly().GetManifestResourceStream(typeof(SystemHelper), name);
+            var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(typeof(SystemHelper), name);
+            if (stream == null)
+                throw new FileNotFoundException("Cannot find resource stream.", name);
+            return stream;
         }
     }
 }

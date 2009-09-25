@@ -40,14 +40,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CollectionsExtensions.cs" />
+    <Compile Include="CollectionsHelper.cs" />
+    <Compile Include="TestCaseGroup.cs" />
     <Compile Include="SystemHelper.cs" />
-    <Compile Include="TestExamplesReader.cs" />
+    <Compile Include="TestCaseReader.cs" />
     <Compile Include="ParserTests.cs" />
-    <Compile Include="DebugExtensions.cs" />
+    <Compile Include="DebugHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="LexerTests.cs" />
-    <Compile Include="TestExample.cs" />
+    <Compile Include="TestCase.cs" />
+    <Compile Include="TestCaseSet.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TexDotNet\TexDotNet.csproj">
@@ -56,8 +57,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Examples.txt">
-    </EmbeddedResource>
+    <EmbeddedResource Include="Input\TestCases1.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
