@@ -11,6 +11,9 @@ namespace TexDotNet
 
     public class TexLexer : ILexer
     {
+        private const string errorMessageIllegalChar = "Illegal character '{0}'.";
+        private const string errorMessageIllegalSymbol = "Illegal symbol '{0}'.";
+
         public TexLexer()
         {
             this.IgnoreUnknownSymbols = true;
@@ -148,7 +151,7 @@ namespace TexDotNet
                         return TexSymbolKind.Letter;
                     }
                     throw new LexerException(reader.Position, chr.ToString(), string.Format(
-                        "Illegal character '{0}'.", chr));
+                        errorMessageIllegalChar, chr));
             }
         }
 
@@ -495,7 +498,7 @@ namespace TexDotNet
                     if (this.IgnoreUnknownSymbols)
                         return TexSymbolKind.Unknown;
                     throw new LexerException(reader.Position, symbol, string.Format(
-                        "Illegal symbol '{0}'.", symbol));
+                        errorMessageIllegalSymbol, symbol));
             }
         }
     }

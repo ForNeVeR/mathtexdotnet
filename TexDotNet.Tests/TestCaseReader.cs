@@ -79,9 +79,12 @@ namespace TexDotNet.Tests
 
             var group = new TestCaseGroup(groupName);
             TestCase testCase;
+            bool isComment;
             while (true)
             {
-                testCase = ReadTestCase();
+                testCase = ReadTestCase(out isComment);
+                if (isComment)
+                    continue;
                 if (testCase == null)
                     break;
                 group.Add(testCase);
@@ -89,11 +92,17 @@ namespace TexDotNet.Tests
             return group;
         }
 
-        public TestCase ReadTestCase()
+        public TestCase ReadTestCase(out bool isComment)
         {
             var line = streamReader.ReadLine();
+            isComment = false;
             if (string.IsNullOrEmpty(line))
                 return null;
+            if (line.StartsWith("//"))
+            {
+                isComment = true;
+                return null;
+            }
             return new TestCase(line);
         }
     }

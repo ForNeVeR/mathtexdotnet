@@ -79,6 +79,18 @@ namespace TexDotNet.Tests
             TestGroup("Brackets");
         }
 
+        [TestMethod()]
+        public void TestParserBracketedFunctions()
+        {
+            TestGroup("Bracketed Functions");
+        }
+
+        [TestMethod()]
+        public void TestParserFunctions()
+        {
+            TestGroup("Functions");
+        }
+
         private void TestGroup(string groupName)
         {
             var group = testCaseSet[groupName];

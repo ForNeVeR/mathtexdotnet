@@ -9,6 +9,11 @@ namespace TexDotNet
 
     public class TexParser : IParser
     {
+        private const string errorMessageExpectedEndOfStream = "Expected end of token stream.";
+        private const string errorMessageExpectedValue = "Expected one of the following: number, letter, open bracket, fraction, binomial, root, function.";
+        private const string errorMessageExpectedValueOrGroup = "Expected a single value or group expression.";
+        private const string errorMessageTextValueEmpty = "A text value must contain at least one character.";
+
         public TexParser()
         {
         }
@@ -20,7 +25,7 @@ namespace TexDotNet
             var node = ParseExpression(tokenStream, ref state);
             if (tokenStream.Current.Symbol != TexSymbolKind.EndOfStream)
                 throw new ParserException(tokenStream.Current,
-                    "Expected end of token stream.");
+                    errorMessageExpectedEndOfStream);
             return node;
         }
 
@@ -87,7 +92,7 @@ namespace TexDotNet
 
         private ParseNode ParseImplicitTermOptional(TokenStream tokenStream, ref ParserState state)
         {
-            var valueNode = ParseIndexedValueOptional(tokenStream, ref state);
+            var valueNode = ParseFactorialValueOptional(tokenStream, ref state);
             if (valueNode == null)
                 return null;
             var node = new ParseNode(ParseNodeKind.PrefixOperator);
@@ -105,7 +110,7 @@ namespace TexDotNet
             var node = ParseSignedValueOptional(tokenStream, ref state);
             if (node == null)
                 throw new ParserException(tokenStream.Current,
-                    "Expected a value.");
+                    errorMessageExpectedValue);
             return node;
         }
 
@@ -128,8 +133,20 @@ namespace TexDotNet
 
         private ParseNode ParseFactorialValue(TokenStream tokenStream, ref ParserState state)
         {
+            var node = ParseFactorialValueOptional(tokenStream, ref state);
+            if (node == null)
+                throw new ParserException(tokenStream.Current,
+                    errorMessageExpectedValue);
+            return node;
+        }
+
+        private ParseNode ParseFactorialValueOptional(TokenStream tokenStream, ref ParserState state)
+        {
+            var valueNode = ParseIndexedValueOptional(tokenStream, ref state);
+            if (valueNode == null)
+                return null;
             var node = new ParseNode(ParseNodeKind.PostfixOperator);
-            node.Children.Add(ParseIndexedValue(tokenStream, ref state));
+            node.Children.Add(valueNode);
             switch (tokenStream.Current.Symbol)
             {
                 case TexSymbolKind.Factorial:
@@ -145,7 +162,7 @@ namespace TexDotNet
             var node = ParseIndexedValueOptional(tokenStream, ref state);
             if (node == null)
                 throw new ParserException(tokenStream.Current,
-                    "Expected a value.");
+                    errorMessageExpectedValue);
             return node;
         }
 
@@ -165,7 +182,7 @@ namespace TexDotNet
             var node = ParseValueOptional(tokenStream, ref state);
             if (node == null)
                 throw new ParserException(tokenStream.Current,
-                    "Expected one of the following: number, letter, open bracket, fraction, binomial, root, function.");
+                    errorMessageExpectedValue);
             return node;
         }
 
@@ -248,7 +265,7 @@ namespace TexDotNet
                 node = ParseGroupOptional(tokenStream, ref state);
             if (node == null)
                 throw new ParserException(tokenStream.Current,
-                    "Expected a single value or group expression.");
+                    errorMessageExpectedValueOrGroup);
             return node;
         }
 
@@ -478,7 +495,7 @@ namespace TexDotNet
                     }
                     if (sb.Length == 0)
                         throw new ParserException(tokenStream.Current,
-                            "A text value must contain at least one character.");
+                            errorMessageTextValueEmpty);
                     tokenStream.ForceMoveNext();
                     return new ParseNode(TexToken.FromValue(TexSymbolKind.Text, sb.ToString(),
                         tokenStream.Current.SourcePosition, null));

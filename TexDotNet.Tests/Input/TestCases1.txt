@@ -9,12 +9,15 @@
 45 + -11/45
 2^13
 2_31
+3!
+2*6!-56
 x
 x + 3/4
 xy - 3zx
 4^x + -11
 x - 2y/3 + z^2
 yz + 5/2x - z_10
+2xy - 5y!*23
 82 \cdot 45
 71/(21 \cdot 31 - 2)
 
@@ -38,7 +41,13 @@ y - 2(5/x)
 5 \cdot 4y + 7/(4+2x)
 
 # Bracketed Functions
-TODO
+\frac{1}{7}
+\binom{2}{10}
+\sqrt{25}
+\sqrt[3]{64}
+\frac{2-5^6/x}{2*(10 - 5/3)}
+\binom{2^{6-[7 \cdot 2]}}{y/-89}
+\sqrt[(2*7)!/y^3]{x_4*2z-29}
 
 # Functions
-TODO
+// TODO
