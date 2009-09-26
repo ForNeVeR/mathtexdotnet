@@ -50,6 +50,7 @@ namespace TexDotNet
                 case TexSymbolKind.Star:
                 case TexSymbolKind.Divide:
                 case TexSymbolKind.Over:
+                case TexSymbolKind.InlineModulo:
                     if (node.Parent != null && node.Symbol != node.Parent.Symbol)
                     {
                         switch (node.Parent.Symbol)
@@ -63,6 +64,7 @@ namespace TexDotNet
                             case TexSymbolKind.Star:
                             case TexSymbolKind.Divide:
                             case TexSymbolKind.Over:
+                            case TexSymbolKind.InlineModulo:
                                 openBracketSymbol = TexSymbolKind.RoundBracketOpen;
                                 closeBracketSymbol = TexSymbolKind.RoundBracketClose;
                                 break;
@@ -133,13 +135,17 @@ namespace TexDotNet
                     {
                         case TexSymbolKind.LowerToIndex:
                         case TexSymbolKind.RaiseToIndex:
-                            if (node.Parent.Children.Count == 2 && node.Parent.Children.IndexOf(node) == 1)
+                            // Surround expression with group if node is second operand, or node has more than one
+                            // child.
+                            if ((node.Parent.Children.Count == 2 && node.Parent.Children.IndexOf(node) == 1) ||
+                                node.Children.Count > 1)
                             {
                                 openBracketSymbol = TexSymbolKind.GroupOpen;
                                 closeBracketSymbol = TexSymbolKind.GroupClose;
                             }
                             break;
                         case TexSymbolKind.Factorial:
+                        case TexSymbolKind.IdentityModulo:
                             if (node.Parent.Children.Count == 1)
                             {
                                 openBracketSymbol = TexSymbolKind.GroupOpen;
@@ -149,12 +155,12 @@ namespace TexDotNet
                     }
                 }
             }
-            if (state.IsParentNodeGroupOpen && node.Parent.Children.Count == 1)
-            {
-                openBracketSymbol = TexSymbolKind.Null;
-                closeBracketSymbol = TexSymbolKind.Null;
-                state.IsParentNodeGroupOpen = false;
-            }
+            //if (state.IsParentNodeGroupOpen && node.Parent.Children.Count == 1)
+            //{
+            //    openBracketSymbol = TexSymbolKind.Null;
+            //    closeBracketSymbol = TexSymbolKind.Null;
+            //    state.IsParentNodeGroupOpen = false;
+            //}
             else if (!state.IsParentNodeGroupOpen && openBracketSymbol == TexSymbolKind.GroupOpen)
             {
                 state.IsParentNodeGroupOpen = true;
@@ -174,6 +180,7 @@ namespace TexDotNet
                 case TexSymbolKind.Over:
                 case TexSymbolKind.RaiseToIndex:
                 case TexSymbolKind.LowerToIndex:
+                case TexSymbolKind.InlineModulo:
                     WriteInfixOperatorNode(tokenStream, node, state);
                     break;
                 case TexSymbolKind.Fraction:
@@ -232,6 +239,7 @@ namespace TexDotNet
                     WritePrefixOperatorNode(tokenStream, node, state);
                     break;
                 case TexSymbolKind.Factorial:
+                case TexSymbolKind.IdentityModulo:
                     WritePostfixOperatorNode(tokenStream, node, state);
                     break;
                 case TexSymbolKind.Number:

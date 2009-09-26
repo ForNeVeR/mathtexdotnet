@@ -70,6 +70,7 @@ namespace TexDotNet
                 case TexSymbolKind.Star:
                 case TexSymbolKind.Divide:
                 case TexSymbolKind.Over:
+                case TexSymbolKind.InlineModulo:
                     node.Children.Add(new ParseNode(tokenStream.Current));
                     tokenStream.ForceMoveNext();
                     node.Children.Add(ParseTerm(tokenStream, ref state));

@@ -9,8 +9,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace TexDotNet.Tests
 {
-    using TokenStream = IEnumerable<TexToken>;
-
     [TestClass]
     public class ParserTests
     {
@@ -44,14 +42,6 @@ namespace TexDotNet.Tests
 
         [TestCleanup()]
         public void TestCleanup()
-        {
-        }
-
-        class MyType
-        {
-        }
-
-        class MyObj
         {
         }
 
@@ -89,6 +79,12 @@ namespace TexDotNet.Tests
         public void TestParserFunctions()
         {
             TestGroup("Functions");
+        }
+
+        [TestMethod()]
+        public void TestParserBigOperators()
+        {
+            TestGroup("Big Operators");
         }
 
         private void TestGroup(string groupName)
