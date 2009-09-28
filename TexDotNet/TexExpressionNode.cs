@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Diagnostics;
 
 namespace TexDotNet
 {
+    [DebuggerDisplay("{ToString() + string.Format(\" [{0} children]\", this.Children.Count),nq}")]
     public class TexExpressionNode
     {
         public TexExpressionNode(TexSymbolKind symbol, IEnumerable<TexExpressionNode> children)
@@ -89,8 +91,12 @@ namespace TexDotNet
 
         public override int GetHashCode()
         {
-            // TODO
-            return base.GetHashCode();
+            if (this.Children.Count == 0)
+                return unchecked((int)this.Symbol * 17 + this.Value.GetHashCode());
+            int hashCode = 0;
+            for (int i = 0; i < this.Children.Count; i++)
+                hashCode = unchecked(hashCode * 31 + this.Children[i].GetHashCode());
+            return hashCode;
         }
     }
 }

@@ -9,7 +9,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace TexDotNet.Tests
 {
-    [TestClass]
+    [TestClass()]
     public class ParserTests
     {
         private static TestCaseSet testCaseSet;
@@ -95,10 +95,17 @@ namespace TexDotNet.Tests
                 try
                 {
                     var text = testCase.ExpressionText;
+                    Trace.WriteLine("Original text: " + text);
                     var exprTree = TexHelper.CreateExpressionTree(text);
+                    Trace.WriteLine("Original expression tree:");
+                    Trace.Write(TreeTextRenderer.GetText(exprTree));
                     var recreatedText = TexHelper.CreateText(exprTree);
+                    Trace.WriteLine("Recreated text: " + recreatedText);
                     var recreatedExprTree = TexHelper.CreateExpressionTree(recreatedText);
+                    Trace.WriteLine("Recreated expression tree:");
+                    Trace.Write(TreeTextRenderer.GetText(recreatedExprTree));
                     Assert.AreEqual(exprTree, recreatedExprTree);
+                    Trace.WriteLine(string.Empty);
                 }
                 catch (LexerException exLexer)
                 {

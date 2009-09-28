@@ -35,6 +35,7 @@ namespace TexDotNet
             }
         }
 
+        // TODO: Refactor code.
         private void WriteNode(ComposedTokenStream tokenStream, TexExpressionNode node, ComposerState state)
         {
             var openBracketSymbol = TexSymbolKind.Null;
@@ -155,12 +156,12 @@ namespace TexDotNet
                     }
                 }
             }
-            //if (state.IsParentNodeGroupOpen && node.Parent.Children.Count == 1)
-            //{
-            //    openBracketSymbol = TexSymbolKind.Null;
-            //    closeBracketSymbol = TexSymbolKind.Null;
-            //    state.IsParentNodeGroupOpen = false;
-            //}
+            if (IsRightMostNode(node))
+            {
+                state.IsParentNodeGroupOpen = false;
+                openBracketSymbol = TexSymbolKind.Null;
+                closeBracketSymbol = TexSymbolKind.Null;
+            }
             else if (!state.IsParentNodeGroupOpen && openBracketSymbol == TexSymbolKind.GroupOpen)
             {
                 state.IsParentNodeGroupOpen = true;
@@ -257,6 +258,21 @@ namespace TexDotNet
                 tokenStream.Write(TexToken.FromSymbol(closeBracketSymbol));
         }
 
+        private TexExpressionNode GetLeftMostDescendent(TexExpressionNode node)
+        {
+            if (node.Children.Count == 0)
+                return node;
+            return GetLeftMostDescendent(node.Children[0]);
+        }
+
+        private bool IsRightMostNode(TexExpressionNode node)
+        {
+            if (node.Parent == null)
+                return true;
+            return node.Parent.Children.IndexOf(node) == node.Parent.Children.Count &&
+                IsRightMostNode(node.Parent);
+        }
+
         private void WriteBracketedFunction(ComposedTokenStream tokenStream, TexExpressionNode node,
             ComposerState state)
         {
@@ -297,27 +313,35 @@ namespace TexDotNet
             {
                 WriteNode(tokenStream, node.Children[0], state);
 
-                var padSymbol = ((this.PadPlusAndMinusSigns && (node.Symbol == TexSymbolKind.Plus ||
-                    node.Symbol == TexSymbolKind.Minus))) || node.Symbol.IsLongOperator();
+                bool writeOpSymbol = true;
+                var padSymbol = (this.PadPlusAndMinusSigns && (node.Symbol == TexSymbolKind.Plus ||
+                    node.Symbol == TexSymbolKind.Minus)) || node.Symbol.IsLongOperator();
                 if (node.Symbol == TexSymbolKind.Dot)
                 {
+                    // Find first node that is not Dot within subtree of second operand.
+                    var checkNode = node.Children[1];
+                    while (checkNode.Symbol == TexSymbolKind.Dot && checkNode.Children.Count >= 1)
+                        checkNode = checkNode.Children[0];
+
                     // If terms can be multipled implicitly, do not write operator token.
-                    switch (node.Children[1].Symbol)
+                    switch (checkNode.Symbol)
                     {
                         case TexSymbolKind.Number:
                         case TexSymbolKind.Text:
-                            tokenStream.Write(TexToken.FromSymbol(node.Symbol));
+                        case TexSymbolKind.RaiseToIndex:
+                        case TexSymbolKind.LowerToIndex:
                             break;
                         default:
+                            writeOpSymbol = false;
+                            padSymbol = false;
                             break;
                     }
                 }
-                else
-                {
-                    if (padSymbol)
-                        tokenStream.Write(TexToken.FromSymbol(TexSymbolKind.Space));
+
+                if (padSymbol)
+                    tokenStream.Write(TexToken.FromSymbol(TexSymbolKind.Space));
+                if (writeOpSymbol)
                     tokenStream.Write(TexToken.FromSymbol(node.Symbol));
-                }
                 if (padSymbol)
                     tokenStream.Write(TexToken.FromSymbol(TexSymbolKind.Space));
 
