@@ -30,5 +30,11 @@ namespace TexDotNet
             item.Parent = this.ParentNode;
             base.InsertItem(index, item);
         }
+
+        protected override void SetItem(int index, TexExpressionNode item)
+        {
+            item.Parent = this.ParentNode;
+            base.SetItem(index, item);
+        }
     }
 }

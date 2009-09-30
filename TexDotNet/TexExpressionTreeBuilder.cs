@@ -8,24 +8,24 @@ namespace TexDotNet
 {
     public static class TexExpressionTreeBuilder
     {
-        private const string errMsgUnexpectedNumberOfChildren =
+        private const string errorMessageUnexpectedNumberOfChildren =
             "An parse node of kind {0} cannot have {1} children.";
 
-        public static TexExpressionNode FromParseTree(ParseNode parseTree)
+        public static TexExpressionNode FromParseTree(ParseNode parseNode)
         {
-            switch (parseTree.Symbol)
+            switch (parseNode.Kind)
             {
                 case ParseNodeKind.InfixOperator:
-                    return FromInfixOperatorParseNode(parseTree);
+                    return FromInfixOperatorParseNode(parseNode);
                 case ParseNodeKind.PrefixOperator:
-                    return FromPrefixCallParseNode(parseTree);
+                    return FromPrefixCallParseNode(parseNode);
                 case ParseNodeKind.PostfixOperator:
-                    return FromPostfixOperatorParseNode(parseTree);
+                    return FromPostfixOperatorParseNode(parseNode);
                 case ParseNodeKind.Token:
-                    return new TexExpressionNode(parseTree.Token.Symbol, parseTree.Token.Value);
+                    return new TexExpressionNode(parseNode.Token.Symbol, parseNode.Token.Value);
                 default:
-                    throw new TexExpressionTreeBuilderException(parseTree, string.Format(
-                        "Invalid parse node kind: {0}.", parseTree.Symbol));
+                    throw new TexExpressionTreeBuilderException(parseNode, string.Format(
+                        "Invalid parse node kind: {0}.", parseNode.Kind));
             }
         }
 
@@ -37,16 +37,40 @@ namespace TexDotNet
             }
             else if (parseNode.Children.Count == 3)
             {
-                var exprNode = new TexExpressionNode(parseNode.Children[1].Token.Symbol);
-                exprNode.Children.Add(FromParseTree(parseNode.Children[0]));
-                exprNode.Children.Add(FromParseTree(parseNode.Children[2]));
-                return exprNode;
+                if (parseNode.Children[1].Token.Symbol.IsLtrInfixOperator())
+                    return FromLtrInfixOperatorParseNode(parseNode);
+                else
+                    return FromRtlInfixOperatorParseNode(parseNode);
+            }
+
+            throw new TexExpressionTreeBuilderException(parseNode, string.Format(
+                errorMessageUnexpectedNumberOfChildren, parseNode.Kind, parseNode.Children.Count));
+        }
+
+        public static TexExpressionNode FromLtrInfixOperatorParseNode(ParseNode parseNode)
+        {
+            var node = new TexExpressionNode(parseNode.Children[1].Token.Symbol);
+            node.Children.Add(FromParseTree(parseNode.Children[0]));
+            var secondOperandNode = FromParseTree(parseNode.Children[2]);
+            if (parseNode.Children[2].IsSubExpression && secondOperandNode.Children.Count == 2)
+            {
+                node.Children.Add(secondOperandNode.Children[0]);
+                secondOperandNode.Children[0] = node;
+                return secondOperandNode;
             }
             else
             {
-                throw new TexExpressionTreeBuilderException(parseNode, string.Format(
-                    errMsgUnexpectedNumberOfChildren, parseNode.Symbol, parseNode.Children.Count));
+                node.Children.Add(secondOperandNode);
+                return node;
             }
+        }
+
+        public static TexExpressionNode FromRtlInfixOperatorParseNode(ParseNode parseNode)
+        {
+            var node = new TexExpressionNode(parseNode.Children[1].Token.Symbol);
+            node.Children.Add(FromParseTree(parseNode.Children[0]));
+            node.Children.Add(FromParseTree(parseNode.Children[2]));
+            return node;
         }
 
         public static TexExpressionNode FromPrefixCallParseNode(ParseNode parseNode)
@@ -62,34 +86,33 @@ namespace TexDotNet
             }
             else if (parseNode.Children.Count >= 2)
             {
-                var exprNode = FromParseTree(parseNode.Children[0]);
+                var node = FromParseTree(parseNode.Children[0]);
                 ParseNode childParseNode;
-                TexExpressionNode childExprNode;
+                TexExpressionNode childNode;
                 for (int i = 1; i < parseNode.Children.Count; i++)
                 {
                     childParseNode = parseNode.Children[i];
-                    if (childParseNode.Symbol == ParseNodeKind.Indices)
+                    if (childParseNode.Kind == ParseNodeKind.Indices)
                     {
                         foreach (var argNode in FromPrefixOperatorIndicesParseNode(childParseNode))
-                            exprNode.Arguments.Add(argNode);
+                            node.Arguments.Add(argNode);
                         continue;
                     }
-                    childExprNode = FromParseTree(childParseNode);
-                    if (childExprNode != null)
+                    childNode = FromParseTree(childParseNode);
+                    if (childNode != null)
                     {
                         if (childParseNode.IsArgument)
-                            exprNode.Arguments.Add(childExprNode);
+                            node.Arguments.Add(childNode);
                         else
-                            exprNode.Children.Add(childExprNode);
+                            node.Children.Add(childNode);
                     }
                 }
-                return exprNode;
+                return node;
             }
-            else
-            {
-                throw new TexExpressionTreeBuilderException(parseNode, string.Format(
-                    errMsgUnexpectedNumberOfChildren, parseNode.Symbol, parseNode.Children.Count));
-            }
+
+            throw new TexExpressionTreeBuilderException(parseNode, string.Format(
+                errorMessageUnexpectedNumberOfChildren, parseNode.Kind, parseNode.Children.Count));
+
         }
 
         public static TexExpressionNode FromPostfixOperatorParseNode(ParseNode parseNode)
@@ -98,32 +121,30 @@ namespace TexDotNet
             {
                 return FromParseTree(parseNode.Children[0]);
             }
-            else if (parseNode.Children.Count == 2 && parseNode.Children[1].Symbol == ParseNodeKind.Indices)
+            else if (parseNode.Children.Count == 2 && parseNode.Children[1].Kind == ParseNodeKind.Indices)
             {
                 // Indices for value.
                 return FromPostfixOperatorIndicesParseNode(parseNode.Children[1], parseNode.Children[0]);
             }
             else if (parseNode.Children.Count >= 2)
             {
-                var exprNode = FromParseTree(parseNode.Children[parseNode.Children.Count - 1]);
+                var node = FromParseTree(parseNode.Children[parseNode.Children.Count - 1]);
                 ParseNode childParseNode;
-                TexExpressionNode childExprNode;
+                TexExpressionNode childNode;
                 for (int i = 0; i < parseNode.Children.Count - 1; i++)
                 {
                     childParseNode = parseNode.Children[i];
-                    childExprNode = FromParseTree(childParseNode);
-                    if (childExprNode != null)
+                    childNode = FromParseTree(childParseNode);
+                    if (childNode != null)
                     {
-                        exprNode.Children.Add(childExprNode);
+                        node.Children.Add(childNode);
                     }
                 }
-                return exprNode;
+                return node;
             }
-            else
-            {
-                throw new TexExpressionTreeBuilderException(parseNode, string.Format(
-                    errMsgUnexpectedNumberOfChildren, parseNode.Symbol, parseNode.Children.Count));
-            }
+
+            throw new TexExpressionTreeBuilderException(parseNode, string.Format(
+                errorMessageUnexpectedNumberOfChildren, parseNode.Kind, parseNode.Children.Count));
         }
 
         public static IEnumerable<TexExpressionNode> FromPrefixOperatorIndicesParseNode(ParseNode parseNode)
@@ -138,6 +159,7 @@ namespace TexDotNet
                 indexNode = new TexExpressionNode(parseNode.Children[0].Token.Symbol);
                 indexNode.Children.Add(FromParseTree(parseNode.Children[1]));
                 yield return indexNode;
+                yield break;
             }
             else if (parseNode.Children.Count == 4)
             {
@@ -147,12 +169,11 @@ namespace TexDotNet
                 indexNode = new TexExpressionNode(parseNode.Children[2].Token.Symbol);
                 indexNode.Children.Add(FromParseTree(parseNode.Children[3]));
                 yield return indexNode;
+                yield break;
             }
-            else
-            {
-                throw new TexExpressionTreeBuilderException(parseNode, string.Format(
-                    errMsgUnexpectedNumberOfChildren, parseNode.Symbol, parseNode.Children.Count));
-            }
+
+            throw new TexExpressionTreeBuilderException(parseNode, string.Format(
+                errorMessageUnexpectedNumberOfChildren, parseNode.Kind, parseNode.Children.Count));
         }
 
         public static TexExpressionNode FromPostfixOperatorIndicesParseNode(ParseNode parseNode, ParseNode childParseNode)
@@ -175,7 +196,7 @@ namespace TexDotNet
             else
             {
                 throw new TexExpressionTreeBuilderException(parseNode, string.Format(
-                    errMsgUnexpectedNumberOfChildren, parseNode.Symbol, parseNode.Children.Count));
+                    errorMessageUnexpectedNumberOfChildren, parseNode.Kind, parseNode.Children.Count));
             }
 
             Debug.Assert(firstIndexNode == null || firstIndexNode.Symbol == TexSymbolKind.RaiseToIndex ||

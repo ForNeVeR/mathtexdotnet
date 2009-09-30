@@ -6,7 +6,7 @@ using System.Diagnostics;
 
 namespace TexDotNet
 {
-    [DebuggerDisplay("{ToString() + string.Format(\" [{0} children]\", this.Children.Count),nq}")]
+    [DebuggerDisplay("{ToString() + string.Format(\" [\\{0\\} children]\", this.Children.Count),nq}")]
     public class TexExpressionNode
     {
         public TexExpressionNode(TexSymbolKind symbol, IEnumerable<TexExpressionNode> children)
@@ -17,6 +17,7 @@ namespace TexDotNet
         }
 
         public TexExpressionNode(TexSymbolKind symbol, object value)
+            : this()
         {
             this.Symbol = symbol;
             this.Value = value;
@@ -25,9 +26,14 @@ namespace TexDotNet
         }
 
         public TexExpressionNode(TexSymbolKind symbol)
+            : this()
         {
             this.Symbol = symbol;
             this.Value = null;
+        }
+
+        public TexExpressionNode()
+        {
             this.Children = new TexExpressionNodeCollection(this);
             this.Arguments = new TexExpressionNodeCollection(this);
         }

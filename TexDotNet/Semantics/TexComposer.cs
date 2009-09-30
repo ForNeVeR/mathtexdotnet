@@ -12,8 +12,10 @@ namespace TexDotNet
 
     public class TexComposer
     {
-        private const string errMsgUnexpectedNumberOfChildren =
+        private const string errorMessageUnexpectedNumberOfChildren =
             "An parse node of kind {0} cannot have {1} children.";
+        private const string errorMessageInvalidOperator =
+            "Invalid operator symbol";
 
         public TexComposer()
         {
@@ -26,11 +28,11 @@ namespace TexDotNet
             set;
         }
 
-        public TokenStream Write(TexExpressionNode tree)
+        public TokenStream Write(TexExpressionNode node)
         {
             using (var tokenStream = new ComposedTokenStream())
             {
-                WriteNode(tokenStream, tree, new ComposerState());
+                WriteNode(tokenStream, node, new ComposerState());
                 return tokenStream;
             }
         }
@@ -66,8 +68,11 @@ namespace TexDotNet
                             case TexSymbolKind.Divide:
                             case TexSymbolKind.Over:
                             case TexSymbolKind.InlineModulo:
-                                openBracketSymbol = TexSymbolKind.RoundBracketOpen;
-                                closeBracketSymbol = TexSymbolKind.RoundBracketClose;
+                                if (GetOperatorPrecedence(node) <= GetOperatorPrecedence(node.Parent))
+                                {
+                                    openBracketSymbol = TexSymbolKind.RoundBracketOpen;
+                                    closeBracketSymbol = TexSymbolKind.RoundBracketClose;
+                                }
                                 break;
                         }
                     }
@@ -136,18 +141,14 @@ namespace TexDotNet
                     {
                         case TexSymbolKind.LowerToIndex:
                         case TexSymbolKind.RaiseToIndex:
-                            // Surround expression with group if node is second operand, or node has more than one
-                            // child.
-                            if ((node.Parent.Children.Count == 2 && node.Parent.Children.IndexOf(node) == 1) ||
-                                node.Children.Count > 1)
+                            if (node.Children.Count > 1)
                             {
                                 openBracketSymbol = TexSymbolKind.GroupOpen;
                                 closeBracketSymbol = TexSymbolKind.GroupClose;
                             }
                             break;
                         case TexSymbolKind.Factorial:
-                        case TexSymbolKind.IdentityModulo:
-                            if (node.Parent.Children.Count == 1)
+                            if (node.Children.Count > 1)
                             {
                                 openBracketSymbol = TexSymbolKind.GroupOpen;
                                 closeBracketSymbol = TexSymbolKind.GroupClose;
@@ -174,6 +175,8 @@ namespace TexDotNet
             {
                 case TexSymbolKind.Plus:
                 case TexSymbolKind.Minus:
+                case TexSymbolKind.PlusMinus:
+                case TexSymbolKind.MinusPlus:
                 case TexSymbolKind.Dot:
                 case TexSymbolKind.Cross:
                 case TexSymbolKind.Star:
@@ -240,7 +243,6 @@ namespace TexDotNet
                     WritePrefixOperatorNode(tokenStream, node, state);
                     break;
                 case TexSymbolKind.Factorial:
-                case TexSymbolKind.IdentityModulo:
                     WritePostfixOperatorNode(tokenStream, node, state);
                     break;
                 case TexSymbolKind.Number:
@@ -256,21 +258,6 @@ namespace TexDotNet
 
             if (closeBracketSymbol != TexSymbolKind.Null)
                 tokenStream.Write(TexToken.FromSymbol(closeBracketSymbol));
-        }
-
-        private TexExpressionNode GetLeftMostDescendent(TexExpressionNode node)
-        {
-            if (node.Children.Count == 0)
-                return node;
-            return GetLeftMostDescendent(node.Children[0]);
-        }
-
-        private bool IsRightMostNode(TexExpressionNode node)
-        {
-            if (node.Parent == null)
-                return true;
-            return node.Parent.Children.IndexOf(node) == node.Parent.Children.Count &&
-                IsRightMostNode(node.Parent);
         }
 
         private void WriteBracketedFunction(ComposedTokenStream tokenStream, TexExpressionNode node,
@@ -297,7 +284,7 @@ namespace TexDotNet
             else
             {
                 throw new TexComposerException(node, string.Format(
-                    errMsgUnexpectedNumberOfChildren, node.Symbol, node.Children.Count));
+                    errorMessageUnexpectedNumberOfChildren, node.Symbol, node.Children.Count));
             }
         }
 
@@ -314,13 +301,14 @@ namespace TexDotNet
                 WriteNode(tokenStream, node.Children[0], state);
 
                 bool writeOpSymbol = true;
-                var padSymbol = (this.PadPlusAndMinusSigns && (node.Symbol == TexSymbolKind.Plus ||
-                    node.Symbol == TexSymbolKind.Minus)) || node.Symbol.IsLongOperator();
+                var padSymbol = (this.PadPlusAndMinusSigns && IsPlusOrMinus(node.Symbol)) ||
+                    node.Symbol.IsLongOperator();
                 if (node.Symbol == TexSymbolKind.Dot)
                 {
                     // Find first node that is not Dot within subtree of second operand.
                     var checkNode = node.Children[1];
-                    while (checkNode.Symbol == TexSymbolKind.Dot && checkNode.Children.Count >= 1)
+                    while ((checkNode.Symbol == TexSymbolKind.Dot || checkNode.Symbol == TexSymbolKind.RaiseToIndex ||
+                        checkNode.Symbol == TexSymbolKind.LowerToIndex) && checkNode.Children.Count >= 1)
                         checkNode = checkNode.Children[0];
 
                     // If terms can be multipled implicitly, do not write operator token.
@@ -328,8 +316,6 @@ namespace TexDotNet
                     {
                         case TexSymbolKind.Number:
                         case TexSymbolKind.Text:
-                        case TexSymbolKind.RaiseToIndex:
-                        case TexSymbolKind.LowerToIndex:
                             break;
                         default:
                             writeOpSymbol = false;
@@ -350,7 +336,7 @@ namespace TexDotNet
             else
             {
                 throw new TexComposerException(node, string.Format(
-                    errMsgUnexpectedNumberOfChildren, node.Symbol, node.Children.Count));
+                    errorMessageUnexpectedNumberOfChildren, node.Symbol, node.Children.Count));
             }
         }
 
@@ -364,7 +350,7 @@ namespace TexDotNet
                 {
                     if (argNode.Children.Count != 1)
                         throw new TexComposerException(argNode, string.Format(
-                            errMsgUnexpectedNumberOfChildren, argNode.Symbol, argNode.Children.Count));
+                            errorMessageUnexpectedNumberOfChildren, argNode.Symbol, argNode.Children.Count));
                     tokenStream.Write(TexToken.FromSymbol(argNode.Symbol));
                     WriteNode(tokenStream, argNode.Children[0], state);
                 }
@@ -375,7 +361,7 @@ namespace TexDotNet
             else
             {
                 throw new TexComposerException(node, string.Format(
-                    errMsgUnexpectedNumberOfChildren, node.Symbol, node.Children.Count));
+                    errorMessageUnexpectedNumberOfChildren, node.Symbol, node.Children.Count));
             }
         }
 
@@ -391,7 +377,7 @@ namespace TexDotNet
             else
             {
                 throw new TexComposerException(node, string.Format(
-                    errMsgUnexpectedNumberOfChildren, node.Symbol, node.Children.Count));
+                    errorMessageUnexpectedNumberOfChildren, node.Symbol, node.Children.Count));
             }
         }
 
@@ -399,6 +385,57 @@ namespace TexDotNet
             ComposerState state)
         {
             tokenStream.Write(TexToken.FromValue(node.Symbol, node.Value));
+        }
+
+        private int GetOperatorPrecedence(TexExpressionNode node)
+        {
+            switch (node.Symbol)
+            {
+                case TexSymbolKind.Plus:
+                case TexSymbolKind.Minus:
+                case TexSymbolKind.PlusMinus:
+                case TexSymbolKind.MinusPlus:
+                    if (node.Children.Count == 1)
+                        return 6;
+                    return 1;
+                case TexSymbolKind.Star:
+                case TexSymbolKind.Divide:
+                    return 2;
+                case TexSymbolKind.Over:
+                case TexSymbolKind.Dot:
+                    return 3;
+                case TexSymbolKind.Fraction:
+                case TexSymbolKind.Cross:
+                case TexSymbolKind.InlineModulo:
+                    return 4;
+                case TexSymbolKind.RaiseToIndex:
+                case TexSymbolKind.LowerToIndex:
+                    return 5;
+                default:
+                    throw new TexComposerException(node, errorMessageInvalidOperator);
+            }
+        }
+
+        private bool IsRightMostNode(TexExpressionNode node)
+        {
+            if (node.Parent == null)
+                return true;
+            return node.Parent.Children.IndexOf(node) == node.Parent.Children.Count &&
+                IsRightMostNode(node.Parent);
+        }
+
+        private bool IsPlusOrMinus(TexSymbolKind symbol)
+        {
+            switch (symbol)
+            {
+                case TexSymbolKind.Plus:
+                case TexSymbolKind.Minus:
+                case TexSymbolKind.PlusMinus:
+                case TexSymbolKind.MinusPlus:
+                    return true;
+                default:
+                    return false;
+            }
         }
 
         private class ComposedTokenStream : TokenStream

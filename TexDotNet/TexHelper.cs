@@ -68,6 +68,26 @@ namespace TexDotNet
                 throw new ParserException(TexToken.Null, "Unexpected end of token stream.");
         }
 
+        public static bool IsLtrInfixOperator(this TexSymbolKind symbol)
+        {
+            switch (symbol)
+            {
+                case TexSymbolKind.Plus:
+                case TexSymbolKind.Minus:
+                case TexSymbolKind.PlusMinus:
+                case TexSymbolKind.MinusPlus:
+                case TexSymbolKind.Cross:
+                case TexSymbolKind.Dot:
+                case TexSymbolKind.Star:
+                case TexSymbolKind.Divide:
+                case TexSymbolKind.Over:
+                case TexSymbolKind.InlineModulo:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
         public static bool IsLongOperator(this TexSymbolKind symbol)
         {
             switch (symbol)

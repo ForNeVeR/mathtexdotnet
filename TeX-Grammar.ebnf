@@ -1,4 +1,5 @@
-expr = term , [ ( "+" | "-" ) , epxr ] ;
+input = expr , ? EOF ? ;
+expr = term , { ( "+" | "-" ) , term } ;
 term = first implicit term , [ ( "*" | "/" | "\cdot" | "\bmod" ) , term ] ;
 first implicit term = signed value , [ implicit term ] ;
 implicit term = factorial value , [ implicit term ] ;

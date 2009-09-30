@@ -17,7 +17,7 @@ namespace TexDotNet
         public ParseNode(TexToken token)
             : this()
         {
-            this.Symbol = ParseNodeKind.Token;
+            this.Kind = ParseNodeKind.Token;
             this.Token = token;
             this.Children = new ParseNodeCollection();
         }
@@ -32,7 +32,7 @@ namespace TexDotNet
         public ParseNode(ParseNodeKind kind)
             : this()
         {
-            this.Symbol = kind;
+            this.Kind = kind;
             this.Token = TexToken.Null;
             this.Children = new ParseNodeCollection();
         }
@@ -40,6 +40,7 @@ namespace TexDotNet
         private ParseNode()
         {
             this.IsArgument = false;
+            this.IsSubExpression = false;
         }
 
         public int SourcePosition
@@ -52,7 +53,7 @@ namespace TexDotNet
             get { return this.Token.SourceText; }
         }
 
-        public ParseNodeKind Symbol
+        public ParseNodeKind Kind
         {
             get;
             set;
@@ -70,6 +71,12 @@ namespace TexDotNet
             set;
         }
 
+        public bool IsSubExpression
+        {
+            get;
+            set;
+        }
+
         public ParseNodeCollection Children
         {
             get;
@@ -78,13 +85,13 @@ namespace TexDotNet
 
         public override string ToString()
         {
-            if (this.Symbol == ParseNodeKind.Token)
+            if (this.Kind == ParseNodeKind.Token)
             {
                 return this.Token.ToString();
             }
             else
             {
-                return this.Symbol.ToString();
+                return this.Kind.ToString();
             }
         }
     }

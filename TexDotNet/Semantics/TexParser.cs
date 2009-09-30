@@ -9,10 +9,14 @@ namespace TexDotNet
 
     public class TexParser : IParser
     {
-        private const string errorMessageExpectedEndOfStream = "Expected end of token stream.";
-        private const string errorMessageExpectedValue = "Expected one of the following: number, letter, open bracket, fraction, binomial, root, function.";
-        private const string errorMessageExpectedValueOrGroup = "Expected a single value or group expression.";
-        private const string errorMessageTextValueEmpty = "A text value must contain at least one character.";
+        private const string errorMessageExpectedEndOfStream =
+            "Expected end of token stream.";
+        private const string errorMessageExpectedValue =
+            "Expected one of the following: number, letter, open bracket, fraction, binomial, root, function.";
+        private const string errorMessageExpectedValueOrGroup =
+            "Expected a single value or group expression.";
+        private const string errorMessageTextValueEmpty =
+            "A text value must contain at least one character.";
 
         public TexParser()
         {
@@ -39,6 +43,11 @@ namespace TexDotNet
 
         private ParseNode ParseExpression(TokenStream tokenStream, ref ParserState state)
         {
+            return ParseExpression(tokenStream, ref state, false);
+        }
+
+        private ParseNode ParseExpression(TokenStream tokenStream, ref ParserState state, bool isSubExpr)
+        {
             var node = new ParseNode(ParseNodeKind.InfixOperator);
             node.Children.Add(ParseTerm(tokenStream, ref state));
             switch (tokenStream.Current.Symbol)
@@ -49,13 +58,14 @@ namespace TexDotNet
                 case TexSymbolKind.Minus:
                 case TexSymbolKind.PlusMinus:
                 case TexSymbolKind.MinusPlus:
+                    node.IsSubExpression = isSubExpr;
                     node.Children.Add(new ParseNode(tokenStream.Current));
                     tokenStream.ForceMoveNext();
                     break;
                 default:
                     return node;
             }
-            node.Children.Add(ParseExpression(tokenStream, ref state));
+            node.Children.Add(ParseExpression(tokenStream, ref state, true));
             return node;
         }
 

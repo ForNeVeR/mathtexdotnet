@@ -11,8 +11,10 @@ namespace TexDotNet
 
     public class TexLexer : ILexer
     {
-        private const string errorMessageIllegalChar = "Illegal character '{0}'.";
-        private const string errorMessageIllegalSymbol = "Illegal symbol '{0}'.";
+        private const string errorMessageIllegalChar =
+            "Illegal character '{0}'.";
+        private const string errorMessageIllegalSymbol =
+            "Illegal symbol '{0}'.";
 
         public TexLexer()
         {
