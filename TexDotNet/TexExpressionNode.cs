@@ -70,8 +70,7 @@ namespace TexDotNet
 
         public override string ToString()
         {
-            return this.Symbol + (this.Value == null ? string.Empty :
-                "(" + this.Value.ToString() + ")");
+            return this.Symbol + (this.Value == null ? string.Empty : "(" + this.Value.ToString() + ")");
         }
 
         public override bool Equals(object obj)

@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
 namespace TexDotNet
 {
+    [DebuggerDisplay("{ToString(),nq}")]
     public class ParseNode : ITexErrorSourceInfo
     {
         public ParseNode(TexToken token, IEnumerable<ParseNode> children)
@@ -85,14 +87,8 @@ namespace TexDotNet
 
         public override string ToString()
         {
-            if (this.Kind == ParseNodeKind.Token)
-            {
-                return this.Token.ToString();
-            }
-            else
-            {
-                return this.Kind.ToString();
-            }
+            return (this.Kind == ParseNodeKind.Token ? this.Token.ToString() : this.Kind.ToString()) +
+                string.Format(" [{0} children]", this.Children.Count);
         }
     }
 
