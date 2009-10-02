@@ -28,8 +28,7 @@ namespace TexDotNet
             tokenStream.ForceMoveNext();
             var node = ParseExpression(tokenStream, ref state);
             if (tokenStream.Current.Symbol != TexSymbolKind.EndOfStream)
-                throw new ParserException(tokenStream.Current,
-                    errorMessageExpectedEndOfStream);
+                throw new ParserException(tokenStream.Current, errorMessageExpectedEndOfStream);
             return node;
         }
 
@@ -46,7 +45,7 @@ namespace TexDotNet
             return ParseExpression(tokenStream, ref state, false);
         }
 
-        private ParseNode ParseExpression(TokenStream tokenStream, ref ParserState state, bool isSubExpr)
+        private ParseNode ParseExpression(TokenStream tokenStream, ref ParserState state, bool isSubTree)
         {
             var node = new ParseNode(ParseNodeKind.InfixOperator);
             node.Children.Add(ParseTerm(tokenStream, ref state));
@@ -58,7 +57,7 @@ namespace TexDotNet
                 case TexSymbolKind.Minus:
                 case TexSymbolKind.PlusMinus:
                 case TexSymbolKind.MinusPlus:
-                    node.IsSubExpression = isSubExpr;
+                    node.IsSubExpression = isSubTree;
                     node.Children.Add(new ParseNode(tokenStream.Current));
                     tokenStream.ForceMoveNext();
                     break;
@@ -71,6 +70,11 @@ namespace TexDotNet
 
         private ParseNode ParseTerm(TokenStream tokenStream, ref ParserState state)
         {
+            return ParseTerm(tokenStream, ref state, false);
+        }
+
+        private ParseNode ParseTerm(TokenStream tokenStream, ref ParserState state, bool isSubTree)
+        {
             var node = new ParseNode(ParseNodeKind.InfixOperator);
             node.Children.Add(ParseFirstImplicitTermOptional(tokenStream, ref state));
             switch (tokenStream.Current.Symbol)
@@ -81,11 +85,14 @@ namespace TexDotNet
                 case TexSymbolKind.Divide:
                 case TexSymbolKind.Over:
                 case TexSymbolKind.InlineModulo:
+                    node.IsSubExpression = isSubTree;
                     node.Children.Add(new ParseNode(tokenStream.Current));
                     tokenStream.ForceMoveNext();
-                    node.Children.Add(ParseTerm(tokenStream, ref state));
                     break;
+                default:
+                    return node;
             }
+            node.Children.Add(ParseTerm(tokenStream, ref state, true));
             return node;
         }
 
@@ -120,8 +127,7 @@ namespace TexDotNet
         {
             var node = ParseSignedValueOptional(tokenStream, ref state);
             if (node == null)
-                throw new ParserException(tokenStream.Current,
-                    errorMessageExpectedValue);
+                throw new ParserException(tokenStream.Current, errorMessageExpectedValue);
             return node;
         }
 
@@ -146,8 +152,7 @@ namespace TexDotNet
         {
             var node = ParseFactorialValueOptional(tokenStream, ref state);
             if (node == null)
-                throw new ParserException(tokenStream.Current,
-                    errorMessageExpectedValue);
+                throw new ParserException(tokenStream.Current, errorMessageExpectedValue);
             return node;
         }
 
@@ -172,8 +177,7 @@ namespace TexDotNet
         {
             var node = ParseIndexedValueOptional(tokenStream, ref state);
             if (node == null)
-                throw new ParserException(tokenStream.Current,
-                    errorMessageExpectedValue);
+                throw new ParserException(tokenStream.Current, errorMessageExpectedValue);
             return node;
         }
 
@@ -192,8 +196,7 @@ namespace TexDotNet
         {
             var node = ParseValueOptional(tokenStream, ref state);
             if (node == null)
-                throw new ParserException(tokenStream.Current,
-                    errorMessageExpectedValue);
+                throw new ParserException(tokenStream.Current, errorMessageExpectedValue);
             return node;
         }
 
@@ -275,8 +278,7 @@ namespace TexDotNet
             if (node == null)
                 node = ParseGroupOptional(tokenStream, ref state);
             if (node == null)
-                throw new ParserException(tokenStream.Current,
-                    errorMessageExpectedValueOrGroup);
+                throw new ParserException(tokenStream.Current, errorMessageExpectedValueOrGroup);
             return node;
         }
 
@@ -284,7 +286,7 @@ namespace TexDotNet
         {
             var node = ParseGroupOptional(tokenStream, ref state);
             if (node == null)
-                throw new ParserException(tokenStream.Current, new[] {
+                throw new ParserException(tokenStream.Current, new[] { 
                     TexSymbolKind.GroupOpen });
             return node;
         }
@@ -418,6 +420,18 @@ namespace TexDotNet
                 case TexSymbolKind.ArcCosecant:
                 case TexSymbolKind.ArcSecant:
                 case TexSymbolKind.ArcCotangent:
+                case TexSymbolKind.HypSine:
+                case TexSymbolKind.HypCosine:
+                case TexSymbolKind.HypTangent:
+                case TexSymbolKind.HypCosecant:
+                case TexSymbolKind.HypSecant:
+                case TexSymbolKind.HypCotangent:
+                case TexSymbolKind.ArHypSine:
+                case TexSymbolKind.ArHypCosine:
+                case TexSymbolKind.ArHypTangent:
+                case TexSymbolKind.ArHypCosecant:
+                case TexSymbolKind.ArHypSecant:
+                case TexSymbolKind.ArHypCotangent:
                     var node = new ParseNode(ParseNodeKind.PrefixOperator);
                     node.Children.Add(new ParseNode(tokenStream.Current));
                     tokenStream.ForceMoveNext();
@@ -505,8 +519,7 @@ namespace TexDotNet
                         tokenStream.ForceMoveNext();
                     }
                     if (sb.Length == 0)
-                        throw new ParserException(tokenStream.Current,
-                            errorMessageTextValueEmpty);
+                        throw new ParserException(tokenStream.Current, errorMessageTextValueEmpty);
                     tokenStream.ForceMoveNext();
                     return new ParseNode(TexToken.FromValue(TexSymbolKind.Text, sb.ToString(),
                         tokenStream.Current.SourcePosition, null));

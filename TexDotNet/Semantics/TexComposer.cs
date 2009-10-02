@@ -105,6 +105,18 @@ namespace TexDotNet
                 case TexSymbolKind.ArcCosecant:
                 case TexSymbolKind.ArcSecant:
                 case TexSymbolKind.ArcCotangent:
+                case TexSymbolKind.HypSine:
+                case TexSymbolKind.HypCosine:
+                case TexSymbolKind.HypTangent:
+                case TexSymbolKind.HypCosecant:
+                case TexSymbolKind.HypSecant:
+                case TexSymbolKind.HypCotangent:
+                case TexSymbolKind.ArHypSine:
+                case TexSymbolKind.ArHypCosine:
+                case TexSymbolKind.ArHypTangent:
+                case TexSymbolKind.ArHypCosecant:
+                case TexSymbolKind.ArHypSecant:
+                case TexSymbolKind.ArHypCotangent:
                 case TexSymbolKind.Sum:
                 case TexSymbolKind.Product:
                 case TexSymbolKind.Coproduct:
@@ -220,6 +232,18 @@ namespace TexDotNet
                 case TexSymbolKind.ArcCosecant:
                 case TexSymbolKind.ArcSecant:
                 case TexSymbolKind.ArcCotangent:
+                case TexSymbolKind.HypSine:
+                case TexSymbolKind.HypCosine:
+                case TexSymbolKind.HypTangent:
+                case TexSymbolKind.HypCosecant:
+                case TexSymbolKind.HypSecant:
+                case TexSymbolKind.HypCotangent:
+                case TexSymbolKind.ArHypSine:
+                case TexSymbolKind.ArHypCosine:
+                case TexSymbolKind.ArHypTangent:
+                case TexSymbolKind.ArHypCosecant:
+                case TexSymbolKind.ArHypSecant:
+                case TexSymbolKind.ArHypCotangent:
                     WritePrefixOperatorNode(tokenStream, node, state);
                     break;
                 case TexSymbolKind.Sum:
@@ -310,9 +334,9 @@ namespace TexDotNet
                     node.Symbol.IsLongOperator();
                 if (node.Symbol == TexSymbolKind.Dot)
                 {
-                    // Find first node that is not Dot within subtree of second operand.
                     var checkNode = node.Children[1];
-                    while (checkNode.Symbol == TexSymbolKind.Dot)
+                    while (checkNode.Symbol == TexSymbolKind.Dot || checkNode.Symbol == TexSymbolKind.RaiseToIndex ||
+                        checkNode.Symbol == TexSymbolKind.LowerToIndex)
                         checkNode = checkNode.Children[0];
 
                     // If terms can be multipled implicitly, do not write operator token.

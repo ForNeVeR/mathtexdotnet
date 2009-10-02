@@ -93,6 +93,7 @@ namespace TexDotNet
             switch (symbol)
             {
                 case TexSymbolKind.Dot:
+                case TexSymbolKind.InlineModulo:
                     return true;
                 default:
                     return false;

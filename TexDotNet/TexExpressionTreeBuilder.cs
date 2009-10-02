@@ -8,6 +8,8 @@ namespace TexDotNet
 {
     public static class TexExpressionTreeBuilder
     {
+        private const string errorMessageInvalidParseNodeKind =
+            "Parse node kind {0} is invalid.";
         private const string errorMessageUnexpectedNumberOfChildren =
             "An parse node of kind {0} cannot have {1} children.";
 
@@ -25,7 +27,7 @@ namespace TexDotNet
                     return new TexExpressionNode(parseNode.Token.Symbol, parseNode.Token.Value);
                 default:
                     throw new TexExpressionTreeBuilderException(parseNode, string.Format(
-                        "Invalid parse node kind: {0}.", parseNode.Kind));
+                        errorMessageInvalidParseNodeKind, parseNode.Kind));
             }
         }
 
