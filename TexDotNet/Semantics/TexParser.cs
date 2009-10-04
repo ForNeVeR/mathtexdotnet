@@ -26,7 +26,7 @@ namespace TexDotNet
         {
             var state = CreateDefaultState();
             tokenStream.ForceMoveNext();
-            var node = ParseExpression(tokenStream, ref state);
+            var node = ParseFractionalExpression(tokenStream, ref state);
             if (tokenStream.Current.Symbol != TexSymbolKind.EndOfStream)
                 throw new ParserException(tokenStream.Current, errorMessageExpectedEndOfStream);
             return node;
@@ -38,6 +38,31 @@ namespace TexDotNet
             state.IsModulusBracketOpen = false;
             state.IsNormBracketOpen = false;
             return state;
+        }
+
+        private ParseNode ParseFractionalExpression(TokenStream tokenStream, ref ParserState state)
+        {
+            return ParseFractionalExpression(tokenStream, ref state, false);
+        }
+
+        private ParseNode ParseFractionalExpression(TokenStream tokenStream, ref ParserState state, bool isSubTree)
+        {
+            var node = new ParseNode(ParseNodeKind.InfixOperator);
+            node.Children.Add(ParseExpression(tokenStream, ref state));
+            switch (tokenStream.Current.Symbol)
+            {
+                case TexSymbolKind.EndOfStream:
+                    return node;
+                case TexSymbolKind.Over:
+                    node.IsSubExpression = isSubTree;
+                    node.Children.Add(new ParseNode(tokenStream.Current));
+                    tokenStream.ForceMoveNext();
+                    break;
+                default:
+                    return node;
+            }
+            node.Children.Add(ParseFractionalExpression(tokenStream, ref state, true));
+            return node;
         }
 
         private ParseNode ParseExpression(TokenStream tokenStream, ref ParserState state)

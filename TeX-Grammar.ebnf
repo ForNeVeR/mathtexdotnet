@@ -1,8 +1,8 @@
-input = expr , ? EOF ? ;
+input = fractional expr , ? EOF ? ;
+fractional expr = expr [ "\over" , expr ] ;
 expr = term , { ( "+" | "-" ) , term } ;
-term = first implicit term , [ ( "*" | "/" | "\cdot" | "\bmod" ) , term ] ;
-first implicit term = signed value , [ implicit term ] ;
-implicit term = factorial value , [ implicit term ] ;
+term = signed value , [ ( "*" | "/" | "\times" | "\cdot" | "\bmod" ) , term | implicit term ] ;
+implicit term = factorial value , implicit term | term ;
 signed value = [ "+" | "-" ] , factorial value ;
 factorial value = indexed value , [ "!" ] ;
 indexed value = value , indices pair ;
