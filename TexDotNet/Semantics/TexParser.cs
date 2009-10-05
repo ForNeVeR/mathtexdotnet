@@ -42,11 +42,6 @@ namespace TexDotNet
 
         private ParseNode ParseFractionalExpression(TokenStream tokenStream, ref ParserState state)
         {
-            return ParseFractionalExpression(tokenStream, ref state, false);
-        }
-
-        private ParseNode ParseFractionalExpression(TokenStream tokenStream, ref ParserState state, bool isSubTree)
-        {
             var node = new ParseNode(ParseNodeKind.InfixOperator);
             node.Children.Add(ParseExpression(tokenStream, ref state));
             switch (tokenStream.Current.Symbol)
@@ -54,14 +49,13 @@ namespace TexDotNet
                 case TexSymbolKind.EndOfStream:
                     return node;
                 case TexSymbolKind.Over:
-                    node.IsSubExpression = isSubTree;
                     node.Children.Add(new ParseNode(tokenStream.Current));
                     tokenStream.ForceMoveNext();
                     break;
                 default:
                     return node;
             }
-            node.Children.Add(ParseFractionalExpression(tokenStream, ref state, true));
+            node.Children.Add(ParseExpression(tokenStream, ref state));
             return node;
         }
 
@@ -73,7 +67,7 @@ namespace TexDotNet
         private ParseNode ParseExpression(TokenStream tokenStream, ref ParserState state, bool isSubTree)
         {
             var node = new ParseNode(ParseNodeKind.InfixOperator);
-            node.Children.Add(ParseTerm(tokenStream, ref state));
+            node.Children.Add(ParseSignedTerm(tokenStream, ref state));
             switch (tokenStream.Current.Symbol)
             {
                 case TexSymbolKind.EndOfStream:
@@ -93,70 +87,7 @@ namespace TexDotNet
             return node;
         }
 
-        private ParseNode ParseTerm(TokenStream tokenStream, ref ParserState state)
-        {
-            return ParseTerm(tokenStream, ref state, false);
-        }
-
-        private ParseNode ParseTerm(TokenStream tokenStream, ref ParserState state, bool isSubTree)
-        {
-            var node = new ParseNode(ParseNodeKind.InfixOperator);
-            node.Children.Add(ParseFirstImplicitTermOptional(tokenStream, ref state));
-            switch (tokenStream.Current.Symbol)
-            {
-                case TexSymbolKind.Cross:
-                case TexSymbolKind.Dot:
-                case TexSymbolKind.Star:
-                case TexSymbolKind.Divide:
-                case TexSymbolKind.Over:
-                case TexSymbolKind.InlineModulo:
-                    node.IsSubExpression = isSubTree;
-                    node.Children.Add(new ParseNode(tokenStream.Current));
-                    tokenStream.ForceMoveNext();
-                    break;
-                default:
-                    return node;
-            }
-            node.Children.Add(ParseTerm(tokenStream, ref state, true));
-            return node;
-        }
-
-        private ParseNode ParseFirstImplicitTermOptional(TokenStream tokenStream, ref ParserState state)
-        {
-            var node = new ParseNode(ParseNodeKind.PrefixOperator);
-            node.Children.Add(new ParseNode(TexToken.FromSymbol(TexSymbolKind.Dot,
-                tokenStream.Current.SourcePosition, null)));
-            node.Children.Add(ParseSignedValue(tokenStream, ref state));
-            var implicitTermNode = ParseImplicitTermOptional(tokenStream, ref state);
-            if (implicitTermNode != null)
-                node.Children.Add(implicitTermNode);
-            return node;
-        }
-
-        private ParseNode ParseImplicitTermOptional(TokenStream tokenStream, ref ParserState state)
-        {
-            var valueNode = ParseFactorialValueOptional(tokenStream, ref state);
-            if (valueNode == null)
-                return null;
-            var node = new ParseNode(ParseNodeKind.PrefixOperator);
-            node.Children.Add(new ParseNode(TexToken.FromSymbol(TexSymbolKind.Dot, tokenStream.Current.SourcePosition,
-                null)));
-            node.Children.Add(valueNode);
-            var implicitTermNode = ParseImplicitTermOptional(tokenStream, ref state);
-            if (implicitTermNode != null)
-                node.Children.Add(implicitTermNode);
-            return node;
-        }
-
-        private ParseNode ParseSignedValue(TokenStream tokenStream, ref ParserState state)
-        {
-            var node = ParseSignedValueOptional(tokenStream, ref state);
-            if (node == null)
-                throw new ParserException(tokenStream.Current, errorMessageExpectedValue);
-            return node;
-        }
-
-        private ParseNode ParseSignedValueOptional(TokenStream tokenStream, ref ParserState state)
+        private ParseNode ParseSignedTerm(TokenStream tokenStream, ref ParserState state)
         {
             var node = new ParseNode(ParseNodeKind.PrefixOperator);
             switch (tokenStream.Current.Symbol)
@@ -169,8 +100,60 @@ namespace TexDotNet
                     tokenStream.ForceMoveNext();
                     break;
             }
-            node.Children.Add(ParseFactorialValue(tokenStream, ref state));
+            node.Children.Add(ParseTerm(tokenStream, ref state));
             return node;
+        }
+
+        private ParseNode ParseTerm(TokenStream tokenStream, ref ParserState state)
+        {
+            var node = ParseTermOptional(tokenStream, ref state);
+            if (node == null)
+                throw new ParserException(tokenStream.Current, errorMessageExpectedValue);
+            return node;
+        }
+
+        private ParseNode ParseTermOptional(TokenStream tokenStream, ref ParserState state)
+        {
+            return ParseTermOptional(tokenStream, ref state, false);
+        }
+
+        private ParseNode ParseTermOptional(TokenStream tokenStream, ref ParserState state, bool isSubTree)
+        {
+            var valueNode = ParseFactorialValueOptional(tokenStream, ref state);
+            if (valueNode == null)
+                return null;
+            var node = new ParseNode(ParseNodeKind.InfixOperator);
+            node.Children.Add(valueNode);
+            var opNode = ParseTermOperatorOptional(tokenStream, ref state);
+            var termNode = ParseTermOptional(tokenStream, ref state, true);
+            if (termNode == null)
+                return node;
+            if (opNode == null)
+                node.Children.Add(new ParseNode(TexToken.FromSymbol(TexSymbolKind.Dot,
+                    tokenStream.Current.SourcePosition, null)));
+            else
+                node.Children.Add(opNode);
+            node.Children.Add(termNode);
+            node.IsSubExpression = isSubTree;
+            return node;
+        }
+
+        private ParseNode ParseTermOperatorOptional(TokenStream tokenStream, ref ParserState state)
+        {
+            switch (tokenStream.Current.Symbol)
+            {
+                case TexSymbolKind.Cross:
+                case TexSymbolKind.Dot:
+                case TexSymbolKind.Star:
+                case TexSymbolKind.Divide:
+                case TexSymbolKind.InlineModulo:
+                case TexSymbolKind.Over:
+                    var node = new ParseNode(tokenStream.Current);
+                    tokenStream.ForceMoveNext();
+                    return node;
+                default:
+                    return null;
+            }
         }
 
         private ParseNode ParseFactorialValue(TokenStream tokenStream, ref ParserState state)
@@ -322,7 +305,7 @@ namespace TexDotNet
             {
                 case TexSymbolKind.GroupOpen:
                     tokenStream.ForceMoveNext();
-                    var node = ParseExpression(tokenStream, ref state);
+                    var node = ParseFractionalExpression(tokenStream, ref state);
                     if (tokenStream.Current.Symbol != TexSymbolKind.GroupClose)
                         throw new ParserException(tokenStream.Current, new[] {
                             TexSymbolKind.GroupClose });
@@ -463,7 +446,7 @@ namespace TexDotNet
                     var indicesNode = ParseIndicesPairOptional(tokenStream, ref state);
                     indicesNode.IsArgument = true;
                     node.Children.Add(indicesNode);
-                    node.Children.Add(ParseExpression(tokenStream, ref state));
+                    node.Children.Add(ParseFractionalExpression(tokenStream, ref state));
                     return node;
                 default:
                     return null;
@@ -521,7 +504,7 @@ namespace TexDotNet
                     var indicesNode = ParseIndicesPairOptional(tokenStream, ref state);
                     indicesNode.IsArgument = true;
                     node.Children.Add(indicesNode);
-                    node.Children.Add(ParseExpression(tokenStream, ref state));
+                    node.Children.Add(ParseFractionalExpression(tokenStream, ref state));
                     return node;
                 default:
                     return null;

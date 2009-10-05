@@ -53,7 +53,6 @@ namespace TexDotNet
                 case TexSymbolKind.Cross:
                 case TexSymbolKind.Star:
                 case TexSymbolKind.Divide:
-                case TexSymbolKind.Over:
                 case TexSymbolKind.InlineModulo:
                     if (node.Parent != null)
                     {
@@ -67,12 +66,11 @@ namespace TexDotNet
                             case TexSymbolKind.Cross:
                             case TexSymbolKind.Star:
                             case TexSymbolKind.Divide:
-                            case TexSymbolKind.Over:
                             case TexSymbolKind.InlineModulo:
                                 var nodePrecedence = GetOperatorPrecedence(node);
                                 var parentNodePrecedence = GetOperatorPrecedence(node.Parent);
                                 if (nodePrecedence < parentNodePrecedence || (node.Parent.Children.IndexOf(node) == 1 &&
-                                    nodePrecedence == parentNodePrecedence && 
+                                    nodePrecedence == parentNodePrecedence &&
                                     IsOperatorLeftAssociative(node.Parent.Symbol)))
                                 {
                                     openBracketSymbol = TexSymbolKind.RoundBracketOpen;
@@ -154,27 +152,37 @@ namespace TexDotNet
             {
                 if (node.Parent != null)
                 {
-                    switch (node.Parent.Symbol)
+                    // If any descendant nodes has more than one child, then group is needed.
+                    bool needGroup = false;
+                    var curNode = node;
+                    while (curNode.Children.Count >= 1)
                     {
-                        case TexSymbolKind.LowerToIndex:
-                        case TexSymbolKind.RaiseToIndex:
-                            if (node.Children.Count > 1)
-                            {
+                        if (curNode.Children.Count > 1)
+                        {
+                            needGroup = true;
+                            break;
+                        }
+                        curNode = curNode.Children[0];
+                    }
+
+                    if (needGroup)
+                    {
+                        switch (node.Parent.Symbol)
+                        {
+                            case TexSymbolKind.LowerToIndex:
+                            case TexSymbolKind.RaiseToIndex:
                                 openBracketSymbol = TexSymbolKind.GroupOpen;
                                 closeBracketSymbol = TexSymbolKind.GroupClose;
-                            }
-                            break;
-                        case TexSymbolKind.Factorial:
-                            if (node.Children.Count > 1)
-                            {
+                                break;
+                            case TexSymbolKind.Factorial:
                                 openBracketSymbol = TexSymbolKind.GroupOpen;
                                 closeBracketSymbol = TexSymbolKind.GroupClose;
-                            }
-                            break;
+                                break;
+                        }
                     }
                 }
             }
-            if (IsRightMostNode(node) && false) // TODO: Investigate whether this is needed.
+            if (IsRightMostNode(node))
             {
                 state.IsParentNodeGroupOpen = false;
                 openBracketSymbol = TexSymbolKind.Null;
@@ -322,6 +330,7 @@ namespace TexDotNet
         {
             if (node.Children.Count == 1)
             {
+                // Node is actually term prefix.
                 tokenStream.Write(TexToken.FromSymbol(node.Symbol));
                 WriteNode(tokenStream, node.Children[0], state);
             }
@@ -427,19 +436,18 @@ namespace TexDotNet
                 case TexSymbolKind.PlusMinus:
                 case TexSymbolKind.MinusPlus:
                     if (node.Children.Count == 1)
-                        return 4;
-                    return 1;
+                        return 1;
+                    return 2;
                 case TexSymbolKind.Star:
                 case TexSymbolKind.Dot:
                 case TexSymbolKind.Cross:
-                case TexSymbolKind.Over:
                 case TexSymbolKind.Divide:
                 case TexSymbolKind.Fraction:
                 case TexSymbolKind.InlineModulo:
-                    return 2;
+                    return 3;
                 case TexSymbolKind.RaiseToIndex:
                 case TexSymbolKind.LowerToIndex:
-                    return 3;
+                    return 4;
                 default:
                     throw new TexComposerException(node, errorMessageInvalidOperator);
             }

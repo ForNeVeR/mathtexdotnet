@@ -21,7 +21,7 @@ namespace TexDotNet
         {
             this.Kind = ParseNodeKind.Token;
             this.Token = token;
-            this.Children = new ParseNodeCollection();
+            this.Children = new ParseNodeCollection(this);
         }
 
         public ParseNode(ParseNodeKind kind, IEnumerable<ParseNode> children)
@@ -36,7 +36,7 @@ namespace TexDotNet
         {
             this.Kind = kind;
             this.Token = TexToken.Null;
-            this.Children = new ParseNodeCollection();
+            this.Children = new ParseNodeCollection(this);
         }
 
         private ParseNode()
@@ -83,6 +83,12 @@ namespace TexDotNet
         {
             get;
             private set;
+        }
+
+        public ParseNode Parent
+        {
+            get;
+            internal set;
         }
 
         public override string ToString()

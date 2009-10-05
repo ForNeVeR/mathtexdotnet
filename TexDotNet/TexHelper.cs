@@ -94,6 +94,7 @@ namespace TexDotNet
             {
                 case TexSymbolKind.Dot:
                 case TexSymbolKind.InlineModulo:
+                case TexSymbolKind.Over:
                     return true;
                 default:
                     return false;
