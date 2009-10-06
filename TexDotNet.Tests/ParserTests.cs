@@ -52,6 +52,12 @@ namespace TexDotNet.Tests
         }
 
         [TestMethod()]
+        public void TestParserRelationOperators()
+        {
+            TestGroup("Relation Operators");
+        }
+
+        [TestMethod()]
         public void TestParserText()
         {
             TestGroup("Text");

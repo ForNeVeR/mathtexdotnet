@@ -1,4 +1,5 @@
 input = fractional expr , ? EOF ? ;
+relation expr = expr , [ ? relational op ? , relation expr ] ;
 fractional expr = expr [ "\over" , expr ] ;
 expr = term , [ expr operator , signed term ] ;
 expr operator = "+" | "-" | "\pm" | "\mp" ;

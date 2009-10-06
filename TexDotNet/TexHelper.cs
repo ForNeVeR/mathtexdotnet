@@ -15,12 +15,18 @@ namespace TexDotNet
             using (var stringWriter = new StringWriter())
             {
                 var texWriter = new TexWriter(stringWriter);
-                texWriter.Write(CreateTokenSream(tree));
+                texWriter.Write(CreateTokenStream(tree));
                 return stringWriter.ToString();
             }
         }
 
-        public static TokenStream CreateTokenSream(this TexExpressionNode tree)
+        public static TokenStream CreateTokenStream(string expression)
+        {
+            var lexer = new TexLexer();
+            return lexer.Tokenise(expression);
+        }
+
+        public static TokenStream CreateTokenStream(this TexExpressionNode tree)
         {
             var texComposer = new TexComposer();
             return texComposer.Write(tree);
@@ -45,13 +51,6 @@ namespace TexDotNet
         {
             var parser = new TexParser();
             return parser.Parse(tokenStream);
-        }
-
-
-        public static TokenStream CreateTokenStream(string expression)
-        {
-            var lexer = new TexLexer();
-            return lexer.Tokenise(expression);
         }
 
         internal static void ForceMoveNext(this TokenStream tokenStream)

@@ -13,13 +13,9 @@ namespace TexDotNet
         public TexWriter(TextWriter writer)
         {
             this.TextWriter = writer;
-            this.IgnoreUnknownSymbols = true;
-        }
 
-        public TextWriter TextWriter
-        {
-            get;
-            private set;
+            this.IgnoreUnknownSymbols = true;
+            this.StrictMode = true;
         }
 
         public bool IgnoreUnknownSymbols
@@ -28,35 +24,63 @@ namespace TexDotNet
             set;
         }
 
+        public bool StrictMode
+        {
+            get;
+            set;
+        }
+
+        public TextWriter TextWriter
+        {
+            get;
+            private set;
+        }
+
         public void Write(TokenStream tokenStream)
         {
-            // True to insert space before the next token, if it is required to make syntax correct.
+            var prevToken = TexToken.Null;
             while (tokenStream.MoveNext())
             {
                 var chr = GetShortSymbol(tokenStream.Current);
                 if (chr != null)
                 {
-                    this.TextWriter.Write(chr);
-                    continue;
+                    Write(chr.ToString(), prevToken);
+                    goto tokenWritten;
                 }
                 var str = GetLongSymbol(tokenStream.Current);
                 if (str != null)
                 {
-                    this.TextWriter.Write('\\' + str);
-                    continue;
+                    Write('\\' + str, prevToken);
+                    goto tokenWritten;
                 }
                 if (tokenStream.Current.Symbol == TexSymbolKind.Number)
                 {
                     var value = (double)tokenStream.Current.Value;
                     if (double.IsPositiveInfinity(value))
-                        this.TextWriter.Write("infty");
+                        Write("infty", prevToken);
                     else
-                        this.TextWriter.Write(value.ToString());
+                        Write(value.ToString(), prevToken);
+                    goto tokenWritten;
                 }
-
                 if (!this.IgnoreUnknownSymbols)
                     throw new WriterException(tokenStream.Current);
+
+            tokenWritten:
+                prevToken = tokenStream.Current;
             }
+        }
+
+        private void Write(string value, TexToken prevToken)
+        {
+            var encloseWithGroup = this.StrictMode &&
+                (prevToken.Symbol == TexSymbolKind.RaiseToIndex || prevToken.Symbol == TexSymbolKind.LowerToIndex) &&
+                value.Length > 1;
+
+            if (encloseWithGroup)
+                this.TextWriter.Write("{");
+            this.TextWriter.Write(value);
+            if (encloseWithGroup)
+                this.TextWriter.Write("}");
         }
 
         private char? GetShortSymbol(TexToken token)
