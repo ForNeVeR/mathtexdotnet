@@ -43,7 +43,9 @@ namespace TexDotNet
                 node.Children.Add(FromParseTree(parseNode.Children[0]));
                 node.Children.Add(FromParseTree(parseNode.Children[2]));
 
-                if (!parseNode.IsSubExpression && parseNode.Children[1].Token.Symbol.IsLtrInfixOperator())
+                // If node is root of sub-expression and operator is left-recursive, then convert sub-tree from right
+                // recursive to left recursive.
+                if (!parseNode.IsSubExpression && node.Symbol.IsLtrInfixOperator())
                     return ConvertTreeToLeftRecursive(node, parseNode);
                 else
                     return node;
@@ -167,7 +169,8 @@ namespace TexDotNet
                 errorMessageUnexpectedNumberOfChildren, parseNode.Kind, parseNode.Children.Count));
         }
 
-        private static TexExpressionNode FromPostfixOperatorIndicesParseNode(ParseNode parseNode, ParseNode childParseNode)
+        private static TexExpressionNode FromPostfixOperatorIndicesParseNode(ParseNode parseNode,
+            ParseNode childParseNode)
         {
             TexExpressionNode firstIndexNode = null;
             TexExpressionNode secondIndexNode = null;

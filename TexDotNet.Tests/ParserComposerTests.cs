@@ -10,7 +10,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace TexDotNet.Tests
 {
     [TestClass()]
-    public class ParserTests
+    public class ParserComposerTests
     {
         private static TestCaseSet testCaseSet;
 
@@ -25,7 +25,7 @@ namespace TexDotNet.Tests
         {
         }
 
-        public ParserTests()
+        public ParserComposerTests()
         {
         }
 
@@ -102,12 +102,12 @@ namespace TexDotNet.Tests
                 {
                     var text = testCase.ExpressionText;
                     Trace.WriteLine("Original text: " + text);
-                    var exprTree = TexHelper.CreateExpressionTree(text);
+                    var exprTree = TexUtilities.CreateExpressionTree(text);
                     Trace.WriteLine("Original expression tree:");
                     Trace.Write(TreeTextRenderer.GetText(exprTree));
-                    var recreatedText = TexHelper.CreateText(exprTree);
+                    var recreatedText = TexUtilities.CreateText(exprTree);
                     Trace.WriteLine("Recreated text: " + recreatedText);
-                    var recreatedExprTree = TexHelper.CreateExpressionTree(recreatedText);
+                    var recreatedExprTree = TexUtilities.CreateExpressionTree(recreatedText);
                     Trace.WriteLine("Recreated expression tree:");
                     Trace.Write(TreeTextRenderer.GetText(recreatedExprTree));
                     AssertAreTreesEqual(exprTree, recreatedExprTree);

@@ -1,17 +1,17 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <TestLists xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
   <TestList name="Lists of Tests" id="8c43106b-9dc1-4907-a29f-aa66a61bf5b6">
     <RunConfiguration id="317bd6ce-8f2d-4f4e-b460-7440e150509d" name="Local Test Run" storage="localtestrun.testrunconfig" type="Microsoft.VisualStudio.TestTools.Common.TestRunConfiguration, Microsoft.VisualStudio.QualityTools.Common,   PublicKeyToken=b03f5f7f11d50a3a" />
   </TestList>
   <TestList name="Parser Tests" id="b393cb49-62b2-4b69-9808-568565dad86f" parentListId="8c43106b-9dc1-4907-a29f-aa66a61bf5b6">
     <TestLinks>
-      <TestLink id="baab9ee4-6076-96bc-0c44-64ccb3566dac" name="TestParserFunctions" storage="texdotnet.tests\bin\release\texdotnet.tests.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel,   PublicKeyToken=b03f5f7f11d50a3a" />
-      <TestLink id="abf07e0a-14a5-1c8a-f71e-b66c31f7e785" name="TestParserGroups" storage="texdotnet.tests\bin\release\texdotnet.tests.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel,   PublicKeyToken=b03f5f7f11d50a3a" />
-      <TestLink id="eed8f793-6c94-9bed-496e-2da8ccdf2156" name="TestParserBasic" storage="texdotnet.tests\bin\release\texdotnet.tests.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel,   PublicKeyToken=b03f5f7f11d50a3a" />
-      <TestLink id="f220dbfb-b125-7c22-7d21-b1fe133e0c63" name="TestParserText" storage="texdotnet.tests\bin\release\texdotnet.tests.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel,   PublicKeyToken=b03f5f7f11d50a3a" />
-      <TestLink id="db2341bf-c628-3c71-32ef-1b72e7f0efbf" name="TestParserBracketedFunctions" storage="texdotnet.tests\bin\release\texdotnet.tests.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel,   PublicKeyToken=b03f5f7f11d50a3a" />
-      <TestLink id="7ce755f3-3bc2-5b17-13c2-28418d50d8ef" name="TestParserBigOperators" storage="texdotnet.tests\bin\release\texdotnet.tests.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel,   PublicKeyToken=b03f5f7f11d50a3a" />
-      <TestLink id="fbf3ca07-3a29-0726-9bb8-062fda5d1ae6" name="TestParserBrackets" storage="texdotnet.tests\bin\release\texdotnet.tests.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel,   PublicKeyToken=b03f5f7f11d50a3a" />
+      <TestLink id="baab9ee4-6076-96bc-0c44-64ccb3566dac" name="TestParserFunctions" storage="texdotnet.tests\bin\debug\texdotnet.tests.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel,   PublicKeyToken=b03f5f7f11d50a3a" />
+      <TestLink id="abf07e0a-14a5-1c8a-f71e-b66c31f7e785" name="TestParserGroups" storage="texdotnet.tests\bin\debug\texdotnet.tests.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel,   PublicKeyToken=b03f5f7f11d50a3a" />
+      <TestLink id="eed8f793-6c94-9bed-496e-2da8ccdf2156" name="TestParserBasic" storage="texdotnet.tests\bin\debug\texdotnet.tests.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel,   PublicKeyToken=b03f5f7f11d50a3a" />
+      <TestLink id="f220dbfb-b125-7c22-7d21-b1fe133e0c63" name="TestParserText" storage="texdotnet.tests\bin\debug\texdotnet.tests.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel,   PublicKeyToken=b03f5f7f11d50a3a" />
+      <TestLink id="db2341bf-c628-3c71-32ef-1b72e7f0efbf" name="TestParserBracketedFunctions" storage="texdotnet.tests\bin\debug\texdotnet.tests.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel,   PublicKeyToken=b03f5f7f11d50a3a" />
+      <TestLink id="7ce755f3-3bc2-5b17-13c2-28418d50d8ef" name="TestParserBigOperators" storage="texdotnet.tests\bin\debug\texdotnet.tests.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel,   PublicKeyToken=b03f5f7f11d50a3a" />
+      <TestLink id="fbf3ca07-3a29-0726-9bb8-062fda5d1ae6" name="TestParserBrackets" storage="texdotnet.tests\bin\debug\texdotnet.tests.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel,   PublicKeyToken=b03f5f7f11d50a3a" />
     </TestLinks>
   </TestList>
 </TestLists>

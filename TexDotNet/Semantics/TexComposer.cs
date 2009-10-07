@@ -37,122 +37,39 @@ namespace TexDotNet
             }
         }
 
-        // TODO: Refactor code.
         private void WriteNode(ComposedTokenStream tokenStream, TexExpressionNode node, ComposerState state)
         {
             var openBracketSymbol = TexSymbolKind.Null;
             var closeBracketSymbol = TexSymbolKind.Null;
-            switch (node.Symbol)
+            if ((node.Symbol.IsBinaryOperator() || node.Symbol.IsRelationOperator()) && 
+                !node.Symbol.IsRaiseOrLowerOperator())
             {
-                // Infix operators.
-                case TexSymbolKind.Plus:
-                case TexSymbolKind.Minus:
-                case TexSymbolKind.PlusMinus:
-                case TexSymbolKind.MinusPlus:
-                case TexSymbolKind.Dot:
-                case TexSymbolKind.Cross:
-                case TexSymbolKind.Star:
-                case TexSymbolKind.Divide:
-                case TexSymbolKind.InlineModulo:
-                    if (node.Parent != null)
+                // Check if current operator needs brackets because it has lower precedence than parent operator.
+                if (node.Parent != null && !node.Parent.Symbol.IsRaiseOrLowerOperator())
+                {
+                    var nodePrecedence = GetOperatorPrecedence(node);
+                    var parentNodePrecedence = GetOperatorPrecedence(node.Parent);
+                    if (nodePrecedence != -1 && parentNodePrecedence != -1 &&
+                        nodePrecedence < parentNodePrecedence ||
+                        (nodePrecedence == parentNodePrecedence && 
+                        (node.Parent.Children.IndexOf(node) == 0 ^ node.Parent.Symbol.IsLeftAssociativeOperator())))
                     {
-                        switch (node.Parent.Symbol)
-                        {
-                            case TexSymbolKind.Plus:
-                            case TexSymbolKind.Minus:
-                            case TexSymbolKind.PlusMinus:
-                            case TexSymbolKind.MinusPlus:
-                            case TexSymbolKind.Dot:
-                            case TexSymbolKind.Cross:
-                            case TexSymbolKind.Star:
-                            case TexSymbolKind.Divide:
-                            case TexSymbolKind.InlineModulo:
-                                var nodePrecedence = GetOperatorPrecedence(node);
-                                var parentNodePrecedence = GetOperatorPrecedence(node.Parent);
-                                if (nodePrecedence < parentNodePrecedence || (node.Parent.Children.IndexOf(node) == 1 &&
-                                    nodePrecedence == parentNodePrecedence &&
-                                    IsOperatorLeftAssociative(node.Parent.Symbol)))
-                                {
-                                    openBracketSymbol = TexSymbolKind.RoundBracketOpen;
-                                    closeBracketSymbol = TexSymbolKind.RoundBracketClose;
-                                }
-                                break;
-                        }
+                        openBracketSymbol = TexSymbolKind.RoundBracketOpen;
+                        closeBracketSymbol = TexSymbolKind.RoundBracketClose;
                     }
-                    break;
-                case TexSymbolKind.Minimum:
-                case TexSymbolKind.Maximum:
-                case TexSymbolKind.GreatestCommonDenominator:
-                case TexSymbolKind.LowestCommonMultiple:
-                case TexSymbolKind.Exponent:
-                case TexSymbolKind.Log:
-                case TexSymbolKind.NaturalLog:
-                case TexSymbolKind.Argument:
-                case TexSymbolKind.Limit:
-                case TexSymbolKind.LimitInferior:
-                case TexSymbolKind.LimitSuperior:
-                case TexSymbolKind.Sine:
-                case TexSymbolKind.Cosine:
-                case TexSymbolKind.Tangent:
-                case TexSymbolKind.Cosecant:
-                case TexSymbolKind.Secant:
-                case TexSymbolKind.Cotangent:
-                case TexSymbolKind.ArcSine:
-                case TexSymbolKind.ArcCosine:
-                case TexSymbolKind.ArcTangent:
-                case TexSymbolKind.ArcCosecant:
-                case TexSymbolKind.ArcSecant:
-                case TexSymbolKind.ArcCotangent:
-                case TexSymbolKind.HypSine:
-                case TexSymbolKind.HypCosine:
-                case TexSymbolKind.HypTangent:
-                case TexSymbolKind.HypCosecant:
-                case TexSymbolKind.HypSecant:
-                case TexSymbolKind.HypCotangent:
-                case TexSymbolKind.ArHypSine:
-                case TexSymbolKind.ArHypCosine:
-                case TexSymbolKind.ArHypTangent:
-                case TexSymbolKind.ArHypCosecant:
-                case TexSymbolKind.ArHypSecant:
-                case TexSymbolKind.ArHypCotangent:
-                case TexSymbolKind.Sum:
-                case TexSymbolKind.Product:
-                case TexSymbolKind.Coproduct:
-                case TexSymbolKind.Integral:
-                case TexSymbolKind.DoubleIntegral:
-                case TexSymbolKind.TripleIntegral:
-                case TexSymbolKind.QuadrupleIntegral:
-                case TexSymbolKind.NtupleIntegral:
-                case TexSymbolKind.ClosedIntegral:
-                case TexSymbolKind.ClosedDoubleIntegral:
-                case TexSymbolKind.ClosedTripleIntegral:
-                case TexSymbolKind.ClosedQuadrupleIntegral:
-                case TexSymbolKind.ClosedNtupleIntegral:
-                case TexSymbolKind.BigOPlus:
-                case TexSymbolKind.BigOTimes:
-                case TexSymbolKind.BigODot:
-                case TexSymbolKind.BigCup:
-                case TexSymbolKind.BigCap:
-                case TexSymbolKind.BigCupPlus:
-                case TexSymbolKind.BigSquareCup:
-                case TexSymbolKind.BigSquareCap:
-                case TexSymbolKind.BigVee:
-                case TexSymbolKind.BigWedge:
-                    openBracketSymbol = TexSymbolKind.GroupOpen;
-                    closeBracketSymbol = TexSymbolKind.GroupClose;
-                    break;
-                case TexSymbolKind.Number:
-                case TexSymbolKind.Letter:
-                case TexSymbolKind.GreekLetter:
-                    break;
-                default:
-                    break;
+                }
             }
+            else if (node.Symbol.IsFunctionOperator() || node.Symbol.IsBigOperator())
+            {
+                openBracketSymbol = TexSymbolKind.GroupOpen;
+                closeBracketSymbol = TexSymbolKind.GroupClose;
+            }
+
             if (openBracketSymbol == TexSymbolKind.Null)
             {
                 if (node.Parent != null)
                 {
-                    // If any descendant nodes has more than one child, then group is needed.
+                    // If any descendant node has more than one child, then group is needed.
                     bool needGroup = false;
                     var curNode = node;
                     while (curNode.Children.Count >= 1)
@@ -182,115 +99,47 @@ namespace TexDotNet
                     }
                 }
             }
+
             if (IsRightMostNode(node))
             {
+                // No need to write brackets, since current operator will be written last.
                 state.IsParentNodeGroupOpen = false;
                 openBracketSymbol = TexSymbolKind.Null;
                 closeBracketSymbol = TexSymbolKind.Null;
             }
             else if (!state.IsParentNodeGroupOpen && openBracketSymbol == TexSymbolKind.GroupOpen)
             {
+                // Do not directly nest group brackets.
                 state.IsParentNodeGroupOpen = true;
             }
 
             if (openBracketSymbol != TexSymbolKind.Null)
                 tokenStream.Write(TexToken.FromSymbol(openBracketSymbol));
 
-            switch (node.Symbol)
+            if (node.Symbol.IsBinaryOperator() || node.Symbol.IsRelationOperator())
             {
-                case TexSymbolKind.Plus:
-                case TexSymbolKind.Minus:
-                case TexSymbolKind.PlusMinus:
-                case TexSymbolKind.MinusPlus:
-                case TexSymbolKind.Dot:
-                case TexSymbolKind.Cross:
-                case TexSymbolKind.Star:
-                case TexSymbolKind.Divide:
-                case TexSymbolKind.Over:
-                case TexSymbolKind.RaiseToIndex:
-                case TexSymbolKind.LowerToIndex:
-                case TexSymbolKind.InlineModulo:
-                    WriteInfixOperatorNode(tokenStream, node, state);
-                    break;
-                case TexSymbolKind.Fraction:
-                case TexSymbolKind.Binomial:
-                case TexSymbolKind.Root:
-                    WriteBracketedFunction(tokenStream, node, state);
-                    break;
-                case TexSymbolKind.Minimum:
-                case TexSymbolKind.Maximum:
-                case TexSymbolKind.GreatestCommonDenominator:
-                case TexSymbolKind.LowestCommonMultiple:
-                case TexSymbolKind.Exponent:
-                case TexSymbolKind.Log:
-                case TexSymbolKind.NaturalLog:
-                case TexSymbolKind.Argument:
-                case TexSymbolKind.Limit:
-                case TexSymbolKind.LimitInferior:
-                case TexSymbolKind.LimitSuperior:
-                case TexSymbolKind.Sine:
-                case TexSymbolKind.Cosine:
-                case TexSymbolKind.Tangent:
-                case TexSymbolKind.Cosecant:
-                case TexSymbolKind.Secant:
-                case TexSymbolKind.Cotangent:
-                case TexSymbolKind.ArcSine:
-                case TexSymbolKind.ArcCosine:
-                case TexSymbolKind.ArcTangent:
-                case TexSymbolKind.ArcCosecant:
-                case TexSymbolKind.ArcSecant:
-                case TexSymbolKind.ArcCotangent:
-                case TexSymbolKind.HypSine:
-                case TexSymbolKind.HypCosine:
-                case TexSymbolKind.HypTangent:
-                case TexSymbolKind.HypCosecant:
-                case TexSymbolKind.HypSecant:
-                case TexSymbolKind.HypCotangent:
-                case TexSymbolKind.ArHypSine:
-                case TexSymbolKind.ArHypCosine:
-                case TexSymbolKind.ArHypTangent:
-                case TexSymbolKind.ArHypCosecant:
-                case TexSymbolKind.ArHypSecant:
-                case TexSymbolKind.ArHypCotangent:
-                    WritePrefixOperatorNode(tokenStream, node, state);
-                    break;
-                case TexSymbolKind.Sum:
-                case TexSymbolKind.Product:
-                case TexSymbolKind.Coproduct:
-                case TexSymbolKind.Integral:
-                case TexSymbolKind.DoubleIntegral:
-                case TexSymbolKind.TripleIntegral:
-                case TexSymbolKind.QuadrupleIntegral:
-                case TexSymbolKind.NtupleIntegral:
-                case TexSymbolKind.ClosedIntegral:
-                case TexSymbolKind.ClosedDoubleIntegral:
-                case TexSymbolKind.ClosedTripleIntegral:
-                case TexSymbolKind.ClosedQuadrupleIntegral:
-                case TexSymbolKind.ClosedNtupleIntegral:
-                case TexSymbolKind.BigOPlus:
-                case TexSymbolKind.BigOTimes:
-                case TexSymbolKind.BigODot:
-                case TexSymbolKind.BigCup:
-                case TexSymbolKind.BigCap:
-                case TexSymbolKind.BigCupPlus:
-                case TexSymbolKind.BigSquareCup:
-                case TexSymbolKind.BigSquareCap:
-                case TexSymbolKind.BigVee:
-                case TexSymbolKind.BigWedge:
-                    WritePrefixOperatorNode(tokenStream, node, state);
-                    break;
-                case TexSymbolKind.Factorial:
-                    WritePostfixOperatorNode(tokenStream, node, state);
-                    break;
-                case TexSymbolKind.Number:
-                case TexSymbolKind.Letter:
-                case TexSymbolKind.GreekLetter:
-                case TexSymbolKind.Text:
-                    WriteValueNode(tokenStream, node, state);
-                    break;
-                default:
-                    throw new TexComposerException(node,
-                        "Unrecognised node symbol.");
+                WriteInfixOperatorNode(tokenStream, node, state);
+            }
+            else if (node.Symbol.IsBracketedFunction())
+            {
+                WriteBracketedFunction(tokenStream, node, state);
+            }
+            else if (node.Symbol.IsFunctionOperator() || node.Symbol.IsBigOperator())
+            {
+                WritePrefixOperatorNode(tokenStream, node, state);
+            }
+            else if (node.Symbol.IsPostfixOperator())
+            {
+                WritePostfixOperatorNode(tokenStream, node, state);
+            }
+            else if (node.Symbol.IsValue())
+            {
+                WriteValueNode(tokenStream, node, state);
+            }
+            else
+            {
+                throw new TexComposerException(node,
+                    "Unrecognised node symbol.");
             }
 
             if (closeBracketSymbol != TexSymbolKind.Null)
@@ -339,7 +188,7 @@ namespace TexDotNet
                 WriteNode(tokenStream, node.Children[0], state);
 
                 bool writeOpSymbol = true;
-                var padSymbol = (this.PadPlusAndMinusSigns && IsPlusOrMinus(node.Symbol)) ||
+                var padSymbol = (this.PadPlusAndMinusSigns && node.Symbol.IsPlusOrMinusOperator()) ||
                     node.Symbol.IsLongOperator();
                 if (node.Symbol == TexSymbolKind.Dot)
                 {
@@ -429,6 +278,7 @@ namespace TexDotNet
 
         private int GetOperatorPrecedence(TexExpressionNode node)
         {
+            // Higher value means higher precedence.
             switch (node.Symbol)
             {
                 case TexSymbolKind.Plus:
@@ -436,7 +286,7 @@ namespace TexDotNet
                 case TexSymbolKind.PlusMinus:
                 case TexSymbolKind.MinusPlus:
                     if (node.Children.Count == 1)
-                        return 1;
+                        return 3;
                     return 2;
                 case TexSymbolKind.Star:
                 case TexSymbolKind.Dot:
@@ -444,12 +294,14 @@ namespace TexDotNet
                 case TexSymbolKind.Divide:
                 case TexSymbolKind.Fraction:
                 case TexSymbolKind.InlineModulo:
-                    return 3;
+                    return 4;
                 case TexSymbolKind.RaiseToIndex:
                 case TexSymbolKind.LowerToIndex:
-                    return 4;
+                    return 5;
                 default:
-                    throw new TexComposerException(node, errorMessageInvalidOperator);
+                    if (node.Symbol.IsRelationOperator())
+                        return 1;
+                    return -1;
             }
         }
 
@@ -459,39 +311,6 @@ namespace TexDotNet
                 return true;
             return node.Parent.Children.IndexOf(node) == node.Parent.Children.Count &&
                 IsRightMostNode(node.Parent);
-        }
-
-        private bool IsOperatorLeftAssociative(TexSymbolKind symbol)
-        {
-            switch (symbol)
-            {
-                case TexSymbolKind.Minus:
-                case TexSymbolKind.PlusMinus:
-                case TexSymbolKind.MinusPlus:
-                case TexSymbolKind.Divide:
-                case TexSymbolKind.Over:
-                case TexSymbolKind.Fraction:
-                case TexSymbolKind.InlineModulo:
-                case TexSymbolKind.RaiseToIndex:
-                case TexSymbolKind.LowerToIndex:
-                    return true;
-                default:
-                    return false;
-            }
-        }
-
-        private bool IsPlusOrMinus(TexSymbolKind symbol)
-        {
-            switch (symbol)
-            {
-                case TexSymbolKind.Plus:
-                case TexSymbolKind.Minus:
-                case TexSymbolKind.PlusMinus:
-                case TexSymbolKind.MinusPlus:
-                    return true;
-                default:
-                    return false;
-            }
         }
 
         private class ComposedTokenStream : TokenStream

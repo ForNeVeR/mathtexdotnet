@@ -26,7 +26,7 @@ namespace TexDotNet
         {
             var state = CreateDefaultState();
             tokenStream.ForceMoveNext();
-            var node = ParseFractionalExpression(tokenStream, ref state);
+            var node = ParseRelationalExpression(tokenStream, ref state);
             if (tokenStream.Current.Symbol != TexSymbolKind.EndOfStream)
                 throw new ParserException(tokenStream.Current, errorMessageExpectedEndOfStream);
             return node;
@@ -38,6 +38,71 @@ namespace TexDotNet
             state.IsModulusBracketOpen = false;
             state.IsNormBracketOpen = false;
             return state;
+        }
+
+        private ParseNode ParseRelationalExpression(TokenStream tokenStream, ref ParserState state)
+        {
+            return ParseRelationalExpression(tokenStream, ref state, false);
+        }
+
+        private ParseNode ParseRelationalExpression(TokenStream tokenStream, ref ParserState state, bool isSubTree)
+        {
+            var node = new ParseNode(ParseNodeKind.InfixOperator);
+            node.Children.Add(ParseFractionalExpression(tokenStream, ref state));
+            switch (tokenStream.Current.Symbol)
+            {
+                case TexSymbolKind.EndOfStream:
+                    return node;
+                case TexSymbolKind.Equals:
+                case TexSymbolKind.NotEquals:
+                case TexSymbolKind.DotEquals:
+                case TexSymbolKind.Approximates:
+                case TexSymbolKind.Equivalent:
+                case TexSymbolKind.LessThan:
+                case TexSymbolKind.LessThanOrEqualTo:
+                case TexSymbolKind.GreaterThan:
+                case TexSymbolKind.GreaterThanOrEqualTo:
+                case TexSymbolKind.MuchLessThan:
+                case TexSymbolKind.MuchGreaterThan:
+                case TexSymbolKind.Proportional:
+                case TexSymbolKind.Asymptotic:
+                case TexSymbolKind.Bowtie:
+                case TexSymbolKind.Models:
+                case TexSymbolKind.Precedes:
+                case TexSymbolKind.PrecedesOrEquals:
+                case TexSymbolKind.Succedes:
+                case TexSymbolKind.SuccedesOrEquals:
+                case TexSymbolKind.Congruent:
+                case TexSymbolKind.Similar:
+                case TexSymbolKind.SimilarOrEquals:
+                case TexSymbolKind.Perpendicular:
+                case TexSymbolKind.Parallel:
+                case TexSymbolKind.Middle:
+                case TexSymbolKind.Subset:
+                case TexSymbolKind.SubsetOrEqualTo:
+                case TexSymbolKind.Superset:
+                case TexSymbolKind.SupersetOrEqualTo:
+                case TexSymbolKind.SquareSubset:
+                case TexSymbolKind.SquareSubsetOrEqualTo:
+                case TexSymbolKind.SquareSuperset:
+                case TexSymbolKind.SquareSupersetOrEqualTo:
+                case TexSymbolKind.Member:
+                case TexSymbolKind.NotMember:
+                case TexSymbolKind.Contains:
+                case TexSymbolKind.NotContains:
+                case TexSymbolKind.Smile:
+                case TexSymbolKind.Frown:
+                case TexSymbolKind.VLineDash:
+                case TexSymbolKind.DashVLine:
+                    node.IsSubExpression = isSubTree;
+                    node.Children.Add(new ParseNode(tokenStream.Current));
+                    tokenStream.ForceMoveNext();
+                    break;
+                default:
+                    return node;
+            }
+            node.Children.Add(ParseRelationalExpression(tokenStream, ref state, true));
+            return node;
         }
 
         private ParseNode ParseFractionalExpression(TokenStream tokenStream, ref ParserState state)
@@ -305,7 +370,7 @@ namespace TexDotNet
             {
                 case TexSymbolKind.GroupOpen:
                     tokenStream.ForceMoveNext();
-                    var node = ParseFractionalExpression(tokenStream, ref state);
+                    var node = ParseRelationalExpression(tokenStream, ref state);
                     if (tokenStream.Current.Symbol != TexSymbolKind.GroupClose)
                         throw new ParserException(tokenStream.Current, new[] {
                             TexSymbolKind.GroupClose });
@@ -356,7 +421,7 @@ namespace TexDotNet
                     return null;
             }
             tokenStream.ForceMoveNext();
-            var node = ParseExpression(tokenStream, ref newState);
+            var node = ParseRelationalExpression(tokenStream, ref newState);
             if (tokenStream.Current.Symbol != bracketCloseToken)
                 throw new ParserException(tokenStream.Current, new[] {
                     bracketCloseToken });
@@ -446,7 +511,7 @@ namespace TexDotNet
                     var indicesNode = ParseIndicesPairOptional(tokenStream, ref state);
                     indicesNode.IsArgument = true;
                     node.Children.Add(indicesNode);
-                    node.Children.Add(ParseFractionalExpression(tokenStream, ref state));
+                    node.Children.Add(ParseRelationalExpression(tokenStream, ref state));
                     return node;
                 default:
                     return null;
@@ -504,7 +569,7 @@ namespace TexDotNet
                     var indicesNode = ParseIndicesPairOptional(tokenStream, ref state);
                     indicesNode.IsArgument = true;
                     node.Children.Add(indicesNode);
-                    node.Children.Add(ParseFractionalExpression(tokenStream, ref state));
+                    node.Children.Add(ParseRelationalExpression(tokenStream, ref state));
                     return node;
                 default:
                     return null;

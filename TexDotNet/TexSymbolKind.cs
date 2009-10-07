@@ -11,16 +11,17 @@ namespace TexDotNet
         Unknown,
         EndOfStream,
 
-        #region Mathematical Symbols
+        #region General
+        Prime,
+        Colon,
+        Comma,
+        #endregion
+
+        #region Values
         Number,
         Letter,
         GreekLetter,
         Text,
-        Prime,
-        Colon,
-        Comma,
-        RaiseToIndex,
-        LowerToIndex,
         #endregion
 
         #region Brackets
@@ -42,7 +43,7 @@ namespace TexDotNet
         NormBracket,
         #endregion
 
-        #region Relations
+        #region Relation Operators
         Equals,
         NotEquals,
         DotEquals,
@@ -86,10 +87,13 @@ namespace TexDotNet
         DashVLine,
         #endregion
 
-        #region Prefix Operators
+        #region Bracketed Functions
         Fraction,
         Binomial,
         Root,
+        #endregion
+
+        #region Functions
         Minimum,
         Maximum,
         GreatestCommonDenominator,
@@ -127,6 +131,9 @@ namespace TexDotNet
         ArHypCotangent,
         InlineModulo,
         IdentityModulo,
+        #endregion
+
+        #region Big Operators
         Sum,
         Product,
         Coproduct,
@@ -152,7 +159,7 @@ namespace TexDotNet
         BigWedge,
         #endregion
 
-        #region Infix Operators
+        #region Binary Operators
         Plus,
         Minus,
         PlusMinus,
@@ -162,16 +169,19 @@ namespace TexDotNet
         Star,
         Divide,
         Over,
+        RaiseToIndex,
+        LowerToIndex,
         #endregion
 
         #region Postfix Operators
         Factorial,
         #endregion
 
+        // Not used in expression trees.
         #region Formatting
         // Only used by writer
         Space,
-        
+
         Separator,
         Left,
         Right,

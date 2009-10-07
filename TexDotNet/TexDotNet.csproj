@@ -68,7 +68,7 @@
     <Compile Include="Syntax\TexWriterException.cs" />
     <Compile Include="Syntax\ITexLexer.cs" />
     <Compile Include="Syntax\TexLexerException.cs" />
-    <Compile Include="TexHelper.cs" />
+    <Compile Include="TexUtilities.cs" />
     <Compile Include="Syntax\TexLexer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Syntax\TexWriter.cs" />
