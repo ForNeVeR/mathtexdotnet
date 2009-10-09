@@ -69,7 +69,7 @@ namespace TexDotNet
         internal static void ForceMoveNextIncludeFormatting(this TokenStream tokenStream)
         {
             if (!tokenStream.MoveNext())
-                throw new ParserException(TexToken.Null, "Unexpected end of token stream.");
+                throw new TexParserException(TexToken.Null, "Unexpected end of token stream.");
         }
 
         #region Symbols

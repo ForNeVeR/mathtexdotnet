@@ -28,7 +28,7 @@ namespace TexDotNet
             tokenStream.ForceMoveNext();
             var node = ParseRelationalExpression(tokenStream, ref state);
             if (tokenStream.Current.Symbol != TexSymbolKind.EndOfStream)
-                throw new ParserException(tokenStream.Current, errorMessageExpectedEndOfStream);
+                throw new TexParserException(tokenStream.Current, errorMessageExpectedEndOfStream);
             return node;
         }
 
@@ -173,7 +173,7 @@ namespace TexDotNet
         {
             var node = ParseTermOptional(tokenStream, ref state);
             if (node == null)
-                throw new ParserException(tokenStream.Current, errorMessageExpectedValue);
+                throw new TexParserException(tokenStream.Current, errorMessageExpectedValue);
             return node;
         }
 
@@ -225,7 +225,7 @@ namespace TexDotNet
         {
             var node = ParseFactorialValueOptional(tokenStream, ref state);
             if (node == null)
-                throw new ParserException(tokenStream.Current, errorMessageExpectedValue);
+                throw new TexParserException(tokenStream.Current, errorMessageExpectedValue);
             return node;
         }
 
@@ -250,7 +250,7 @@ namespace TexDotNet
         {
             var node = ParseIndexedValueOptional(tokenStream, ref state);
             if (node == null)
-                throw new ParserException(tokenStream.Current, errorMessageExpectedValue);
+                throw new TexParserException(tokenStream.Current, errorMessageExpectedValue);
             return node;
         }
 
@@ -269,7 +269,7 @@ namespace TexDotNet
         {
             var node = ParseValueOptional(tokenStream, ref state);
             if (node == null)
-                throw new ParserException(tokenStream.Current, errorMessageExpectedValue);
+                throw new TexParserException(tokenStream.Current, errorMessageExpectedValue);
             return node;
         }
 
@@ -332,7 +332,7 @@ namespace TexDotNet
                 case TexSymbolKind.LowerToIndex:
                     if (tokenStream.Current.Symbol == firstSymbol)
                     {
-                        throw new ParserException(tokenStream.Current, new[] {
+                        throw new TexParserException(tokenStream.Current, new[] {
                             firstSymbol == TexSymbolKind.RaiseToIndex ? TexSymbolKind.LowerToIndex : 
                             TexSymbolKind.RaiseToIndex});
                     }
@@ -351,7 +351,7 @@ namespace TexDotNet
             if (node == null)
                 node = ParseGroupOptional(tokenStream, ref state);
             if (node == null)
-                throw new ParserException(tokenStream.Current, errorMessageExpectedValueOrGroup);
+                throw new TexParserException(tokenStream.Current, errorMessageExpectedValueOrGroup);
             return node;
         }
 
@@ -359,7 +359,7 @@ namespace TexDotNet
         {
             var node = ParseGroupOptional(tokenStream, ref state);
             if (node == null)
-                throw new ParserException(tokenStream.Current, new[] { 
+                throw new TexParserException(tokenStream.Current, new[] { 
                     TexSymbolKind.GroupOpen });
             return node;
         }
@@ -372,7 +372,7 @@ namespace TexDotNet
                     tokenStream.ForceMoveNext();
                     var node = ParseRelationalExpression(tokenStream, ref state);
                     if (tokenStream.Current.Symbol != TexSymbolKind.GroupClose)
-                        throw new ParserException(tokenStream.Current, new[] {
+                        throw new TexParserException(tokenStream.Current, new[] {
                             TexSymbolKind.GroupClose });
                     tokenStream.ForceMoveNext();
                     return node;
@@ -423,7 +423,7 @@ namespace TexDotNet
             tokenStream.ForceMoveNext();
             var node = ParseRelationalExpression(tokenStream, ref newState);
             if (tokenStream.Current.Symbol != bracketCloseToken)
-                throw new ParserException(tokenStream.Current, new[] {
+                throw new TexParserException(tokenStream.Current, new[] {
                     bracketCloseToken });
             tokenStream.ForceMoveNext();
             return node;
@@ -526,7 +526,7 @@ namespace TexDotNet
                     tokenStream.ForceMoveNext();
                     var node = ParseExpression(tokenStream, ref state);
                     if (tokenStream.Current.Symbol != TexSymbolKind.SquareBracketClose)
-                        throw new ParserException(tokenStream.Current, new[] {
+                        throw new TexParserException(tokenStream.Current, new[] {
                             TexSymbolKind.SquareBracketClose });
                     tokenStream.ForceMoveNext();
                     node.IsArgument = true;
@@ -592,12 +592,12 @@ namespace TexDotNet
                         tokenStream.ForceMoveNext();
                     }
                     if (sb.Length == 0)
-                        throw new ParserException(tokenStream.Current, errorMessageTextValueEmpty);
+                        throw new TexParserException(tokenStream.Current, errorMessageTextValueEmpty);
                     tokenStream.ForceMoveNext();
                     return new ParseNode(TexToken.FromValue(TexSymbolKind.Text, sb.ToString(),
                         tokenStream.Current.SourcePosition, null));
                 default:
-                    throw new ParserException(tokenStream.Current, new[] {
+                    throw new TexParserException(tokenStream.Current, new[] {
                         TexSymbolKind.GroupOpen});
             }
         }

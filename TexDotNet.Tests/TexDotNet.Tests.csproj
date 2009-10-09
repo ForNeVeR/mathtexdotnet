@@ -54,24 +54,25 @@
     <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <SpecificVersion>True</SpecificVersion>
     </Reference>
+    <Reference Include="Syracuse.Common, Version=0.1.0.36546, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Syracuse Tools\devel\Syracuse.UnitTesting\bin\Release\Syracuse.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="Syracuse.UnitTesting, Version=0.1.0.36364, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Syracuse Tools\devel\Syracuse.UnitTesting\bin\Release\Syracuse.UnitTesting.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CollectionsHelper.cs" />
-    <Compile Include="TestCaseGroup.cs" />
-    <Compile Include="SystemHelper.cs" />
-    <Compile Include="TestCaseReader.cs" />
+    <Compile Include="IoUtilities.cs" />
+    <Compile Include="ParserComposerTestCase.cs" />
     <Compile Include="ParserComposerTests.cs" />
-    <Compile Include="DebugHelper.cs" />
+    <Compile Include="DebugUtilities.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TestCase.cs" />
-    <Compile Include="TestCaseSet.cs" />
-    <Compile Include="TreeTextRenderer.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TexDotNet\TexDotNet.csproj">
@@ -80,7 +81,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Input\TestCases1.txt" />
+    <EmbeddedResource Include="Input\ParserComposerTestCases.txt" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">

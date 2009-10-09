@@ -5,9 +5,9 @@ using System.Text;
 
 namespace TexDotNet
 {
-    public class LexerException : TexErrorSourceInfoException
+    public class TexLexerException : TexErrorSourceInfoException
     {
-        public LexerException(int sourcePosition, string sourceText, string message)
+        public TexLexerException(int sourcePosition, string sourceText, string message)
             : base(sourcePosition, sourceText, message)
         {
         }

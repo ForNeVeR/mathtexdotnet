@@ -6,18 +6,21 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Syracuse.Common;
+using Syracuse.UnitTesting;
 
 namespace TexDotNet.Tests
 {
     [TestClass()]
     public class ParserComposerTests
     {
-        private static TestCaseSet testCaseSet;
+        private static TestCaseSet<ParserComposerTestCase> testCaseSet;
 
         [ClassInitialize()]
         public static void ClassInitialize(TestContext testContext)
         {
-            testCaseSet = TestCaseSet.FromStream(SystemHelper.GetResourceStream("Input.TestCases1.txt"));
+            testCaseSet = TestCaseSet<ParserComposerTestCase>.FromStream(IoUtilities.GetResourceStream(
+                "Input.ParserComposerTestCases.txt"));
         }
 
         [ClassCleanup()]
@@ -100,24 +103,25 @@ namespace TexDotNet.Tests
             {
                 try
                 {
-                    var text = testCase.ExpressionText;
-                    Trace.WriteLine("Original text: " + text);
-                    var exprTree = TexUtilities.CreateExpressionTree(text);
+                    var exprText = testCase.Expression;
+                    Trace.WriteLine("Original text: " + exprText);
+                    var exprTree = TexUtilities.CreateExpressionTree(exprText);
                     Trace.WriteLine("Original expression tree:");
                     Trace.Write(TreeTextRenderer.GetText(exprTree));
-                    var recreatedText = TexUtilities.CreateText(exprTree);
-                    Trace.WriteLine("Recreated text: " + recreatedText);
-                    var recreatedExprTree = TexUtilities.CreateExpressionTree(recreatedText);
+                    var recreatedExprText = TexUtilities.CreateText(exprTree);
+                    Trace.WriteLine("Recreated text: " + recreatedExprText);
+                    var recreatedExprTree = TexUtilities.CreateExpressionTree(recreatedExprText);
                     Trace.WriteLine("Recreated expression tree:");
                     Trace.Write(TreeTextRenderer.GetText(recreatedExprTree));
-                    AssertAreTreesEqual(exprTree, recreatedExprTree);
                     Trace.WriteLine(string.Empty);
+
+                    AssertAreTreesEqual(exprTree, recreatedExprTree);
                 }
-                catch (LexerException exLexer)
+                catch (TexLexerException exLexer)
                 {
                     Assert.Fail(string.Format("Lexer error. {0}", exLexer.Message));
                 }
-                catch (ParserException exParser)
+                catch (TexParserException exParser)
                 {
                     Assert.Fail(string.Format("Parser error. {0}", exParser.Message));
                 }

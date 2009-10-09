@@ -5,18 +5,18 @@ using System.Text;
 
 namespace TexDotNet
 {
-    public class ParserException : TexErrorSourceInfoException
+    public class TexParserException : TexErrorSourceInfoException
     {
         private const string errorMessageInvalidSymbol =
             "Expected a token with one of the following symbol kinds: {0}.";
 
-        public ParserException(TexToken token, ICollection<TexSymbolKind> expectedSymbolKinds)
+        public TexParserException(TexToken token, ICollection<TexSymbolKind> expectedSymbolKinds)
             : this(token, string.Format(errorMessageInvalidSymbol,
             string.Join(", ", expectedSymbolKinds.Select(tokenKind => tokenKind.ToString()).ToArray())))
         {
         }
 
-        public ParserException(TexToken token, string message)
+        public TexParserException(TexToken token, string message)
             : base(token, message)
         {
             this.Token = token;

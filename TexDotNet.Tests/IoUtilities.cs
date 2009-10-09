@@ -7,11 +7,11 @@ using System.Text;
 
 namespace TexDotNet.Tests
 {
-    public static class SystemHelper
+    public static class IoUtilities
     {
         public static Stream GetResourceStream(string name)
         {
-            var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(typeof(SystemHelper), name);
+            var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(typeof(IoUtilities), name);
             if (stream == null)
                 throw new FileNotFoundException("Cannot find resource stream.", name);
             return stream;

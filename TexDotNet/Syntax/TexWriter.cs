@@ -57,7 +57,7 @@ namespace TexDotNet
                 {
                     var value = (double)tokenStream.Current.Value;
                     if (double.IsPositiveInfinity(value))
-                        Write("infty", prevToken);
+                        Write("\\infty", prevToken);
                     else
                         Write(value.ToString(), prevToken);
                     goto tokenWritten;
@@ -87,39 +87,22 @@ namespace TexDotNet
         {
             switch (token.Symbol)
             {
-                case TexSymbolKind.RaiseToIndex:
-                    return '^';
-                case TexSymbolKind.LowerToIndex:
-                    return '_';
+                #region General
                 case TexSymbolKind.Prime:
                     return '\'';
                 case TexSymbolKind.Colon:
                     return ':';
                 case TexSymbolKind.Comma:
                     return ',';
-                case TexSymbolKind.Letter:
-                    return (char)token.Value;
-
-                #region Relations
-                case TexSymbolKind.Equals:
-                    return '=';
-                case TexSymbolKind.LessThan:
-                    return '<';
-                case TexSymbolKind.GreaterThan:
-                    return '>';
+                case TexSymbolKind.RaiseToIndex:
+                    return '^';
+                case TexSymbolKind.LowerToIndex:
+                    return '_';
                 #endregion
 
-                #region Operators
-                case TexSymbolKind.Plus:
-                    return '+';
-                case TexSymbolKind.Minus:
-                    return '-';
-                case TexSymbolKind.Star:
-                    return '*';
-                case TexSymbolKind.Divide:
-                    return '/';
-                case TexSymbolKind.Factorial:
-                    return '!';
+                #region Values
+                case TexSymbolKind.Letter:
+                    return (char)token.Value;
                 #endregion
 
                 #region Brackets
@@ -139,6 +122,31 @@ namespace TexDotNet
                     return '|';
                 #endregion
 
+                #region Relation Operators
+                case TexSymbolKind.Equals:
+                    return '=';
+                case TexSymbolKind.LessThan:
+                    return '<';
+                case TexSymbolKind.GreaterThan:
+                    return '>';
+                #endregion
+
+                #region Binary Operators
+                case TexSymbolKind.Plus:
+                    return '+';
+                case TexSymbolKind.Minus:
+                    return '-';
+                case TexSymbolKind.Star:
+                    return '*';
+                case TexSymbolKind.Divide:
+                    return '/';
+                #endregion
+
+                #region Postfix Operators
+                case TexSymbolKind.Factorial:
+                    return '!';
+                #endregion
+
                 #region Formatting
                 case TexSymbolKind.Space:
                     return ' ';
@@ -153,10 +161,12 @@ namespace TexDotNet
         {
             switch (token.Symbol)
             {
+                #region Values
                 case TexSymbolKind.Text:
                     return string.Format("text{{{0}}}", (string)token.Value);
                 case TexSymbolKind.GreekLetter:
                     return (string)token.Value;
+                #endregion
 
                 #region Brackets
                 case TexSymbolKind.CurlyBracketOpen:
@@ -179,7 +189,7 @@ namespace TexDotNet
                     return "|";
                 #endregion
 
-                #region Relations
+                #region Relation Operators
                 case TexSymbolKind.NotEquals:
                     return "neq";
                 case TexSymbolKind.DotEquals:
@@ -256,7 +266,7 @@ namespace TexDotNet
                     return "dashv";
                 #endregion
 
-                #region Operators
+                #region Binary Operators
                 case TexSymbolKind.PlusMinus:
                     return "pm";
                 case TexSymbolKind.MinusPlus:
@@ -271,13 +281,16 @@ namespace TexDotNet
                     return "over";
                 #endregion
 
-                #region Functions
+                #region Bracketed Functions
                 case TexSymbolKind.Fraction:
                     return "frac";
                 case TexSymbolKind.Binomial:
                     return "binom";
                 case TexSymbolKind.Root:
                     return "sqrt";
+                #endregion
+
+                #region Functions
                 case TexSymbolKind.Minimum:
                     return "min";
                 case TexSymbolKind.Maximum:
@@ -352,6 +365,9 @@ namespace TexDotNet
                     return "bmod";
                 case TexSymbolKind.IdentityModulo:
                     return "pmod";
+                #endregion
+
+                #region Big Operators
                 case TexSymbolKind.Sum:
                     return "sum";
                 case TexSymbolKind.Product:

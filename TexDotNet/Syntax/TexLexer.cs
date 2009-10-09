@@ -96,37 +96,17 @@ namespace TexDotNet
             value = null;
             switch (chr)
             {
-                case '^':
-                    return TexSymbolKind.RaiseToIndex;
-                case '_':
-                    return TexSymbolKind.LowerToIndex;
+                #region General
                 case '\'':
                     return TexSymbolKind.Prime;
                 case ':':
                     return TexSymbolKind.Colon;
                 case ',':
                     return TexSymbolKind.Comma;
-
-                #region Relations
-                case '=':
-                    return TexSymbolKind.Equals;
-                case '<':
-                    return TexSymbolKind.LessThan;
-                case '>':
-                    return TexSymbolKind.GreaterThan;
-                #endregion
-
-                #region Operators
-                case '+':
-                    return TexSymbolKind.Plus;
-                case '-':
-                    return TexSymbolKind.Minus;
-                case '*':
-                    return TexSymbolKind.Star;
-                case '/':
-                    return TexSymbolKind.Divide;
-                case '!':
-                    return TexSymbolKind.Factorial;
+                case '^':
+                    return TexSymbolKind.RaiseToIndex;
+                case '_':
+                    return TexSymbolKind.LowerToIndex;
                 #endregion
 
                 #region Brackets
@@ -146,13 +126,38 @@ namespace TexDotNet
                     return TexSymbolKind.ModulusBracket;
                 #endregion
 
+                #region Relation Operators
+                case '=':
+                    return TexSymbolKind.Equals;
+                case '<':
+                    return TexSymbolKind.LessThan;
+                case '>':
+                    return TexSymbolKind.GreaterThan;
+                #endregion
+
+                #region Binary Operators
+                case '+':
+                    return TexSymbolKind.Plus;
+                case '-':
+                    return TexSymbolKind.Minus;
+                case '*':
+                    return TexSymbolKind.Star;
+                case '/':
+                    return TexSymbolKind.Divide;
+                #endregion
+
+                #region Postfix Operators
+                case '!':
+                    return TexSymbolKind.Factorial;
+                #endregion
+
                 default:
                     if (char.IsLetter(chr))
                     {
                         value = chr;
                         return TexSymbolKind.Letter;
                     }
-                    throw new LexerException(reader.Position, chr.ToString(), string.Format(
+                    throw new TexLexerException(reader.Position, chr.ToString(), string.Format(
                         errorMessageIllegalChar, chr));
             }
         }
@@ -166,11 +171,6 @@ namespace TexDotNet
                 nextChr = (char)reader.Peek();
                 if (char.IsWhiteSpace(nextChr))
                     break;
-                if (nextChr == ',')
-                {
-                    sb.Append((char)reader.Read());
-                    break;
-                }
                 if (sb.Length > 0 && !char.IsLetter(nextChr))
                     break;
 
@@ -181,13 +181,10 @@ namespace TexDotNet
             value = null;
             switch (symbol.Substring(1))
             {
+                #region Values
                 case "infty":
                     value = double.PositiveInfinity;
                     return TexSymbolKind.Number;
-                case "text":
-                    return TexSymbolKind.Text;
-
-                #region Greek letters
                 case "alpha":
                 case "Alpha":
                 case "beta":
@@ -243,6 +240,8 @@ namespace TexDotNet
                 case "Omega":
                     value = symbol.Substring(1);
                     return TexSymbolKind.GreekLetter;
+                case "text":
+                    return TexSymbolKind.Text;
                 #endregion
 
                 #region Brackets
@@ -266,7 +265,7 @@ namespace TexDotNet
                     return TexSymbolKind.NormBracket;
                 #endregion
 
-                #region Relations
+                #region Relation Operators
                 case "neq":
                     return TexSymbolKind.NotEquals;
                 case "doteq":
@@ -343,7 +342,7 @@ namespace TexDotNet
                     return TexSymbolKind.DashVLine;
                 #endregion
 
-                #region Operators
+                #region Binary Operators
                 case "pm":
                     return TexSymbolKind.PlusMinus;
                 case "mp":
@@ -358,13 +357,16 @@ namespace TexDotNet
                     return TexSymbolKind.Over;
                 #endregion
 
-                #region Functions
+                #region Bracketed Functions
                 case "frac":
                     return TexSymbolKind.Fraction;
                 case "binom":
                     return TexSymbolKind.Binomial;
                 case "sqrt":
                     return TexSymbolKind.Root;
+                #endregion
+
+                #region Functions
                 case "min":
                     return TexSymbolKind.Minimum;
                 case "max":
@@ -439,6 +441,9 @@ namespace TexDotNet
                     return TexSymbolKind.InlineModulo;
                 case "pmod":
                     return TexSymbolKind.IdentityModulo;
+                #endregion
+
+                #region Big Operators
                 case "sum":
                     return TexSymbolKind.Sum;
                 case "prod":
@@ -499,7 +504,7 @@ namespace TexDotNet
                 default:
                     if (this.IgnoreUnknownSymbols)
                         return TexSymbolKind.Unknown;
-                    throw new LexerException(reader.Position, symbol, string.Format(
+                    throw new TexLexerException(reader.Position, symbol, string.Format(
                         errorMessageIllegalSymbol, symbol));
             }
         }
