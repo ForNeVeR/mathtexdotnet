@@ -1,4 +1,4 @@
-TeX.NET is copyright © Alex Regueiro 2009.
+TeX.NET is copyright (c) Alex Regueiro 2009â€”2017.
 
 The following persons and groups are acknowledged for their contributions to
 specific releases of the software.
