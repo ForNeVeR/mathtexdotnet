@@ -51,17 +51,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <SpecificVersion>True</SpecificVersion>
-    </Reference>
-    <Reference Include="Syracuse.Common, Version=0.1.0.36546, Culture=neutral, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\Syracuse Tools\devel\Syracuse.UnitTesting\bin\Release\Syracuse.Common.dll</HintPath>
-    </Reference>
-    <Reference Include="Syracuse.UnitTesting, Version=0.1.0.36364, Culture=neutral, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\Syracuse Tools\devel\Syracuse.UnitTesting\bin\Release\Syracuse.UnitTesting.dll</HintPath>
-    </Reference>
+    <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -75,6 +65,14 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Syracuse.Common\Syracuse.Common.csproj">
+      <Project>{f9105a50-ae13-4a78-81c0-2ddcd593a6a4}</Project>
+      <Name>Syracuse.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Syracuse.UnitTesting\Syracuse.UnitTesting.csproj">
+      <Project>{20ff4601-1283-4755-91c2-c3028c1299fa}</Project>
+      <Name>Syracuse.UnitTesting</Name>
+    </ProjectReference>
     <ProjectReference Include="..\TexDotNet\TexDotNet.csproj">
       <Project>{24039324-63B9-4F57-969D-23A574C6A7FE}</Project>
       <Name>TexDotNet</Name>

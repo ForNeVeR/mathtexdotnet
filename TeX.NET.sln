@@ -1,6 +1,8 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 10
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26403.7
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Project", "Project", "{1ECAC666-9FEE-456B-8D62-5FB3344E494C}"
 	ProjectSection(SolutionItems) = preProject
 		Authors.txt = Authors.txt
@@ -9,6 +11,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Project", "Project", "{1ECA
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C76E8266-8283-4E07-ADA3-1591B68A6728}"
 	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		.gitignore = .gitignore
 		LocalTestRun.testrunconfig = LocalTestRun.testrunconfig
 		TeX.NET.vsmdi = TeX.NET.vsmdi
 	EndProjectSection
@@ -19,10 +23,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TexDotNet.Tests", "TexDotNe
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "TexDotNet.FSharp", "TexDotNet.FSharp\TexDotNet.FSharp.fsproj", "{957CFD65-9967-4F84-89D1-083152718504}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Syracuse.Common", "Syracuse.Common\Syracuse.Common.csproj", "{F9105A50-AE13-4A78-81C0-2DDCD593A6A4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Syracuse.UnitTesting", "Syracuse.UnitTesting\Syracuse.UnitTesting.csproj", "{20FF4601-1283-4755-91C2-C3028C1299FA}"
+EndProject
 Global
-	GlobalSection(TestCaseManagementSettings) = postSolution
-		CategoryFile = TeX.NET.vsmdi
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
@@ -40,8 +45,19 @@ Global
 		{957CFD65-9967-4F84-89D1-083152718504}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{957CFD65-9967-4F84-89D1-083152718504}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{957CFD65-9967-4F84-89D1-083152718504}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F9105A50-AE13-4A78-81C0-2DDCD593A6A4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F9105A50-AE13-4A78-81C0-2DDCD593A6A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F9105A50-AE13-4A78-81C0-2DDCD593A6A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F9105A50-AE13-4A78-81C0-2DDCD593A6A4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{20FF4601-1283-4755-91C2-C3028C1299FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{20FF4601-1283-4755-91C2-C3028C1299FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{20FF4601-1283-4755-91C2-C3028C1299FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{20FF4601-1283-4755-91C2-C3028C1299FA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(TestCaseManagementSettings) = postSolution
+		CategoryFile = TeX.NET.vsmdi
 	EndGlobalSection
 EndGlobal
